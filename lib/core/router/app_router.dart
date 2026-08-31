@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/board/presentation/board_screen.dart';
+import '../../features/settings/presentation/settings_screen.dart';
 import '../theme/theme.dart';
 import '../widgets/caps_label.dart';
 
@@ -37,10 +38,7 @@ final appRouter = GoRouter(
         StatefulShellBranch(routes: [
           GoRoute(
             path: '/settings',
-            builder: (_, _) => const _ComingSoon(
-              'Settings',
-              'Everything here will be editable on purpose.',
-            ),
+            builder: (_, _) => const SettingsScreen(),
           ),
         ]),
       ],
