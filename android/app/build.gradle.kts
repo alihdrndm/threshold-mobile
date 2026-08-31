@@ -28,6 +28,12 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        // AppAuth's redirect receiver. Google's Android clients redirect to
+        // com.googleusercontent.apps.<client-number>:/oauth2redirect — the
+        // number goes here once the user's OAuth client exists. Until then
+        // this placeholder keeps the manifest valid (Connect will say so).
+        manifestPlaceholders["appAuthRedirectScheme"] =
+            "com.threshold.mobile"
     }
 
     buildTypes {

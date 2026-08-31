@@ -51,14 +51,48 @@ class SettingsKV extends Table {
   Set<Column> get primaryKey => {key};
 }
 
-@DriftDatabase(tables: [Tasks, Areas, SettingsKV])
+/// The read model for events on the user's calendars — foreign events with
+/// their titles (v1's upgrade over the desktop's anonymous busy stripes)
+/// and the isThreshold marker for our own. Adoption fills adoptedTaskUid.
+@DataClassName('GoogleEventRow')
+class GoogleEventMap extends Table {
+  TextColumn get eventId => text()();
+  TextColumn get calendarId => text()();
+  TextColumn get summary => text().withDefault(const Constant(''))();
+  IntColumn get startTs => integer().nullable()();
+  IntColumn get endTs => integer().nullable()();
+  BoolColumn get isAllDay => boolean().withDefault(const Constant(false))();
+  TextColumn get updated => text().withDefault(const Constant(''))();
+  BoolColumn get isThreshold => boolean().withDefault(const Constant(false))();
+  TextColumn get status => text().withDefault(const Constant('confirmed'))();
+  TextColumn get eventType => text().withDefault(const Constant('default'))();
+  TextColumn get adoptedTaskUid => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {eventId};
+}
+
+/// Per-calendar incremental-sync bookkeeping. Sync tokens are per-device
+/// by design — there is no shared cursor to corrupt.
+@DataClassName('SyncStateRow')
+class SyncState extends Table {
+  TextColumn get calendarId => text()();
+  TextColumn get syncToken => text().nullable()();
+  IntColumn get lastSyncTs => integer().nullable()();
+  TextColumn get lastStatus => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {calendarId};
+}
+
+@DriftDatabase(tables: [Tasks, Areas, SettingsKV, GoogleEventMap, SyncState])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(driftDatabase(name: 'threshold'));
 
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -74,6 +108,13 @@ class AppDatabase extends _$AppDatabase {
               sortOrder: i,
               updatedTs: now,
             ));
+          }
+        },
+        onUpgrade: (m, from, to) async {
+          // v2: the calendar read model + per-calendar sync bookkeeping.
+          if (from < 2) {
+            await m.createTable(googleEventMap);
+            await m.createTable(syncState);
           }
         },
       );

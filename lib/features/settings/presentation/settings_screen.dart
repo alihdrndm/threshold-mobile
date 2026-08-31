@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/theme.dart';
 import '../../../core/widgets/caps_label.dart';
 import '../../../core/widgets/pressable_scale.dart';
+import '../../calendar_sync/presentation/sync_providers.dart';
 import '../../tasks/domain/areas_syntax.dart';
 import '../../tasks/presentation/providers.dart';
 
@@ -32,6 +33,15 @@ class SettingsScreen extends ConsumerWidget {
           note: 'Eight at most: past that they stop being areas and start '
               'being tags. Removing one leaves its tasks in place, unlabelled.',
           child: const _AreasEditor(),
+        ),
+        const SizedBox(height: AppSpacing.xxl),
+        _Section(
+          title: 'Google Calendar',
+          note: 'Connect your own Google account and the week fills with '
+              'your calendar — including events made on your phone or the '
+              'web. Threshold uses your own OAuth client; nothing is shared '
+              'with anyone else.',
+          child: const _GoogleSection(),
         ),
         const SizedBox(height: AppSpacing.xxl),
         _Section(
@@ -76,6 +86,150 @@ class _Section extends StatelessWidget {
       ],
     );
   }
+}
+
+class _GoogleSection extends ConsumerStatefulWidget {
+  const _GoogleSection();
+
+  @override
+  ConsumerState<_GoogleSection> createState() => _GoogleSectionState();
+}
+
+class _GoogleSectionState extends ConsumerState<_GoogleSection> {
+  final _clientId = TextEditingController();
+  String? _error;
+  bool _busy = false;
+  bool _seeded = false;
+
+  @override
+  void dispose() {
+    _clientId.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final settings = ref.watch(settingsProvider).value ?? const {};
+    final status = ref.watch(calendarStatusProvider).value;
+    final repo = ref.read(taskRepositoryProvider);
+    if (!_seeded && (settings['google_client_id'] ?? '').isNotEmpty) {
+      _clientId.text = settings['google_client_id']!;
+      _seeded = true;
+    }
+
+    Future<void> act(Future<void> Function() action) async {
+      if (_busy) return;
+      setState(() {
+        _busy = true;
+        _error = null;
+      });
+      try {
+        await action();
+      } on Object catch (e) {
+        setState(() => _error = '$e');
+      } finally {
+        if (mounted) setState(() => _busy = false);
+      }
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (status == null || !status.connected) ...[
+          TextField(
+            controller: _clientId,
+            style: AppTypography.caption.copyWith(color: c.ink),
+            decoration: InputDecoration(
+              hintText: 'Android OAuth client ID',
+              hintStyle:
+                  AppTypography.caption.copyWith(color: c.inkMuted),
+              isDense: true,
+              filled: true,
+              fillColor: c.fillSubtle,
+              contentPadding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.lg, vertical: 10),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppRadii.item),
+                borderSide: BorderSide(color: c.borderSubtle),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppRadii.item),
+                borderSide: BorderSide(
+                    color: c.accent.withValues(alpha: 0.65)),
+              ),
+            ),
+            onChanged: (v) => repo.setSetting('google_client_id', v.trim()),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          PressableScale(
+            onPressed: _busy
+                ? null
+                : () => act(() =>
+                    ref.read(calendarStatusProvider.notifier).connect()),
+            child: _chip(c, _busy ? 'Opening your browser…' : 'Connect'),
+          ),
+        ] else ...[
+          Row(
+            children: [
+              _chip(c, 'Connected', accent: true),
+              const SizedBox(width: AppSpacing.sm),
+              PressableScale(
+                onPressed: () => act(() =>
+                    ref.read(calendarStatusProvider.notifier).syncNow()),
+                child: _chip(c, 'Sync now'),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              PressableScale(
+                onPressed: () => act(() => ref
+                    .read(calendarStatusProvider.notifier)
+                    .disconnect()),
+                child: _chip(c, 'Disconnect'),
+              ),
+            ],
+          ),
+          if (status.thresholdCalendarId != null) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Text('Board calendar ready.',
+                style:
+                    AppTypography.caption.copyWith(color: c.inkMuted)),
+          ],
+        ],
+        if ((settings['google_last_sync_status'] ?? '').isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.sm),
+          Text('Last sync: ${settings['google_last_sync_status']}',
+              style: AppTypography.caption.copyWith(color: c.inkMuted)),
+        ],
+        if (_error != null) ...[
+          const SizedBox(height: AppSpacing.sm),
+          Container(
+            padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
+            decoration: BoxDecoration(
+              color: c.errorFill,
+              borderRadius: BorderRadius.circular(AppRadii.card),
+              border: Border.all(color: c.errorBorder),
+            ),
+            child: Text(_error!,
+                style: AppTypography.caption.copyWith(color: c.ink)),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _chip(ThresholdColors c, String label, {bool accent = false}) =>
+      Container(
+        padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(AppRadii.full),
+          border: Border.all(color: accent ? c.accent : c.borderSubtle),
+          color: accent ? c.accent.withValues(alpha: 0.12) : c.fillSubtle,
+        ),
+        child:
+            Text(label, style: AppTypography.body.copyWith(color: c.ink)),
+      );
 }
 
 class _AppearancePills extends ConsumerWidget {

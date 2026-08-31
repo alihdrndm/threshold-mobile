@@ -1654,12 +1654,1015 @@ class SettingsKVCompanion extends UpdateCompanion<SettingsKVData> {
   }
 }
 
+class $GoogleEventMapTable extends GoogleEventMap
+    with TableInfo<$GoogleEventMapTable, GoogleEventRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $GoogleEventMapTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _eventIdMeta = const VerificationMeta(
+    'eventId',
+  );
+  @override
+  late final GeneratedColumn<String> eventId = GeneratedColumn<String>(
+    'event_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _calendarIdMeta = const VerificationMeta(
+    'calendarId',
+  );
+  @override
+  late final GeneratedColumn<String> calendarId = GeneratedColumn<String>(
+    'calendar_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _summaryMeta = const VerificationMeta(
+    'summary',
+  );
+  @override
+  late final GeneratedColumn<String> summary = GeneratedColumn<String>(
+    'summary',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _startTsMeta = const VerificationMeta(
+    'startTs',
+  );
+  @override
+  late final GeneratedColumn<int> startTs = GeneratedColumn<int>(
+    'start_ts',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _endTsMeta = const VerificationMeta('endTs');
+  @override
+  late final GeneratedColumn<int> endTs = GeneratedColumn<int>(
+    'end_ts',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isAllDayMeta = const VerificationMeta(
+    'isAllDay',
+  );
+  @override
+  late final GeneratedColumn<bool> isAllDay = GeneratedColumn<bool>(
+    'is_all_day',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_all_day" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _updatedMeta = const VerificationMeta(
+    'updated',
+  );
+  @override
+  late final GeneratedColumn<String> updated = GeneratedColumn<String>(
+    'updated',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _isThresholdMeta = const VerificationMeta(
+    'isThreshold',
+  );
+  @override
+  late final GeneratedColumn<bool> isThreshold = GeneratedColumn<bool>(
+    'is_threshold',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_threshold" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('confirmed'),
+  );
+  static const VerificationMeta _eventTypeMeta = const VerificationMeta(
+    'eventType',
+  );
+  @override
+  late final GeneratedColumn<String> eventType = GeneratedColumn<String>(
+    'event_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('default'),
+  );
+  static const VerificationMeta _adoptedTaskUidMeta = const VerificationMeta(
+    'adoptedTaskUid',
+  );
+  @override
+  late final GeneratedColumn<String> adoptedTaskUid = GeneratedColumn<String>(
+    'adopted_task_uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    eventId,
+    calendarId,
+    summary,
+    startTs,
+    endTs,
+    isAllDay,
+    updated,
+    isThreshold,
+    status,
+    eventType,
+    adoptedTaskUid,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'google_event_map';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<GoogleEventRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('event_id')) {
+      context.handle(
+        _eventIdMeta,
+        eventId.isAcceptableOrUnknown(data['event_id']!, _eventIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_eventIdMeta);
+    }
+    if (data.containsKey('calendar_id')) {
+      context.handle(
+        _calendarIdMeta,
+        calendarId.isAcceptableOrUnknown(data['calendar_id']!, _calendarIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_calendarIdMeta);
+    }
+    if (data.containsKey('summary')) {
+      context.handle(
+        _summaryMeta,
+        summary.isAcceptableOrUnknown(data['summary']!, _summaryMeta),
+      );
+    }
+    if (data.containsKey('start_ts')) {
+      context.handle(
+        _startTsMeta,
+        startTs.isAcceptableOrUnknown(data['start_ts']!, _startTsMeta),
+      );
+    }
+    if (data.containsKey('end_ts')) {
+      context.handle(
+        _endTsMeta,
+        endTs.isAcceptableOrUnknown(data['end_ts']!, _endTsMeta),
+      );
+    }
+    if (data.containsKey('is_all_day')) {
+      context.handle(
+        _isAllDayMeta,
+        isAllDay.isAcceptableOrUnknown(data['is_all_day']!, _isAllDayMeta),
+      );
+    }
+    if (data.containsKey('updated')) {
+      context.handle(
+        _updatedMeta,
+        updated.isAcceptableOrUnknown(data['updated']!, _updatedMeta),
+      );
+    }
+    if (data.containsKey('is_threshold')) {
+      context.handle(
+        _isThresholdMeta,
+        isThreshold.isAcceptableOrUnknown(
+          data['is_threshold']!,
+          _isThresholdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('event_type')) {
+      context.handle(
+        _eventTypeMeta,
+        eventType.isAcceptableOrUnknown(data['event_type']!, _eventTypeMeta),
+      );
+    }
+    if (data.containsKey('adopted_task_uid')) {
+      context.handle(
+        _adoptedTaskUidMeta,
+        adoptedTaskUid.isAcceptableOrUnknown(
+          data['adopted_task_uid']!,
+          _adoptedTaskUidMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {eventId};
+  @override
+  GoogleEventRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return GoogleEventRow(
+      eventId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}event_id'],
+      )!,
+      calendarId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}calendar_id'],
+      )!,
+      summary: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}summary'],
+      )!,
+      startTs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}start_ts'],
+      ),
+      endTs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}end_ts'],
+      ),
+      isAllDay: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_all_day'],
+      )!,
+      updated: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}updated'],
+      )!,
+      isThreshold: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_threshold'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      eventType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}event_type'],
+      )!,
+      adoptedTaskUid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}adopted_task_uid'],
+      ),
+    );
+  }
+
+  @override
+  $GoogleEventMapTable createAlias(String alias) {
+    return $GoogleEventMapTable(attachedDatabase, alias);
+  }
+}
+
+class GoogleEventRow extends DataClass implements Insertable<GoogleEventRow> {
+  final String eventId;
+  final String calendarId;
+  final String summary;
+  final int? startTs;
+  final int? endTs;
+  final bool isAllDay;
+  final String updated;
+  final bool isThreshold;
+  final String status;
+  final String eventType;
+  final String? adoptedTaskUid;
+  const GoogleEventRow({
+    required this.eventId,
+    required this.calendarId,
+    required this.summary,
+    this.startTs,
+    this.endTs,
+    required this.isAllDay,
+    required this.updated,
+    required this.isThreshold,
+    required this.status,
+    required this.eventType,
+    this.adoptedTaskUid,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['event_id'] = Variable<String>(eventId);
+    map['calendar_id'] = Variable<String>(calendarId);
+    map['summary'] = Variable<String>(summary);
+    if (!nullToAbsent || startTs != null) {
+      map['start_ts'] = Variable<int>(startTs);
+    }
+    if (!nullToAbsent || endTs != null) {
+      map['end_ts'] = Variable<int>(endTs);
+    }
+    map['is_all_day'] = Variable<bool>(isAllDay);
+    map['updated'] = Variable<String>(updated);
+    map['is_threshold'] = Variable<bool>(isThreshold);
+    map['status'] = Variable<String>(status);
+    map['event_type'] = Variable<String>(eventType);
+    if (!nullToAbsent || adoptedTaskUid != null) {
+      map['adopted_task_uid'] = Variable<String>(adoptedTaskUid);
+    }
+    return map;
+  }
+
+  GoogleEventMapCompanion toCompanion(bool nullToAbsent) {
+    return GoogleEventMapCompanion(
+      eventId: Value(eventId),
+      calendarId: Value(calendarId),
+      summary: Value(summary),
+      startTs: startTs == null && nullToAbsent
+          ? const Value.absent()
+          : Value(startTs),
+      endTs: endTs == null && nullToAbsent
+          ? const Value.absent()
+          : Value(endTs),
+      isAllDay: Value(isAllDay),
+      updated: Value(updated),
+      isThreshold: Value(isThreshold),
+      status: Value(status),
+      eventType: Value(eventType),
+      adoptedTaskUid: adoptedTaskUid == null && nullToAbsent
+          ? const Value.absent()
+          : Value(adoptedTaskUid),
+    );
+  }
+
+  factory GoogleEventRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return GoogleEventRow(
+      eventId: serializer.fromJson<String>(json['eventId']),
+      calendarId: serializer.fromJson<String>(json['calendarId']),
+      summary: serializer.fromJson<String>(json['summary']),
+      startTs: serializer.fromJson<int?>(json['startTs']),
+      endTs: serializer.fromJson<int?>(json['endTs']),
+      isAllDay: serializer.fromJson<bool>(json['isAllDay']),
+      updated: serializer.fromJson<String>(json['updated']),
+      isThreshold: serializer.fromJson<bool>(json['isThreshold']),
+      status: serializer.fromJson<String>(json['status']),
+      eventType: serializer.fromJson<String>(json['eventType']),
+      adoptedTaskUid: serializer.fromJson<String?>(json['adoptedTaskUid']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'eventId': serializer.toJson<String>(eventId),
+      'calendarId': serializer.toJson<String>(calendarId),
+      'summary': serializer.toJson<String>(summary),
+      'startTs': serializer.toJson<int?>(startTs),
+      'endTs': serializer.toJson<int?>(endTs),
+      'isAllDay': serializer.toJson<bool>(isAllDay),
+      'updated': serializer.toJson<String>(updated),
+      'isThreshold': serializer.toJson<bool>(isThreshold),
+      'status': serializer.toJson<String>(status),
+      'eventType': serializer.toJson<String>(eventType),
+      'adoptedTaskUid': serializer.toJson<String?>(adoptedTaskUid),
+    };
+  }
+
+  GoogleEventRow copyWith({
+    String? eventId,
+    String? calendarId,
+    String? summary,
+    Value<int?> startTs = const Value.absent(),
+    Value<int?> endTs = const Value.absent(),
+    bool? isAllDay,
+    String? updated,
+    bool? isThreshold,
+    String? status,
+    String? eventType,
+    Value<String?> adoptedTaskUid = const Value.absent(),
+  }) => GoogleEventRow(
+    eventId: eventId ?? this.eventId,
+    calendarId: calendarId ?? this.calendarId,
+    summary: summary ?? this.summary,
+    startTs: startTs.present ? startTs.value : this.startTs,
+    endTs: endTs.present ? endTs.value : this.endTs,
+    isAllDay: isAllDay ?? this.isAllDay,
+    updated: updated ?? this.updated,
+    isThreshold: isThreshold ?? this.isThreshold,
+    status: status ?? this.status,
+    eventType: eventType ?? this.eventType,
+    adoptedTaskUid: adoptedTaskUid.present
+        ? adoptedTaskUid.value
+        : this.adoptedTaskUid,
+  );
+  GoogleEventRow copyWithCompanion(GoogleEventMapCompanion data) {
+    return GoogleEventRow(
+      eventId: data.eventId.present ? data.eventId.value : this.eventId,
+      calendarId: data.calendarId.present
+          ? data.calendarId.value
+          : this.calendarId,
+      summary: data.summary.present ? data.summary.value : this.summary,
+      startTs: data.startTs.present ? data.startTs.value : this.startTs,
+      endTs: data.endTs.present ? data.endTs.value : this.endTs,
+      isAllDay: data.isAllDay.present ? data.isAllDay.value : this.isAllDay,
+      updated: data.updated.present ? data.updated.value : this.updated,
+      isThreshold: data.isThreshold.present
+          ? data.isThreshold.value
+          : this.isThreshold,
+      status: data.status.present ? data.status.value : this.status,
+      eventType: data.eventType.present ? data.eventType.value : this.eventType,
+      adoptedTaskUid: data.adoptedTaskUid.present
+          ? data.adoptedTaskUid.value
+          : this.adoptedTaskUid,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('GoogleEventRow(')
+          ..write('eventId: $eventId, ')
+          ..write('calendarId: $calendarId, ')
+          ..write('summary: $summary, ')
+          ..write('startTs: $startTs, ')
+          ..write('endTs: $endTs, ')
+          ..write('isAllDay: $isAllDay, ')
+          ..write('updated: $updated, ')
+          ..write('isThreshold: $isThreshold, ')
+          ..write('status: $status, ')
+          ..write('eventType: $eventType, ')
+          ..write('adoptedTaskUid: $adoptedTaskUid')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    eventId,
+    calendarId,
+    summary,
+    startTs,
+    endTs,
+    isAllDay,
+    updated,
+    isThreshold,
+    status,
+    eventType,
+    adoptedTaskUid,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is GoogleEventRow &&
+          other.eventId == this.eventId &&
+          other.calendarId == this.calendarId &&
+          other.summary == this.summary &&
+          other.startTs == this.startTs &&
+          other.endTs == this.endTs &&
+          other.isAllDay == this.isAllDay &&
+          other.updated == this.updated &&
+          other.isThreshold == this.isThreshold &&
+          other.status == this.status &&
+          other.eventType == this.eventType &&
+          other.adoptedTaskUid == this.adoptedTaskUid);
+}
+
+class GoogleEventMapCompanion extends UpdateCompanion<GoogleEventRow> {
+  final Value<String> eventId;
+  final Value<String> calendarId;
+  final Value<String> summary;
+  final Value<int?> startTs;
+  final Value<int?> endTs;
+  final Value<bool> isAllDay;
+  final Value<String> updated;
+  final Value<bool> isThreshold;
+  final Value<String> status;
+  final Value<String> eventType;
+  final Value<String?> adoptedTaskUid;
+  final Value<int> rowid;
+  const GoogleEventMapCompanion({
+    this.eventId = const Value.absent(),
+    this.calendarId = const Value.absent(),
+    this.summary = const Value.absent(),
+    this.startTs = const Value.absent(),
+    this.endTs = const Value.absent(),
+    this.isAllDay = const Value.absent(),
+    this.updated = const Value.absent(),
+    this.isThreshold = const Value.absent(),
+    this.status = const Value.absent(),
+    this.eventType = const Value.absent(),
+    this.adoptedTaskUid = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  GoogleEventMapCompanion.insert({
+    required String eventId,
+    required String calendarId,
+    this.summary = const Value.absent(),
+    this.startTs = const Value.absent(),
+    this.endTs = const Value.absent(),
+    this.isAllDay = const Value.absent(),
+    this.updated = const Value.absent(),
+    this.isThreshold = const Value.absent(),
+    this.status = const Value.absent(),
+    this.eventType = const Value.absent(),
+    this.adoptedTaskUid = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : eventId = Value(eventId),
+       calendarId = Value(calendarId);
+  static Insertable<GoogleEventRow> custom({
+    Expression<String>? eventId,
+    Expression<String>? calendarId,
+    Expression<String>? summary,
+    Expression<int>? startTs,
+    Expression<int>? endTs,
+    Expression<bool>? isAllDay,
+    Expression<String>? updated,
+    Expression<bool>? isThreshold,
+    Expression<String>? status,
+    Expression<String>? eventType,
+    Expression<String>? adoptedTaskUid,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (eventId != null) 'event_id': eventId,
+      if (calendarId != null) 'calendar_id': calendarId,
+      if (summary != null) 'summary': summary,
+      if (startTs != null) 'start_ts': startTs,
+      if (endTs != null) 'end_ts': endTs,
+      if (isAllDay != null) 'is_all_day': isAllDay,
+      if (updated != null) 'updated': updated,
+      if (isThreshold != null) 'is_threshold': isThreshold,
+      if (status != null) 'status': status,
+      if (eventType != null) 'event_type': eventType,
+      if (adoptedTaskUid != null) 'adopted_task_uid': adoptedTaskUid,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  GoogleEventMapCompanion copyWith({
+    Value<String>? eventId,
+    Value<String>? calendarId,
+    Value<String>? summary,
+    Value<int?>? startTs,
+    Value<int?>? endTs,
+    Value<bool>? isAllDay,
+    Value<String>? updated,
+    Value<bool>? isThreshold,
+    Value<String>? status,
+    Value<String>? eventType,
+    Value<String?>? adoptedTaskUid,
+    Value<int>? rowid,
+  }) {
+    return GoogleEventMapCompanion(
+      eventId: eventId ?? this.eventId,
+      calendarId: calendarId ?? this.calendarId,
+      summary: summary ?? this.summary,
+      startTs: startTs ?? this.startTs,
+      endTs: endTs ?? this.endTs,
+      isAllDay: isAllDay ?? this.isAllDay,
+      updated: updated ?? this.updated,
+      isThreshold: isThreshold ?? this.isThreshold,
+      status: status ?? this.status,
+      eventType: eventType ?? this.eventType,
+      adoptedTaskUid: adoptedTaskUid ?? this.adoptedTaskUid,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (eventId.present) {
+      map['event_id'] = Variable<String>(eventId.value);
+    }
+    if (calendarId.present) {
+      map['calendar_id'] = Variable<String>(calendarId.value);
+    }
+    if (summary.present) {
+      map['summary'] = Variable<String>(summary.value);
+    }
+    if (startTs.present) {
+      map['start_ts'] = Variable<int>(startTs.value);
+    }
+    if (endTs.present) {
+      map['end_ts'] = Variable<int>(endTs.value);
+    }
+    if (isAllDay.present) {
+      map['is_all_day'] = Variable<bool>(isAllDay.value);
+    }
+    if (updated.present) {
+      map['updated'] = Variable<String>(updated.value);
+    }
+    if (isThreshold.present) {
+      map['is_threshold'] = Variable<bool>(isThreshold.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (eventType.present) {
+      map['event_type'] = Variable<String>(eventType.value);
+    }
+    if (adoptedTaskUid.present) {
+      map['adopted_task_uid'] = Variable<String>(adoptedTaskUid.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('GoogleEventMapCompanion(')
+          ..write('eventId: $eventId, ')
+          ..write('calendarId: $calendarId, ')
+          ..write('summary: $summary, ')
+          ..write('startTs: $startTs, ')
+          ..write('endTs: $endTs, ')
+          ..write('isAllDay: $isAllDay, ')
+          ..write('updated: $updated, ')
+          ..write('isThreshold: $isThreshold, ')
+          ..write('status: $status, ')
+          ..write('eventType: $eventType, ')
+          ..write('adoptedTaskUid: $adoptedTaskUid, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SyncStateTable extends SyncState
+    with TableInfo<$SyncStateTable, SyncStateRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SyncStateTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _calendarIdMeta = const VerificationMeta(
+    'calendarId',
+  );
+  @override
+  late final GeneratedColumn<String> calendarId = GeneratedColumn<String>(
+    'calendar_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _syncTokenMeta = const VerificationMeta(
+    'syncToken',
+  );
+  @override
+  late final GeneratedColumn<String> syncToken = GeneratedColumn<String>(
+    'sync_token',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _lastSyncTsMeta = const VerificationMeta(
+    'lastSyncTs',
+  );
+  @override
+  late final GeneratedColumn<int> lastSyncTs = GeneratedColumn<int>(
+    'last_sync_ts',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _lastStatusMeta = const VerificationMeta(
+    'lastStatus',
+  );
+  @override
+  late final GeneratedColumn<String> lastStatus = GeneratedColumn<String>(
+    'last_status',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    calendarId,
+    syncToken,
+    lastSyncTs,
+    lastStatus,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'sync_state';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SyncStateRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('calendar_id')) {
+      context.handle(
+        _calendarIdMeta,
+        calendarId.isAcceptableOrUnknown(data['calendar_id']!, _calendarIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_calendarIdMeta);
+    }
+    if (data.containsKey('sync_token')) {
+      context.handle(
+        _syncTokenMeta,
+        syncToken.isAcceptableOrUnknown(data['sync_token']!, _syncTokenMeta),
+      );
+    }
+    if (data.containsKey('last_sync_ts')) {
+      context.handle(
+        _lastSyncTsMeta,
+        lastSyncTs.isAcceptableOrUnknown(
+          data['last_sync_ts']!,
+          _lastSyncTsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('last_status')) {
+      context.handle(
+        _lastStatusMeta,
+        lastStatus.isAcceptableOrUnknown(data['last_status']!, _lastStatusMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {calendarId};
+  @override
+  SyncStateRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SyncStateRow(
+      calendarId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}calendar_id'],
+      )!,
+      syncToken: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_token'],
+      ),
+      lastSyncTs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}last_sync_ts'],
+      ),
+      lastStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_status'],
+      ),
+    );
+  }
+
+  @override
+  $SyncStateTable createAlias(String alias) {
+    return $SyncStateTable(attachedDatabase, alias);
+  }
+}
+
+class SyncStateRow extends DataClass implements Insertable<SyncStateRow> {
+  final String calendarId;
+  final String? syncToken;
+  final int? lastSyncTs;
+  final String? lastStatus;
+  const SyncStateRow({
+    required this.calendarId,
+    this.syncToken,
+    this.lastSyncTs,
+    this.lastStatus,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['calendar_id'] = Variable<String>(calendarId);
+    if (!nullToAbsent || syncToken != null) {
+      map['sync_token'] = Variable<String>(syncToken);
+    }
+    if (!nullToAbsent || lastSyncTs != null) {
+      map['last_sync_ts'] = Variable<int>(lastSyncTs);
+    }
+    if (!nullToAbsent || lastStatus != null) {
+      map['last_status'] = Variable<String>(lastStatus);
+    }
+    return map;
+  }
+
+  SyncStateCompanion toCompanion(bool nullToAbsent) {
+    return SyncStateCompanion(
+      calendarId: Value(calendarId),
+      syncToken: syncToken == null && nullToAbsent
+          ? const Value.absent()
+          : Value(syncToken),
+      lastSyncTs: lastSyncTs == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastSyncTs),
+      lastStatus: lastStatus == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastStatus),
+    );
+  }
+
+  factory SyncStateRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SyncStateRow(
+      calendarId: serializer.fromJson<String>(json['calendarId']),
+      syncToken: serializer.fromJson<String?>(json['syncToken']),
+      lastSyncTs: serializer.fromJson<int?>(json['lastSyncTs']),
+      lastStatus: serializer.fromJson<String?>(json['lastStatus']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'calendarId': serializer.toJson<String>(calendarId),
+      'syncToken': serializer.toJson<String?>(syncToken),
+      'lastSyncTs': serializer.toJson<int?>(lastSyncTs),
+      'lastStatus': serializer.toJson<String?>(lastStatus),
+    };
+  }
+
+  SyncStateRow copyWith({
+    String? calendarId,
+    Value<String?> syncToken = const Value.absent(),
+    Value<int?> lastSyncTs = const Value.absent(),
+    Value<String?> lastStatus = const Value.absent(),
+  }) => SyncStateRow(
+    calendarId: calendarId ?? this.calendarId,
+    syncToken: syncToken.present ? syncToken.value : this.syncToken,
+    lastSyncTs: lastSyncTs.present ? lastSyncTs.value : this.lastSyncTs,
+    lastStatus: lastStatus.present ? lastStatus.value : this.lastStatus,
+  );
+  SyncStateRow copyWithCompanion(SyncStateCompanion data) {
+    return SyncStateRow(
+      calendarId: data.calendarId.present
+          ? data.calendarId.value
+          : this.calendarId,
+      syncToken: data.syncToken.present ? data.syncToken.value : this.syncToken,
+      lastSyncTs: data.lastSyncTs.present
+          ? data.lastSyncTs.value
+          : this.lastSyncTs,
+      lastStatus: data.lastStatus.present
+          ? data.lastStatus.value
+          : this.lastStatus,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncStateRow(')
+          ..write('calendarId: $calendarId, ')
+          ..write('syncToken: $syncToken, ')
+          ..write('lastSyncTs: $lastSyncTs, ')
+          ..write('lastStatus: $lastStatus')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(calendarId, syncToken, lastSyncTs, lastStatus);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SyncStateRow &&
+          other.calendarId == this.calendarId &&
+          other.syncToken == this.syncToken &&
+          other.lastSyncTs == this.lastSyncTs &&
+          other.lastStatus == this.lastStatus);
+}
+
+class SyncStateCompanion extends UpdateCompanion<SyncStateRow> {
+  final Value<String> calendarId;
+  final Value<String?> syncToken;
+  final Value<int?> lastSyncTs;
+  final Value<String?> lastStatus;
+  final Value<int> rowid;
+  const SyncStateCompanion({
+    this.calendarId = const Value.absent(),
+    this.syncToken = const Value.absent(),
+    this.lastSyncTs = const Value.absent(),
+    this.lastStatus = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SyncStateCompanion.insert({
+    required String calendarId,
+    this.syncToken = const Value.absent(),
+    this.lastSyncTs = const Value.absent(),
+    this.lastStatus = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : calendarId = Value(calendarId);
+  static Insertable<SyncStateRow> custom({
+    Expression<String>? calendarId,
+    Expression<String>? syncToken,
+    Expression<int>? lastSyncTs,
+    Expression<String>? lastStatus,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (calendarId != null) 'calendar_id': calendarId,
+      if (syncToken != null) 'sync_token': syncToken,
+      if (lastSyncTs != null) 'last_sync_ts': lastSyncTs,
+      if (lastStatus != null) 'last_status': lastStatus,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SyncStateCompanion copyWith({
+    Value<String>? calendarId,
+    Value<String?>? syncToken,
+    Value<int?>? lastSyncTs,
+    Value<String?>? lastStatus,
+    Value<int>? rowid,
+  }) {
+    return SyncStateCompanion(
+      calendarId: calendarId ?? this.calendarId,
+      syncToken: syncToken ?? this.syncToken,
+      lastSyncTs: lastSyncTs ?? this.lastSyncTs,
+      lastStatus: lastStatus ?? this.lastStatus,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (calendarId.present) {
+      map['calendar_id'] = Variable<String>(calendarId.value);
+    }
+    if (syncToken.present) {
+      map['sync_token'] = Variable<String>(syncToken.value);
+    }
+    if (lastSyncTs.present) {
+      map['last_sync_ts'] = Variable<int>(lastSyncTs.value);
+    }
+    if (lastStatus.present) {
+      map['last_status'] = Variable<String>(lastStatus.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncStateCompanion(')
+          ..write('calendarId: $calendarId, ')
+          ..write('syncToken: $syncToken, ')
+          ..write('lastSyncTs: $lastSyncTs, ')
+          ..write('lastStatus: $lastStatus, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $TasksTable tasks = $TasksTable(this);
   late final $AreasTable areas = $AreasTable(this);
   late final $SettingsKVTable settingsKV = $SettingsKVTable(this);
+  late final $GoogleEventMapTable googleEventMap = $GoogleEventMapTable(this);
+  late final $SyncStateTable syncState = $SyncStateTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1668,6 +2671,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     tasks,
     areas,
     settingsKV,
+    googleEventMap,
+    syncState,
   ];
 }
 
@@ -2474,6 +3479,515 @@ typedef $$SettingsKVTableProcessedTableManager =
       SettingsKVData,
       PrefetchHooks Function()
     >;
+typedef $$GoogleEventMapTableCreateCompanionBuilder =
+    GoogleEventMapCompanion Function({
+      required String eventId,
+      required String calendarId,
+      Value<String> summary,
+      Value<int?> startTs,
+      Value<int?> endTs,
+      Value<bool> isAllDay,
+      Value<String> updated,
+      Value<bool> isThreshold,
+      Value<String> status,
+      Value<String> eventType,
+      Value<String?> adoptedTaskUid,
+      Value<int> rowid,
+    });
+typedef $$GoogleEventMapTableUpdateCompanionBuilder =
+    GoogleEventMapCompanion Function({
+      Value<String> eventId,
+      Value<String> calendarId,
+      Value<String> summary,
+      Value<int?> startTs,
+      Value<int?> endTs,
+      Value<bool> isAllDay,
+      Value<String> updated,
+      Value<bool> isThreshold,
+      Value<String> status,
+      Value<String> eventType,
+      Value<String?> adoptedTaskUid,
+      Value<int> rowid,
+    });
+
+class $$GoogleEventMapTableFilterComposer
+    extends Composer<_$AppDatabase, $GoogleEventMapTable> {
+  $$GoogleEventMapTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get eventId => $composableBuilder(
+    column: $table.eventId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get calendarId => $composableBuilder(
+    column: $table.calendarId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get summary => $composableBuilder(
+    column: $table.summary,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get startTs => $composableBuilder(
+    column: $table.startTs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get endTs => $composableBuilder(
+    column: $table.endTs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isAllDay => $composableBuilder(
+    column: $table.isAllDay,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get updated => $composableBuilder(
+    column: $table.updated,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isThreshold => $composableBuilder(
+    column: $table.isThreshold,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get eventType => $composableBuilder(
+    column: $table.eventType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get adoptedTaskUid => $composableBuilder(
+    column: $table.adoptedTaskUid,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$GoogleEventMapTableOrderingComposer
+    extends Composer<_$AppDatabase, $GoogleEventMapTable> {
+  $$GoogleEventMapTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get eventId => $composableBuilder(
+    column: $table.eventId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get calendarId => $composableBuilder(
+    column: $table.calendarId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get summary => $composableBuilder(
+    column: $table.summary,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get startTs => $composableBuilder(
+    column: $table.startTs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get endTs => $composableBuilder(
+    column: $table.endTs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isAllDay => $composableBuilder(
+    column: $table.isAllDay,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get updated => $composableBuilder(
+    column: $table.updated,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isThreshold => $composableBuilder(
+    column: $table.isThreshold,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get eventType => $composableBuilder(
+    column: $table.eventType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get adoptedTaskUid => $composableBuilder(
+    column: $table.adoptedTaskUid,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$GoogleEventMapTableAnnotationComposer
+    extends Composer<_$AppDatabase, $GoogleEventMapTable> {
+  $$GoogleEventMapTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get eventId =>
+      $composableBuilder(column: $table.eventId, builder: (column) => column);
+
+  GeneratedColumn<String> get calendarId => $composableBuilder(
+    column: $table.calendarId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get summary =>
+      $composableBuilder(column: $table.summary, builder: (column) => column);
+
+  GeneratedColumn<int> get startTs =>
+      $composableBuilder(column: $table.startTs, builder: (column) => column);
+
+  GeneratedColumn<int> get endTs =>
+      $composableBuilder(column: $table.endTs, builder: (column) => column);
+
+  GeneratedColumn<bool> get isAllDay =>
+      $composableBuilder(column: $table.isAllDay, builder: (column) => column);
+
+  GeneratedColumn<String> get updated =>
+      $composableBuilder(column: $table.updated, builder: (column) => column);
+
+  GeneratedColumn<bool> get isThreshold => $composableBuilder(
+    column: $table.isThreshold,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get eventType =>
+      $composableBuilder(column: $table.eventType, builder: (column) => column);
+
+  GeneratedColumn<String> get adoptedTaskUid => $composableBuilder(
+    column: $table.adoptedTaskUid,
+    builder: (column) => column,
+  );
+}
+
+class $$GoogleEventMapTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $GoogleEventMapTable,
+          GoogleEventRow,
+          $$GoogleEventMapTableFilterComposer,
+          $$GoogleEventMapTableOrderingComposer,
+          $$GoogleEventMapTableAnnotationComposer,
+          $$GoogleEventMapTableCreateCompanionBuilder,
+          $$GoogleEventMapTableUpdateCompanionBuilder,
+          (
+            GoogleEventRow,
+            BaseReferences<_$AppDatabase, $GoogleEventMapTable, GoogleEventRow>,
+          ),
+          GoogleEventRow,
+          PrefetchHooks Function()
+        > {
+  $$GoogleEventMapTableTableManager(
+    _$AppDatabase db,
+    $GoogleEventMapTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$GoogleEventMapTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$GoogleEventMapTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$GoogleEventMapTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> eventId = const Value.absent(),
+                Value<String> calendarId = const Value.absent(),
+                Value<String> summary = const Value.absent(),
+                Value<int?> startTs = const Value.absent(),
+                Value<int?> endTs = const Value.absent(),
+                Value<bool> isAllDay = const Value.absent(),
+                Value<String> updated = const Value.absent(),
+                Value<bool> isThreshold = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String> eventType = const Value.absent(),
+                Value<String?> adoptedTaskUid = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => GoogleEventMapCompanion(
+                eventId: eventId,
+                calendarId: calendarId,
+                summary: summary,
+                startTs: startTs,
+                endTs: endTs,
+                isAllDay: isAllDay,
+                updated: updated,
+                isThreshold: isThreshold,
+                status: status,
+                eventType: eventType,
+                adoptedTaskUid: adoptedTaskUid,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String eventId,
+                required String calendarId,
+                Value<String> summary = const Value.absent(),
+                Value<int?> startTs = const Value.absent(),
+                Value<int?> endTs = const Value.absent(),
+                Value<bool> isAllDay = const Value.absent(),
+                Value<String> updated = const Value.absent(),
+                Value<bool> isThreshold = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String> eventType = const Value.absent(),
+                Value<String?> adoptedTaskUid = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => GoogleEventMapCompanion.insert(
+                eventId: eventId,
+                calendarId: calendarId,
+                summary: summary,
+                startTs: startTs,
+                endTs: endTs,
+                isAllDay: isAllDay,
+                updated: updated,
+                isThreshold: isThreshold,
+                status: status,
+                eventType: eventType,
+                adoptedTaskUid: adoptedTaskUid,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$GoogleEventMapTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $GoogleEventMapTable,
+      GoogleEventRow,
+      $$GoogleEventMapTableFilterComposer,
+      $$GoogleEventMapTableOrderingComposer,
+      $$GoogleEventMapTableAnnotationComposer,
+      $$GoogleEventMapTableCreateCompanionBuilder,
+      $$GoogleEventMapTableUpdateCompanionBuilder,
+      (
+        GoogleEventRow,
+        BaseReferences<_$AppDatabase, $GoogleEventMapTable, GoogleEventRow>,
+      ),
+      GoogleEventRow,
+      PrefetchHooks Function()
+    >;
+typedef $$SyncStateTableCreateCompanionBuilder =
+    SyncStateCompanion Function({
+      required String calendarId,
+      Value<String?> syncToken,
+      Value<int?> lastSyncTs,
+      Value<String?> lastStatus,
+      Value<int> rowid,
+    });
+typedef $$SyncStateTableUpdateCompanionBuilder =
+    SyncStateCompanion Function({
+      Value<String> calendarId,
+      Value<String?> syncToken,
+      Value<int?> lastSyncTs,
+      Value<String?> lastStatus,
+      Value<int> rowid,
+    });
+
+class $$SyncStateTableFilterComposer
+    extends Composer<_$AppDatabase, $SyncStateTable> {
+  $$SyncStateTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get calendarId => $composableBuilder(
+    column: $table.calendarId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncToken => $composableBuilder(
+    column: $table.syncToken,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get lastSyncTs => $composableBuilder(
+    column: $table.lastSyncTs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastStatus => $composableBuilder(
+    column: $table.lastStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SyncStateTableOrderingComposer
+    extends Composer<_$AppDatabase, $SyncStateTable> {
+  $$SyncStateTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get calendarId => $composableBuilder(
+    column: $table.calendarId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncToken => $composableBuilder(
+    column: $table.syncToken,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get lastSyncTs => $composableBuilder(
+    column: $table.lastSyncTs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lastStatus => $composableBuilder(
+    column: $table.lastStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SyncStateTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SyncStateTable> {
+  $$SyncStateTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get calendarId => $composableBuilder(
+    column: $table.calendarId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get syncToken =>
+      $composableBuilder(column: $table.syncToken, builder: (column) => column);
+
+  GeneratedColumn<int> get lastSyncTs => $composableBuilder(
+    column: $table.lastSyncTs,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get lastStatus => $composableBuilder(
+    column: $table.lastStatus,
+    builder: (column) => column,
+  );
+}
+
+class $$SyncStateTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SyncStateTable,
+          SyncStateRow,
+          $$SyncStateTableFilterComposer,
+          $$SyncStateTableOrderingComposer,
+          $$SyncStateTableAnnotationComposer,
+          $$SyncStateTableCreateCompanionBuilder,
+          $$SyncStateTableUpdateCompanionBuilder,
+          (
+            SyncStateRow,
+            BaseReferences<_$AppDatabase, $SyncStateTable, SyncStateRow>,
+          ),
+          SyncStateRow,
+          PrefetchHooks Function()
+        > {
+  $$SyncStateTableTableManager(_$AppDatabase db, $SyncStateTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SyncStateTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SyncStateTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SyncStateTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> calendarId = const Value.absent(),
+                Value<String?> syncToken = const Value.absent(),
+                Value<int?> lastSyncTs = const Value.absent(),
+                Value<String?> lastStatus = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SyncStateCompanion(
+                calendarId: calendarId,
+                syncToken: syncToken,
+                lastSyncTs: lastSyncTs,
+                lastStatus: lastStatus,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String calendarId,
+                Value<String?> syncToken = const Value.absent(),
+                Value<int?> lastSyncTs = const Value.absent(),
+                Value<String?> lastStatus = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SyncStateCompanion.insert(
+                calendarId: calendarId,
+                syncToken: syncToken,
+                lastSyncTs: lastSyncTs,
+                lastStatus: lastStatus,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SyncStateTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SyncStateTable,
+      SyncStateRow,
+      $$SyncStateTableFilterComposer,
+      $$SyncStateTableOrderingComposer,
+      $$SyncStateTableAnnotationComposer,
+      $$SyncStateTableCreateCompanionBuilder,
+      $$SyncStateTableUpdateCompanionBuilder,
+      (
+        SyncStateRow,
+        BaseReferences<_$AppDatabase, $SyncStateTable, SyncStateRow>,
+      ),
+      SyncStateRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -2484,4 +3998,8 @@ class $AppDatabaseManager {
       $$AreasTableTableManager(_db, _db.areas);
   $$SettingsKVTableTableManager get settingsKV =>
       $$SettingsKVTableTableManager(_db, _db.settingsKV);
+  $$GoogleEventMapTableTableManager get googleEventMap =>
+      $$GoogleEventMapTableTableManager(_db, _db.googleEventMap);
+  $$SyncStateTableTableManager get syncState =>
+      $$SyncStateTableTableManager(_db, _db.syncState);
 }
