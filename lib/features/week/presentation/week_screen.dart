@@ -67,9 +67,18 @@ class WeekScreen extends ConsumerWidget {
                       t.scheduledTs! < dayEnd)
                     t,
               ]..sort((a, b) => a.scheduledTs!.compareTo(b.scheduledTs!));
-              final foreign = [
+              // Events already represented by a local task would render
+              // twice; everything else shows — including the DESKTOP's own
+              // Threshold events, which have no local task here until the
+              // board sync lands (M4). Those wear the accent edge: they are
+              // the user's tasks, wherever they were born.
+              final ownEventIds = {
+                for (final t in tasks)
+                  if (t.calendarEventId != null) t.calendarEventId,
+              };
+              final remote = [
                 for (final e in events)
-                  if (!e.isThreshold &&
+                  if (!ownEventIds.contains(e.eventId) &&
                       e.startTs != null &&
                       e.startTs! >= dayStart &&
                       e.startTs! < dayEnd &&
@@ -77,7 +86,7 @@ class WeekScreen extends ConsumerWidget {
                       e.eventType != 'workingLocation')
                     e,
               ];
-              if (own.isNotEmpty || foreign.isNotEmpty) anything = true;
+              if (own.isNotEmpty || remote.isNotEmpty) anything = true;
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -100,7 +109,7 @@ class WeekScreen extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  if (own.isEmpty && foreign.isEmpty)
+                  if (own.isEmpty && remote.isEmpty)
                     Padding(
                       padding:
                           const EdgeInsets.only(bottom: AppSpacing.sm),
@@ -116,11 +125,11 @@ class WeekScreen extends ConsumerWidget {
                         own: true,
                         repeating: t.repeating,
                       ),
-                    for (final e in foreign)
+                    for (final e in remote)
                       _Entry(
                         time: e.isAllDay ? 'All day' : _clock(e.startTs!),
                         title: e.summary.isEmpty ? '(untitled)' : e.summary,
-                        own: false,
+                        own: e.isThreshold,
                       ),
                   ],
                 ],
