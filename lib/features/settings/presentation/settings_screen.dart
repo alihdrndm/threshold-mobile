@@ -141,7 +141,7 @@ class _GoogleSectionState extends ConsumerState<_GoogleSection> {
             controller: _clientId,
             style: AppTypography.caption.copyWith(color: c.ink),
             decoration: InputDecoration(
-              hintText: 'Android OAuth client ID',
+              hintText: 'Android OAuth client ID (yours is built in)',
               hintStyle:
                   AppTypography.caption.copyWith(color: c.inkMuted),
               isDense: true,

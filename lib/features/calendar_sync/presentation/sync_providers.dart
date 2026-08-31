@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/google/auth_service.dart';
 import '../../../core/google/calendar_client.dart';
+import '../../../core/google/client_config.dart';
 import '../../tasks/presentation/providers.dart';
 import '../data/pull_service.dart';
 
@@ -52,10 +53,8 @@ class CalendarStatusNotifier extends AsyncNotifier<CalendarStatus> {
 
   Future<void> connect() async {
     final repo = ref.read(taskRepositoryProvider);
-    final clientId = (await repo.setting('google_client_id'))?.trim() ?? '';
-    if (clientId.isEmpty) {
-      throw StateError('Paste your Android OAuth client ID first.');
-    }
+    var clientId = (await repo.setting('google_client_id'))?.trim() ?? '';
+    if (clientId.isEmpty) clientId = kDefaultGoogleClientId;
     await ref.read(googleAuthProvider).connect(clientId);
     await repo.setSetting('google_last_sync_status', 'Connected');
     ref.invalidateSelf();
