@@ -4,3 +4,8 @@
 /// type it on a phone keyboard; the Settings field can still override it.
 const kDefaultGoogleClientId =
     '594332838822-ojgntdq9r56dcnla2lrkgoch8i42mk87.apps.googleusercontent.com';
+
+/// The Web-application client from the same project — Android's Credential
+/// Manager wants a server client id, and it must be the Web type.
+const kServerClientId =
+    '594332838822-6f3olhor4au2ffhak0eeu5u0vo5gpsnq.apps.googleusercontent.com';

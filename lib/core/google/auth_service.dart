@@ -1,6 +1,8 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+import 'client_config.dart';
+
 /// Google auth through Play Services — the native account dialog, no
 /// browser tab, no redirect scheme, no process-death window (all three
 /// failed live on OneUI with the AppAuth route). Play Services mints and
@@ -29,7 +31,7 @@ class GoogleAuthService {
 
   Future<void> _ensureInitialized() async {
     if (_initialized) return;
-    await GoogleSignIn.instance.initialize();
+    await GoogleSignIn.instance.initialize(serverClientId: kServerClientId);
     _initialized = true;
   }
 
