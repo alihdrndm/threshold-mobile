@@ -1,0 +1,2487 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'app_database.dart';
+
+// ignore_for_file: type=lint
+class $TasksTable extends Tasks with TableInfo<$TasksTable, TaskRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $TasksTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _uidMeta = const VerificationMeta('uid');
+  @override
+  late final GeneratedColumn<String> uid = GeneratedColumn<String>(
+    'uid',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+  );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _noteMeta = const VerificationMeta('note');
+  @override
+  late final GeneratedColumn<String> note = GeneratedColumn<String>(
+    'note',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _areaUidMeta = const VerificationMeta(
+    'areaUid',
+  );
+  @override
+  late final GeneratedColumn<String> areaUid = GeneratedColumn<String>(
+    'area_uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _urgentMeta = const VerificationMeta('urgent');
+  @override
+  late final GeneratedColumn<bool> urgent = GeneratedColumn<bool>(
+    'urgent',
+    aliasedName,
+    true,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("urgent" IN (0, 1))',
+    ),
+  );
+  static const VerificationMeta _importantMeta = const VerificationMeta(
+    'important',
+  );
+  @override
+  late final GeneratedColumn<bool> important = GeneratedColumn<bool>(
+    'important',
+    aliasedName,
+    true,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("important" IN (0, 1))',
+    ),
+  );
+  static const VerificationMeta _sortOrderMeta = const VerificationMeta(
+    'sortOrder',
+  );
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+    'sort_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('open'),
+  );
+  static const VerificationMeta _createdTsMeta = const VerificationMeta(
+    'createdTs',
+  );
+  @override
+  late final GeneratedColumn<String> createdTs = GeneratedColumn<String>(
+    'created_ts',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _completedTsMeta = const VerificationMeta(
+    'completedTs',
+  );
+  @override
+  late final GeneratedColumn<String> completedTs = GeneratedColumn<String>(
+    'completed_ts',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _scheduledTsMeta = const VerificationMeta(
+    'scheduledTs',
+  );
+  @override
+  late final GeneratedColumn<int> scheduledTs = GeneratedColumn<int>(
+    'scheduled_ts',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _calendarEventIdMeta = const VerificationMeta(
+    'calendarEventId',
+  );
+  @override
+  late final GeneratedColumn<String> calendarEventId = GeneratedColumn<String>(
+    'calendar_event_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _calendarHtmlLinkMeta = const VerificationMeta(
+    'calendarHtmlLink',
+  );
+  @override
+  late final GeneratedColumn<String> calendarHtmlLink = GeneratedColumn<String>(
+    'calendar_html_link',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _repeatDaysMeta = const VerificationMeta(
+    'repeatDays',
+  );
+  @override
+  late final GeneratedColumn<String> repeatDays = GeneratedColumn<String>(
+    'repeat_days',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _remindFiredForTsMeta = const VerificationMeta(
+    'remindFiredForTs',
+  );
+  @override
+  late final GeneratedColumn<int> remindFiredForTs = GeneratedColumn<int>(
+    'remind_fired_for_ts',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _remindSnoozedUntilMeta =
+      const VerificationMeta('remindSnoozedUntil');
+  @override
+  late final GeneratedColumn<int> remindSnoozedUntil = GeneratedColumn<int>(
+    'remind_snoozed_until',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _boardEventIdMeta = const VerificationMeta(
+    'boardEventId',
+  );
+  @override
+  late final GeneratedColumn<String> boardEventId = GeneratedColumn<String>(
+    'board_event_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _legacyDesktopIdMeta = const VerificationMeta(
+    'legacyDesktopId',
+  );
+  @override
+  late final GeneratedColumn<int> legacyDesktopId = GeneratedColumn<int>(
+    'legacy_desktop_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _updatedTsMeta = const VerificationMeta(
+    'updatedTs',
+  );
+  @override
+  late final GeneratedColumn<int> updatedTs = GeneratedColumn<int>(
+    'updated_ts',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    uid,
+    title,
+    note,
+    areaUid,
+    urgent,
+    important,
+    sortOrder,
+    status,
+    createdTs,
+    completedTs,
+    scheduledTs,
+    calendarEventId,
+    calendarHtmlLink,
+    repeatDays,
+    remindFiredForTs,
+    remindSnoozedUntil,
+    boardEventId,
+    legacyDesktopId,
+    updatedTs,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'tasks';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<TaskRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('uid')) {
+      context.handle(
+        _uidMeta,
+        uid.isAcceptableOrUnknown(data['uid']!, _uidMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_uidMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_titleMeta);
+    }
+    if (data.containsKey('note')) {
+      context.handle(
+        _noteMeta,
+        note.isAcceptableOrUnknown(data['note']!, _noteMeta),
+      );
+    }
+    if (data.containsKey('area_uid')) {
+      context.handle(
+        _areaUidMeta,
+        areaUid.isAcceptableOrUnknown(data['area_uid']!, _areaUidMeta),
+      );
+    }
+    if (data.containsKey('urgent')) {
+      context.handle(
+        _urgentMeta,
+        urgent.isAcceptableOrUnknown(data['urgent']!, _urgentMeta),
+      );
+    }
+    if (data.containsKey('important')) {
+      context.handle(
+        _importantMeta,
+        important.isAcceptableOrUnknown(data['important']!, _importantMeta),
+      );
+    }
+    if (data.containsKey('sort_order')) {
+      context.handle(
+        _sortOrderMeta,
+        sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
+      );
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('created_ts')) {
+      context.handle(
+        _createdTsMeta,
+        createdTs.isAcceptableOrUnknown(data['created_ts']!, _createdTsMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdTsMeta);
+    }
+    if (data.containsKey('completed_ts')) {
+      context.handle(
+        _completedTsMeta,
+        completedTs.isAcceptableOrUnknown(
+          data['completed_ts']!,
+          _completedTsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('scheduled_ts')) {
+      context.handle(
+        _scheduledTsMeta,
+        scheduledTs.isAcceptableOrUnknown(
+          data['scheduled_ts']!,
+          _scheduledTsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('calendar_event_id')) {
+      context.handle(
+        _calendarEventIdMeta,
+        calendarEventId.isAcceptableOrUnknown(
+          data['calendar_event_id']!,
+          _calendarEventIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('calendar_html_link')) {
+      context.handle(
+        _calendarHtmlLinkMeta,
+        calendarHtmlLink.isAcceptableOrUnknown(
+          data['calendar_html_link']!,
+          _calendarHtmlLinkMeta,
+        ),
+      );
+    }
+    if (data.containsKey('repeat_days')) {
+      context.handle(
+        _repeatDaysMeta,
+        repeatDays.isAcceptableOrUnknown(data['repeat_days']!, _repeatDaysMeta),
+      );
+    }
+    if (data.containsKey('remind_fired_for_ts')) {
+      context.handle(
+        _remindFiredForTsMeta,
+        remindFiredForTs.isAcceptableOrUnknown(
+          data['remind_fired_for_ts']!,
+          _remindFiredForTsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('remind_snoozed_until')) {
+      context.handle(
+        _remindSnoozedUntilMeta,
+        remindSnoozedUntil.isAcceptableOrUnknown(
+          data['remind_snoozed_until']!,
+          _remindSnoozedUntilMeta,
+        ),
+      );
+    }
+    if (data.containsKey('board_event_id')) {
+      context.handle(
+        _boardEventIdMeta,
+        boardEventId.isAcceptableOrUnknown(
+          data['board_event_id']!,
+          _boardEventIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('legacy_desktop_id')) {
+      context.handle(
+        _legacyDesktopIdMeta,
+        legacyDesktopId.isAcceptableOrUnknown(
+          data['legacy_desktop_id']!,
+          _legacyDesktopIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('updated_ts')) {
+      context.handle(
+        _updatedTsMeta,
+        updatedTs.isAcceptableOrUnknown(data['updated_ts']!, _updatedTsMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedTsMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  TaskRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return TaskRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      uid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid'],
+      )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
+      note: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}note'],
+      ),
+      areaUid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}area_uid'],
+      ),
+      urgent: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}urgent'],
+      ),
+      important: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}important'],
+      ),
+      sortOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sort_order'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      createdTs: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_ts'],
+      )!,
+      completedTs: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}completed_ts'],
+      ),
+      scheduledTs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}scheduled_ts'],
+      ),
+      calendarEventId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}calendar_event_id'],
+      ),
+      calendarHtmlLink: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}calendar_html_link'],
+      ),
+      repeatDays: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}repeat_days'],
+      ),
+      remindFiredForTs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}remind_fired_for_ts'],
+      ),
+      remindSnoozedUntil: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}remind_snoozed_until'],
+      ),
+      boardEventId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}board_event_id'],
+      ),
+      legacyDesktopId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}legacy_desktop_id'],
+      ),
+      updatedTs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_ts'],
+      )!,
+    );
+  }
+
+  @override
+  $TasksTable createAlias(String alias) {
+    return $TasksTable(attachedDatabase, alias);
+  }
+}
+
+class TaskRow extends DataClass implements Insertable<TaskRow> {
+  final int id;
+  final String uid;
+  final String title;
+  final String? note;
+  final String? areaUid;
+  final bool? urgent;
+  final bool? important;
+  final int sortOrder;
+  final String status;
+  final String createdTs;
+  final String? completedTs;
+  final int? scheduledTs;
+  final String? calendarEventId;
+  final String? calendarHtmlLink;
+  final String? repeatDays;
+  final int? remindFiredForTs;
+  final int? remindSnoozedUntil;
+  final String? boardEventId;
+  final int? legacyDesktopId;
+  final int updatedTs;
+  const TaskRow({
+    required this.id,
+    required this.uid,
+    required this.title,
+    this.note,
+    this.areaUid,
+    this.urgent,
+    this.important,
+    required this.sortOrder,
+    required this.status,
+    required this.createdTs,
+    this.completedTs,
+    this.scheduledTs,
+    this.calendarEventId,
+    this.calendarHtmlLink,
+    this.repeatDays,
+    this.remindFiredForTs,
+    this.remindSnoozedUntil,
+    this.boardEventId,
+    this.legacyDesktopId,
+    required this.updatedTs,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['uid'] = Variable<String>(uid);
+    map['title'] = Variable<String>(title);
+    if (!nullToAbsent || note != null) {
+      map['note'] = Variable<String>(note);
+    }
+    if (!nullToAbsent || areaUid != null) {
+      map['area_uid'] = Variable<String>(areaUid);
+    }
+    if (!nullToAbsent || urgent != null) {
+      map['urgent'] = Variable<bool>(urgent);
+    }
+    if (!nullToAbsent || important != null) {
+      map['important'] = Variable<bool>(important);
+    }
+    map['sort_order'] = Variable<int>(sortOrder);
+    map['status'] = Variable<String>(status);
+    map['created_ts'] = Variable<String>(createdTs);
+    if (!nullToAbsent || completedTs != null) {
+      map['completed_ts'] = Variable<String>(completedTs);
+    }
+    if (!nullToAbsent || scheduledTs != null) {
+      map['scheduled_ts'] = Variable<int>(scheduledTs);
+    }
+    if (!nullToAbsent || calendarEventId != null) {
+      map['calendar_event_id'] = Variable<String>(calendarEventId);
+    }
+    if (!nullToAbsent || calendarHtmlLink != null) {
+      map['calendar_html_link'] = Variable<String>(calendarHtmlLink);
+    }
+    if (!nullToAbsent || repeatDays != null) {
+      map['repeat_days'] = Variable<String>(repeatDays);
+    }
+    if (!nullToAbsent || remindFiredForTs != null) {
+      map['remind_fired_for_ts'] = Variable<int>(remindFiredForTs);
+    }
+    if (!nullToAbsent || remindSnoozedUntil != null) {
+      map['remind_snoozed_until'] = Variable<int>(remindSnoozedUntil);
+    }
+    if (!nullToAbsent || boardEventId != null) {
+      map['board_event_id'] = Variable<String>(boardEventId);
+    }
+    if (!nullToAbsent || legacyDesktopId != null) {
+      map['legacy_desktop_id'] = Variable<int>(legacyDesktopId);
+    }
+    map['updated_ts'] = Variable<int>(updatedTs);
+    return map;
+  }
+
+  TasksCompanion toCompanion(bool nullToAbsent) {
+    return TasksCompanion(
+      id: Value(id),
+      uid: Value(uid),
+      title: Value(title),
+      note: note == null && nullToAbsent ? const Value.absent() : Value(note),
+      areaUid: areaUid == null && nullToAbsent
+          ? const Value.absent()
+          : Value(areaUid),
+      urgent: urgent == null && nullToAbsent
+          ? const Value.absent()
+          : Value(urgent),
+      important: important == null && nullToAbsent
+          ? const Value.absent()
+          : Value(important),
+      sortOrder: Value(sortOrder),
+      status: Value(status),
+      createdTs: Value(createdTs),
+      completedTs: completedTs == null && nullToAbsent
+          ? const Value.absent()
+          : Value(completedTs),
+      scheduledTs: scheduledTs == null && nullToAbsent
+          ? const Value.absent()
+          : Value(scheduledTs),
+      calendarEventId: calendarEventId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(calendarEventId),
+      calendarHtmlLink: calendarHtmlLink == null && nullToAbsent
+          ? const Value.absent()
+          : Value(calendarHtmlLink),
+      repeatDays: repeatDays == null && nullToAbsent
+          ? const Value.absent()
+          : Value(repeatDays),
+      remindFiredForTs: remindFiredForTs == null && nullToAbsent
+          ? const Value.absent()
+          : Value(remindFiredForTs),
+      remindSnoozedUntil: remindSnoozedUntil == null && nullToAbsent
+          ? const Value.absent()
+          : Value(remindSnoozedUntil),
+      boardEventId: boardEventId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(boardEventId),
+      legacyDesktopId: legacyDesktopId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(legacyDesktopId),
+      updatedTs: Value(updatedTs),
+    );
+  }
+
+  factory TaskRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return TaskRow(
+      id: serializer.fromJson<int>(json['id']),
+      uid: serializer.fromJson<String>(json['uid']),
+      title: serializer.fromJson<String>(json['title']),
+      note: serializer.fromJson<String?>(json['note']),
+      areaUid: serializer.fromJson<String?>(json['areaUid']),
+      urgent: serializer.fromJson<bool?>(json['urgent']),
+      important: serializer.fromJson<bool?>(json['important']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
+      status: serializer.fromJson<String>(json['status']),
+      createdTs: serializer.fromJson<String>(json['createdTs']),
+      completedTs: serializer.fromJson<String?>(json['completedTs']),
+      scheduledTs: serializer.fromJson<int?>(json['scheduledTs']),
+      calendarEventId: serializer.fromJson<String?>(json['calendarEventId']),
+      calendarHtmlLink: serializer.fromJson<String?>(json['calendarHtmlLink']),
+      repeatDays: serializer.fromJson<String?>(json['repeatDays']),
+      remindFiredForTs: serializer.fromJson<int?>(json['remindFiredForTs']),
+      remindSnoozedUntil: serializer.fromJson<int?>(json['remindSnoozedUntil']),
+      boardEventId: serializer.fromJson<String?>(json['boardEventId']),
+      legacyDesktopId: serializer.fromJson<int?>(json['legacyDesktopId']),
+      updatedTs: serializer.fromJson<int>(json['updatedTs']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'uid': serializer.toJson<String>(uid),
+      'title': serializer.toJson<String>(title),
+      'note': serializer.toJson<String?>(note),
+      'areaUid': serializer.toJson<String?>(areaUid),
+      'urgent': serializer.toJson<bool?>(urgent),
+      'important': serializer.toJson<bool?>(important),
+      'sortOrder': serializer.toJson<int>(sortOrder),
+      'status': serializer.toJson<String>(status),
+      'createdTs': serializer.toJson<String>(createdTs),
+      'completedTs': serializer.toJson<String?>(completedTs),
+      'scheduledTs': serializer.toJson<int?>(scheduledTs),
+      'calendarEventId': serializer.toJson<String?>(calendarEventId),
+      'calendarHtmlLink': serializer.toJson<String?>(calendarHtmlLink),
+      'repeatDays': serializer.toJson<String?>(repeatDays),
+      'remindFiredForTs': serializer.toJson<int?>(remindFiredForTs),
+      'remindSnoozedUntil': serializer.toJson<int?>(remindSnoozedUntil),
+      'boardEventId': serializer.toJson<String?>(boardEventId),
+      'legacyDesktopId': serializer.toJson<int?>(legacyDesktopId),
+      'updatedTs': serializer.toJson<int>(updatedTs),
+    };
+  }
+
+  TaskRow copyWith({
+    int? id,
+    String? uid,
+    String? title,
+    Value<String?> note = const Value.absent(),
+    Value<String?> areaUid = const Value.absent(),
+    Value<bool?> urgent = const Value.absent(),
+    Value<bool?> important = const Value.absent(),
+    int? sortOrder,
+    String? status,
+    String? createdTs,
+    Value<String?> completedTs = const Value.absent(),
+    Value<int?> scheduledTs = const Value.absent(),
+    Value<String?> calendarEventId = const Value.absent(),
+    Value<String?> calendarHtmlLink = const Value.absent(),
+    Value<String?> repeatDays = const Value.absent(),
+    Value<int?> remindFiredForTs = const Value.absent(),
+    Value<int?> remindSnoozedUntil = const Value.absent(),
+    Value<String?> boardEventId = const Value.absent(),
+    Value<int?> legacyDesktopId = const Value.absent(),
+    int? updatedTs,
+  }) => TaskRow(
+    id: id ?? this.id,
+    uid: uid ?? this.uid,
+    title: title ?? this.title,
+    note: note.present ? note.value : this.note,
+    areaUid: areaUid.present ? areaUid.value : this.areaUid,
+    urgent: urgent.present ? urgent.value : this.urgent,
+    important: important.present ? important.value : this.important,
+    sortOrder: sortOrder ?? this.sortOrder,
+    status: status ?? this.status,
+    createdTs: createdTs ?? this.createdTs,
+    completedTs: completedTs.present ? completedTs.value : this.completedTs,
+    scheduledTs: scheduledTs.present ? scheduledTs.value : this.scheduledTs,
+    calendarEventId: calendarEventId.present
+        ? calendarEventId.value
+        : this.calendarEventId,
+    calendarHtmlLink: calendarHtmlLink.present
+        ? calendarHtmlLink.value
+        : this.calendarHtmlLink,
+    repeatDays: repeatDays.present ? repeatDays.value : this.repeatDays,
+    remindFiredForTs: remindFiredForTs.present
+        ? remindFiredForTs.value
+        : this.remindFiredForTs,
+    remindSnoozedUntil: remindSnoozedUntil.present
+        ? remindSnoozedUntil.value
+        : this.remindSnoozedUntil,
+    boardEventId: boardEventId.present ? boardEventId.value : this.boardEventId,
+    legacyDesktopId: legacyDesktopId.present
+        ? legacyDesktopId.value
+        : this.legacyDesktopId,
+    updatedTs: updatedTs ?? this.updatedTs,
+  );
+  TaskRow copyWithCompanion(TasksCompanion data) {
+    return TaskRow(
+      id: data.id.present ? data.id.value : this.id,
+      uid: data.uid.present ? data.uid.value : this.uid,
+      title: data.title.present ? data.title.value : this.title,
+      note: data.note.present ? data.note.value : this.note,
+      areaUid: data.areaUid.present ? data.areaUid.value : this.areaUid,
+      urgent: data.urgent.present ? data.urgent.value : this.urgent,
+      important: data.important.present ? data.important.value : this.important,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+      status: data.status.present ? data.status.value : this.status,
+      createdTs: data.createdTs.present ? data.createdTs.value : this.createdTs,
+      completedTs: data.completedTs.present
+          ? data.completedTs.value
+          : this.completedTs,
+      scheduledTs: data.scheduledTs.present
+          ? data.scheduledTs.value
+          : this.scheduledTs,
+      calendarEventId: data.calendarEventId.present
+          ? data.calendarEventId.value
+          : this.calendarEventId,
+      calendarHtmlLink: data.calendarHtmlLink.present
+          ? data.calendarHtmlLink.value
+          : this.calendarHtmlLink,
+      repeatDays: data.repeatDays.present
+          ? data.repeatDays.value
+          : this.repeatDays,
+      remindFiredForTs: data.remindFiredForTs.present
+          ? data.remindFiredForTs.value
+          : this.remindFiredForTs,
+      remindSnoozedUntil: data.remindSnoozedUntil.present
+          ? data.remindSnoozedUntil.value
+          : this.remindSnoozedUntil,
+      boardEventId: data.boardEventId.present
+          ? data.boardEventId.value
+          : this.boardEventId,
+      legacyDesktopId: data.legacyDesktopId.present
+          ? data.legacyDesktopId.value
+          : this.legacyDesktopId,
+      updatedTs: data.updatedTs.present ? data.updatedTs.value : this.updatedTs,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TaskRow(')
+          ..write('id: $id, ')
+          ..write('uid: $uid, ')
+          ..write('title: $title, ')
+          ..write('note: $note, ')
+          ..write('areaUid: $areaUid, ')
+          ..write('urgent: $urgent, ')
+          ..write('important: $important, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('status: $status, ')
+          ..write('createdTs: $createdTs, ')
+          ..write('completedTs: $completedTs, ')
+          ..write('scheduledTs: $scheduledTs, ')
+          ..write('calendarEventId: $calendarEventId, ')
+          ..write('calendarHtmlLink: $calendarHtmlLink, ')
+          ..write('repeatDays: $repeatDays, ')
+          ..write('remindFiredForTs: $remindFiredForTs, ')
+          ..write('remindSnoozedUntil: $remindSnoozedUntil, ')
+          ..write('boardEventId: $boardEventId, ')
+          ..write('legacyDesktopId: $legacyDesktopId, ')
+          ..write('updatedTs: $updatedTs')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    uid,
+    title,
+    note,
+    areaUid,
+    urgent,
+    important,
+    sortOrder,
+    status,
+    createdTs,
+    completedTs,
+    scheduledTs,
+    calendarEventId,
+    calendarHtmlLink,
+    repeatDays,
+    remindFiredForTs,
+    remindSnoozedUntil,
+    boardEventId,
+    legacyDesktopId,
+    updatedTs,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is TaskRow &&
+          other.id == this.id &&
+          other.uid == this.uid &&
+          other.title == this.title &&
+          other.note == this.note &&
+          other.areaUid == this.areaUid &&
+          other.urgent == this.urgent &&
+          other.important == this.important &&
+          other.sortOrder == this.sortOrder &&
+          other.status == this.status &&
+          other.createdTs == this.createdTs &&
+          other.completedTs == this.completedTs &&
+          other.scheduledTs == this.scheduledTs &&
+          other.calendarEventId == this.calendarEventId &&
+          other.calendarHtmlLink == this.calendarHtmlLink &&
+          other.repeatDays == this.repeatDays &&
+          other.remindFiredForTs == this.remindFiredForTs &&
+          other.remindSnoozedUntil == this.remindSnoozedUntil &&
+          other.boardEventId == this.boardEventId &&
+          other.legacyDesktopId == this.legacyDesktopId &&
+          other.updatedTs == this.updatedTs);
+}
+
+class TasksCompanion extends UpdateCompanion<TaskRow> {
+  final Value<int> id;
+  final Value<String> uid;
+  final Value<String> title;
+  final Value<String?> note;
+  final Value<String?> areaUid;
+  final Value<bool?> urgent;
+  final Value<bool?> important;
+  final Value<int> sortOrder;
+  final Value<String> status;
+  final Value<String> createdTs;
+  final Value<String?> completedTs;
+  final Value<int?> scheduledTs;
+  final Value<String?> calendarEventId;
+  final Value<String?> calendarHtmlLink;
+  final Value<String?> repeatDays;
+  final Value<int?> remindFiredForTs;
+  final Value<int?> remindSnoozedUntil;
+  final Value<String?> boardEventId;
+  final Value<int?> legacyDesktopId;
+  final Value<int> updatedTs;
+  const TasksCompanion({
+    this.id = const Value.absent(),
+    this.uid = const Value.absent(),
+    this.title = const Value.absent(),
+    this.note = const Value.absent(),
+    this.areaUid = const Value.absent(),
+    this.urgent = const Value.absent(),
+    this.important = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.status = const Value.absent(),
+    this.createdTs = const Value.absent(),
+    this.completedTs = const Value.absent(),
+    this.scheduledTs = const Value.absent(),
+    this.calendarEventId = const Value.absent(),
+    this.calendarHtmlLink = const Value.absent(),
+    this.repeatDays = const Value.absent(),
+    this.remindFiredForTs = const Value.absent(),
+    this.remindSnoozedUntil = const Value.absent(),
+    this.boardEventId = const Value.absent(),
+    this.legacyDesktopId = const Value.absent(),
+    this.updatedTs = const Value.absent(),
+  });
+  TasksCompanion.insert({
+    this.id = const Value.absent(),
+    required String uid,
+    required String title,
+    this.note = const Value.absent(),
+    this.areaUid = const Value.absent(),
+    this.urgent = const Value.absent(),
+    this.important = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.status = const Value.absent(),
+    required String createdTs,
+    this.completedTs = const Value.absent(),
+    this.scheduledTs = const Value.absent(),
+    this.calendarEventId = const Value.absent(),
+    this.calendarHtmlLink = const Value.absent(),
+    this.repeatDays = const Value.absent(),
+    this.remindFiredForTs = const Value.absent(),
+    this.remindSnoozedUntil = const Value.absent(),
+    this.boardEventId = const Value.absent(),
+    this.legacyDesktopId = const Value.absent(),
+    required int updatedTs,
+  }) : uid = Value(uid),
+       title = Value(title),
+       createdTs = Value(createdTs),
+       updatedTs = Value(updatedTs);
+  static Insertable<TaskRow> custom({
+    Expression<int>? id,
+    Expression<String>? uid,
+    Expression<String>? title,
+    Expression<String>? note,
+    Expression<String>? areaUid,
+    Expression<bool>? urgent,
+    Expression<bool>? important,
+    Expression<int>? sortOrder,
+    Expression<String>? status,
+    Expression<String>? createdTs,
+    Expression<String>? completedTs,
+    Expression<int>? scheduledTs,
+    Expression<String>? calendarEventId,
+    Expression<String>? calendarHtmlLink,
+    Expression<String>? repeatDays,
+    Expression<int>? remindFiredForTs,
+    Expression<int>? remindSnoozedUntil,
+    Expression<String>? boardEventId,
+    Expression<int>? legacyDesktopId,
+    Expression<int>? updatedTs,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (uid != null) 'uid': uid,
+      if (title != null) 'title': title,
+      if (note != null) 'note': note,
+      if (areaUid != null) 'area_uid': areaUid,
+      if (urgent != null) 'urgent': urgent,
+      if (important != null) 'important': important,
+      if (sortOrder != null) 'sort_order': sortOrder,
+      if (status != null) 'status': status,
+      if (createdTs != null) 'created_ts': createdTs,
+      if (completedTs != null) 'completed_ts': completedTs,
+      if (scheduledTs != null) 'scheduled_ts': scheduledTs,
+      if (calendarEventId != null) 'calendar_event_id': calendarEventId,
+      if (calendarHtmlLink != null) 'calendar_html_link': calendarHtmlLink,
+      if (repeatDays != null) 'repeat_days': repeatDays,
+      if (remindFiredForTs != null) 'remind_fired_for_ts': remindFiredForTs,
+      if (remindSnoozedUntil != null)
+        'remind_snoozed_until': remindSnoozedUntil,
+      if (boardEventId != null) 'board_event_id': boardEventId,
+      if (legacyDesktopId != null) 'legacy_desktop_id': legacyDesktopId,
+      if (updatedTs != null) 'updated_ts': updatedTs,
+    });
+  }
+
+  TasksCompanion copyWith({
+    Value<int>? id,
+    Value<String>? uid,
+    Value<String>? title,
+    Value<String?>? note,
+    Value<String?>? areaUid,
+    Value<bool?>? urgent,
+    Value<bool?>? important,
+    Value<int>? sortOrder,
+    Value<String>? status,
+    Value<String>? createdTs,
+    Value<String?>? completedTs,
+    Value<int?>? scheduledTs,
+    Value<String?>? calendarEventId,
+    Value<String?>? calendarHtmlLink,
+    Value<String?>? repeatDays,
+    Value<int?>? remindFiredForTs,
+    Value<int?>? remindSnoozedUntil,
+    Value<String?>? boardEventId,
+    Value<int?>? legacyDesktopId,
+    Value<int>? updatedTs,
+  }) {
+    return TasksCompanion(
+      id: id ?? this.id,
+      uid: uid ?? this.uid,
+      title: title ?? this.title,
+      note: note ?? this.note,
+      areaUid: areaUid ?? this.areaUid,
+      urgent: urgent ?? this.urgent,
+      important: important ?? this.important,
+      sortOrder: sortOrder ?? this.sortOrder,
+      status: status ?? this.status,
+      createdTs: createdTs ?? this.createdTs,
+      completedTs: completedTs ?? this.completedTs,
+      scheduledTs: scheduledTs ?? this.scheduledTs,
+      calendarEventId: calendarEventId ?? this.calendarEventId,
+      calendarHtmlLink: calendarHtmlLink ?? this.calendarHtmlLink,
+      repeatDays: repeatDays ?? this.repeatDays,
+      remindFiredForTs: remindFiredForTs ?? this.remindFiredForTs,
+      remindSnoozedUntil: remindSnoozedUntil ?? this.remindSnoozedUntil,
+      boardEventId: boardEventId ?? this.boardEventId,
+      legacyDesktopId: legacyDesktopId ?? this.legacyDesktopId,
+      updatedTs: updatedTs ?? this.updatedTs,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (uid.present) {
+      map['uid'] = Variable<String>(uid.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (note.present) {
+      map['note'] = Variable<String>(note.value);
+    }
+    if (areaUid.present) {
+      map['area_uid'] = Variable<String>(areaUid.value);
+    }
+    if (urgent.present) {
+      map['urgent'] = Variable<bool>(urgent.value);
+    }
+    if (important.present) {
+      map['important'] = Variable<bool>(important.value);
+    }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (createdTs.present) {
+      map['created_ts'] = Variable<String>(createdTs.value);
+    }
+    if (completedTs.present) {
+      map['completed_ts'] = Variable<String>(completedTs.value);
+    }
+    if (scheduledTs.present) {
+      map['scheduled_ts'] = Variable<int>(scheduledTs.value);
+    }
+    if (calendarEventId.present) {
+      map['calendar_event_id'] = Variable<String>(calendarEventId.value);
+    }
+    if (calendarHtmlLink.present) {
+      map['calendar_html_link'] = Variable<String>(calendarHtmlLink.value);
+    }
+    if (repeatDays.present) {
+      map['repeat_days'] = Variable<String>(repeatDays.value);
+    }
+    if (remindFiredForTs.present) {
+      map['remind_fired_for_ts'] = Variable<int>(remindFiredForTs.value);
+    }
+    if (remindSnoozedUntil.present) {
+      map['remind_snoozed_until'] = Variable<int>(remindSnoozedUntil.value);
+    }
+    if (boardEventId.present) {
+      map['board_event_id'] = Variable<String>(boardEventId.value);
+    }
+    if (legacyDesktopId.present) {
+      map['legacy_desktop_id'] = Variable<int>(legacyDesktopId.value);
+    }
+    if (updatedTs.present) {
+      map['updated_ts'] = Variable<int>(updatedTs.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TasksCompanion(')
+          ..write('id: $id, ')
+          ..write('uid: $uid, ')
+          ..write('title: $title, ')
+          ..write('note: $note, ')
+          ..write('areaUid: $areaUid, ')
+          ..write('urgent: $urgent, ')
+          ..write('important: $important, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('status: $status, ')
+          ..write('createdTs: $createdTs, ')
+          ..write('completedTs: $completedTs, ')
+          ..write('scheduledTs: $scheduledTs, ')
+          ..write('calendarEventId: $calendarEventId, ')
+          ..write('calendarHtmlLink: $calendarHtmlLink, ')
+          ..write('repeatDays: $repeatDays, ')
+          ..write('remindFiredForTs: $remindFiredForTs, ')
+          ..write('remindSnoozedUntil: $remindSnoozedUntil, ')
+          ..write('boardEventId: $boardEventId, ')
+          ..write('legacyDesktopId: $legacyDesktopId, ')
+          ..write('updatedTs: $updatedTs')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $AreasTable extends Areas with TableInfo<$AreasTable, AreaRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AreasTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _uidMeta = const VerificationMeta('uid');
+  @override
+  late final GeneratedColumn<String> uid = GeneratedColumn<String>(
+    'uid',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sortOrderMeta = const VerificationMeta(
+    'sortOrder',
+  );
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+    'sort_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedTsMeta = const VerificationMeta(
+    'updatedTs',
+  );
+  @override
+  late final GeneratedColumn<int> updatedTs = GeneratedColumn<int>(
+    'updated_ts',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [uid, name, sortOrder, updatedTs];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'areas';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AreaRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('uid')) {
+      context.handle(
+        _uidMeta,
+        uid.isAcceptableOrUnknown(data['uid']!, _uidMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_uidMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('sort_order')) {
+      context.handle(
+        _sortOrderMeta,
+        sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sortOrderMeta);
+    }
+    if (data.containsKey('updated_ts')) {
+      context.handle(
+        _updatedTsMeta,
+        updatedTs.isAcceptableOrUnknown(data['updated_ts']!, _updatedTsMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedTsMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {uid};
+  @override
+  AreaRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AreaRow(
+      uid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}uid'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      sortOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sort_order'],
+      )!,
+      updatedTs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_ts'],
+      )!,
+    );
+  }
+
+  @override
+  $AreasTable createAlias(String alias) {
+    return $AreasTable(attachedDatabase, alias);
+  }
+}
+
+class AreaRow extends DataClass implements Insertable<AreaRow> {
+  final String uid;
+  final String name;
+  final int sortOrder;
+  final int updatedTs;
+  const AreaRow({
+    required this.uid,
+    required this.name,
+    required this.sortOrder,
+    required this.updatedTs,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['uid'] = Variable<String>(uid);
+    map['name'] = Variable<String>(name);
+    map['sort_order'] = Variable<int>(sortOrder);
+    map['updated_ts'] = Variable<int>(updatedTs);
+    return map;
+  }
+
+  AreasCompanion toCompanion(bool nullToAbsent) {
+    return AreasCompanion(
+      uid: Value(uid),
+      name: Value(name),
+      sortOrder: Value(sortOrder),
+      updatedTs: Value(updatedTs),
+    );
+  }
+
+  factory AreaRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AreaRow(
+      uid: serializer.fromJson<String>(json['uid']),
+      name: serializer.fromJson<String>(json['name']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
+      updatedTs: serializer.fromJson<int>(json['updatedTs']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'uid': serializer.toJson<String>(uid),
+      'name': serializer.toJson<String>(name),
+      'sortOrder': serializer.toJson<int>(sortOrder),
+      'updatedTs': serializer.toJson<int>(updatedTs),
+    };
+  }
+
+  AreaRow copyWith({
+    String? uid,
+    String? name,
+    int? sortOrder,
+    int? updatedTs,
+  }) => AreaRow(
+    uid: uid ?? this.uid,
+    name: name ?? this.name,
+    sortOrder: sortOrder ?? this.sortOrder,
+    updatedTs: updatedTs ?? this.updatedTs,
+  );
+  AreaRow copyWithCompanion(AreasCompanion data) {
+    return AreaRow(
+      uid: data.uid.present ? data.uid.value : this.uid,
+      name: data.name.present ? data.name.value : this.name,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+      updatedTs: data.updatedTs.present ? data.updatedTs.value : this.updatedTs,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AreaRow(')
+          ..write('uid: $uid, ')
+          ..write('name: $name, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('updatedTs: $updatedTs')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(uid, name, sortOrder, updatedTs);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AreaRow &&
+          other.uid == this.uid &&
+          other.name == this.name &&
+          other.sortOrder == this.sortOrder &&
+          other.updatedTs == this.updatedTs);
+}
+
+class AreasCompanion extends UpdateCompanion<AreaRow> {
+  final Value<String> uid;
+  final Value<String> name;
+  final Value<int> sortOrder;
+  final Value<int> updatedTs;
+  final Value<int> rowid;
+  const AreasCompanion({
+    this.uid = const Value.absent(),
+    this.name = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.updatedTs = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AreasCompanion.insert({
+    required String uid,
+    required String name,
+    required int sortOrder,
+    required int updatedTs,
+    this.rowid = const Value.absent(),
+  }) : uid = Value(uid),
+       name = Value(name),
+       sortOrder = Value(sortOrder),
+       updatedTs = Value(updatedTs);
+  static Insertable<AreaRow> custom({
+    Expression<String>? uid,
+    Expression<String>? name,
+    Expression<int>? sortOrder,
+    Expression<int>? updatedTs,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (uid != null) 'uid': uid,
+      if (name != null) 'name': name,
+      if (sortOrder != null) 'sort_order': sortOrder,
+      if (updatedTs != null) 'updated_ts': updatedTs,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AreasCompanion copyWith({
+    Value<String>? uid,
+    Value<String>? name,
+    Value<int>? sortOrder,
+    Value<int>? updatedTs,
+    Value<int>? rowid,
+  }) {
+    return AreasCompanion(
+      uid: uid ?? this.uid,
+      name: name ?? this.name,
+      sortOrder: sortOrder ?? this.sortOrder,
+      updatedTs: updatedTs ?? this.updatedTs,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (uid.present) {
+      map['uid'] = Variable<String>(uid.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
+    if (updatedTs.present) {
+      map['updated_ts'] = Variable<int>(updatedTs.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AreasCompanion(')
+          ..write('uid: $uid, ')
+          ..write('name: $name, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('updatedTs: $updatedTs, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SettingsKVTable extends SettingsKV
+    with TableInfo<$SettingsKVTable, SettingsKVData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SettingsKVTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _keyMeta = const VerificationMeta('key');
+  @override
+  late final GeneratedColumn<String> key = GeneratedColumn<String>(
+    'key',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _valueMeta = const VerificationMeta('value');
+  @override
+  late final GeneratedColumn<String> value = GeneratedColumn<String>(
+    'value',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [key, value];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'settings_k_v';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SettingsKVData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('key')) {
+      context.handle(
+        _keyMeta,
+        key.isAcceptableOrUnknown(data['key']!, _keyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_keyMeta);
+    }
+    if (data.containsKey('value')) {
+      context.handle(
+        _valueMeta,
+        value.isAcceptableOrUnknown(data['value']!, _valueMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_valueMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {key};
+  @override
+  SettingsKVData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SettingsKVData(
+      key: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}key'],
+      )!,
+      value: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}value'],
+      )!,
+    );
+  }
+
+  @override
+  $SettingsKVTable createAlias(String alias) {
+    return $SettingsKVTable(attachedDatabase, alias);
+  }
+}
+
+class SettingsKVData extends DataClass implements Insertable<SettingsKVData> {
+  final String key;
+  final String value;
+  const SettingsKVData({required this.key, required this.value});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['key'] = Variable<String>(key);
+    map['value'] = Variable<String>(value);
+    return map;
+  }
+
+  SettingsKVCompanion toCompanion(bool nullToAbsent) {
+    return SettingsKVCompanion(key: Value(key), value: Value(value));
+  }
+
+  factory SettingsKVData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SettingsKVData(
+      key: serializer.fromJson<String>(json['key']),
+      value: serializer.fromJson<String>(json['value']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'key': serializer.toJson<String>(key),
+      'value': serializer.toJson<String>(value),
+    };
+  }
+
+  SettingsKVData copyWith({String? key, String? value}) =>
+      SettingsKVData(key: key ?? this.key, value: value ?? this.value);
+  SettingsKVData copyWithCompanion(SettingsKVCompanion data) {
+    return SettingsKVData(
+      key: data.key.present ? data.key.value : this.key,
+      value: data.value.present ? data.value.value : this.value,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SettingsKVData(')
+          ..write('key: $key, ')
+          ..write('value: $value')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(key, value);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SettingsKVData &&
+          other.key == this.key &&
+          other.value == this.value);
+}
+
+class SettingsKVCompanion extends UpdateCompanion<SettingsKVData> {
+  final Value<String> key;
+  final Value<String> value;
+  final Value<int> rowid;
+  const SettingsKVCompanion({
+    this.key = const Value.absent(),
+    this.value = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SettingsKVCompanion.insert({
+    required String key,
+    required String value,
+    this.rowid = const Value.absent(),
+  }) : key = Value(key),
+       value = Value(value);
+  static Insertable<SettingsKVData> custom({
+    Expression<String>? key,
+    Expression<String>? value,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (key != null) 'key': key,
+      if (value != null) 'value': value,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SettingsKVCompanion copyWith({
+    Value<String>? key,
+    Value<String>? value,
+    Value<int>? rowid,
+  }) {
+    return SettingsKVCompanion(
+      key: key ?? this.key,
+      value: value ?? this.value,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (key.present) {
+      map['key'] = Variable<String>(key.value);
+    }
+    if (value.present) {
+      map['value'] = Variable<String>(value.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SettingsKVCompanion(')
+          ..write('key: $key, ')
+          ..write('value: $value, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+abstract class _$AppDatabase extends GeneratedDatabase {
+  _$AppDatabase(QueryExecutor e) : super(e);
+  $AppDatabaseManager get managers => $AppDatabaseManager(this);
+  late final $TasksTable tasks = $TasksTable(this);
+  late final $AreasTable areas = $AreasTable(this);
+  late final $SettingsKVTable settingsKV = $SettingsKVTable(this);
+  @override
+  Iterable<TableInfo<Table, Object?>> get allTables =>
+      allSchemaEntities.whereType<TableInfo<Table, Object?>>();
+  @override
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+    tasks,
+    areas,
+    settingsKV,
+  ];
+}
+
+typedef $$TasksTableCreateCompanionBuilder =
+    TasksCompanion Function({
+      Value<int> id,
+      required String uid,
+      required String title,
+      Value<String?> note,
+      Value<String?> areaUid,
+      Value<bool?> urgent,
+      Value<bool?> important,
+      Value<int> sortOrder,
+      Value<String> status,
+      required String createdTs,
+      Value<String?> completedTs,
+      Value<int?> scheduledTs,
+      Value<String?> calendarEventId,
+      Value<String?> calendarHtmlLink,
+      Value<String?> repeatDays,
+      Value<int?> remindFiredForTs,
+      Value<int?> remindSnoozedUntil,
+      Value<String?> boardEventId,
+      Value<int?> legacyDesktopId,
+      required int updatedTs,
+    });
+typedef $$TasksTableUpdateCompanionBuilder =
+    TasksCompanion Function({
+      Value<int> id,
+      Value<String> uid,
+      Value<String> title,
+      Value<String?> note,
+      Value<String?> areaUid,
+      Value<bool?> urgent,
+      Value<bool?> important,
+      Value<int> sortOrder,
+      Value<String> status,
+      Value<String> createdTs,
+      Value<String?> completedTs,
+      Value<int?> scheduledTs,
+      Value<String?> calendarEventId,
+      Value<String?> calendarHtmlLink,
+      Value<String?> repeatDays,
+      Value<int?> remindFiredForTs,
+      Value<int?> remindSnoozedUntil,
+      Value<String?> boardEventId,
+      Value<int?> legacyDesktopId,
+      Value<int> updatedTs,
+    });
+
+class $$TasksTableFilterComposer extends Composer<_$AppDatabase, $TasksTable> {
+  $$TasksTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get areaUid => $composableBuilder(
+    column: $table.areaUid,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get urgent => $composableBuilder(
+    column: $table.urgent,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get important => $composableBuilder(
+    column: $table.important,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdTs => $composableBuilder(
+    column: $table.createdTs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get completedTs => $composableBuilder(
+    column: $table.completedTs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get scheduledTs => $composableBuilder(
+    column: $table.scheduledTs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get calendarEventId => $composableBuilder(
+    column: $table.calendarEventId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get calendarHtmlLink => $composableBuilder(
+    column: $table.calendarHtmlLink,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get repeatDays => $composableBuilder(
+    column: $table.repeatDays,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get remindFiredForTs => $composableBuilder(
+    column: $table.remindFiredForTs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get remindSnoozedUntil => $composableBuilder(
+    column: $table.remindSnoozedUntil,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get boardEventId => $composableBuilder(
+    column: $table.boardEventId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get legacyDesktopId => $composableBuilder(
+    column: $table.legacyDesktopId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedTs => $composableBuilder(
+    column: $table.updatedTs,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$TasksTableOrderingComposer
+    extends Composer<_$AppDatabase, $TasksTable> {
+  $$TasksTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get note => $composableBuilder(
+    column: $table.note,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get areaUid => $composableBuilder(
+    column: $table.areaUid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get urgent => $composableBuilder(
+    column: $table.urgent,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get important => $composableBuilder(
+    column: $table.important,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdTs => $composableBuilder(
+    column: $table.createdTs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get completedTs => $composableBuilder(
+    column: $table.completedTs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get scheduledTs => $composableBuilder(
+    column: $table.scheduledTs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get calendarEventId => $composableBuilder(
+    column: $table.calendarEventId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get calendarHtmlLink => $composableBuilder(
+    column: $table.calendarHtmlLink,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get repeatDays => $composableBuilder(
+    column: $table.repeatDays,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get remindFiredForTs => $composableBuilder(
+    column: $table.remindFiredForTs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get remindSnoozedUntil => $composableBuilder(
+    column: $table.remindSnoozedUntil,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get boardEventId => $composableBuilder(
+    column: $table.boardEventId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get legacyDesktopId => $composableBuilder(
+    column: $table.legacyDesktopId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedTs => $composableBuilder(
+    column: $table.updatedTs,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$TasksTableAnnotationComposer
+    extends Composer<_$AppDatabase, $TasksTable> {
+  $$TasksTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get uid =>
+      $composableBuilder(column: $table.uid, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get note =>
+      $composableBuilder(column: $table.note, builder: (column) => column);
+
+  GeneratedColumn<String> get areaUid =>
+      $composableBuilder(column: $table.areaUid, builder: (column) => column);
+
+  GeneratedColumn<bool> get urgent =>
+      $composableBuilder(column: $table.urgent, builder: (column) => column);
+
+  GeneratedColumn<bool> get important =>
+      $composableBuilder(column: $table.important, builder: (column) => column);
+
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get createdTs =>
+      $composableBuilder(column: $table.createdTs, builder: (column) => column);
+
+  GeneratedColumn<String> get completedTs => $composableBuilder(
+    column: $table.completedTs,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get scheduledTs => $composableBuilder(
+    column: $table.scheduledTs,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get calendarEventId => $composableBuilder(
+    column: $table.calendarEventId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get calendarHtmlLink => $composableBuilder(
+    column: $table.calendarHtmlLink,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get repeatDays => $composableBuilder(
+    column: $table.repeatDays,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get remindFiredForTs => $composableBuilder(
+    column: $table.remindFiredForTs,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get remindSnoozedUntil => $composableBuilder(
+    column: $table.remindSnoozedUntil,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get boardEventId => $composableBuilder(
+    column: $table.boardEventId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get legacyDesktopId => $composableBuilder(
+    column: $table.legacyDesktopId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get updatedTs =>
+      $composableBuilder(column: $table.updatedTs, builder: (column) => column);
+}
+
+class $$TasksTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $TasksTable,
+          TaskRow,
+          $$TasksTableFilterComposer,
+          $$TasksTableOrderingComposer,
+          $$TasksTableAnnotationComposer,
+          $$TasksTableCreateCompanionBuilder,
+          $$TasksTableUpdateCompanionBuilder,
+          (TaskRow, BaseReferences<_$AppDatabase, $TasksTable, TaskRow>),
+          TaskRow,
+          PrefetchHooks Function()
+        > {
+  $$TasksTableTableManager(_$AppDatabase db, $TasksTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$TasksTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$TasksTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$TasksTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> uid = const Value.absent(),
+                Value<String> title = const Value.absent(),
+                Value<String?> note = const Value.absent(),
+                Value<String?> areaUid = const Value.absent(),
+                Value<bool?> urgent = const Value.absent(),
+                Value<bool?> important = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String> createdTs = const Value.absent(),
+                Value<String?> completedTs = const Value.absent(),
+                Value<int?> scheduledTs = const Value.absent(),
+                Value<String?> calendarEventId = const Value.absent(),
+                Value<String?> calendarHtmlLink = const Value.absent(),
+                Value<String?> repeatDays = const Value.absent(),
+                Value<int?> remindFiredForTs = const Value.absent(),
+                Value<int?> remindSnoozedUntil = const Value.absent(),
+                Value<String?> boardEventId = const Value.absent(),
+                Value<int?> legacyDesktopId = const Value.absent(),
+                Value<int> updatedTs = const Value.absent(),
+              }) => TasksCompanion(
+                id: id,
+                uid: uid,
+                title: title,
+                note: note,
+                areaUid: areaUid,
+                urgent: urgent,
+                important: important,
+                sortOrder: sortOrder,
+                status: status,
+                createdTs: createdTs,
+                completedTs: completedTs,
+                scheduledTs: scheduledTs,
+                calendarEventId: calendarEventId,
+                calendarHtmlLink: calendarHtmlLink,
+                repeatDays: repeatDays,
+                remindFiredForTs: remindFiredForTs,
+                remindSnoozedUntil: remindSnoozedUntil,
+                boardEventId: boardEventId,
+                legacyDesktopId: legacyDesktopId,
+                updatedTs: updatedTs,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String uid,
+                required String title,
+                Value<String?> note = const Value.absent(),
+                Value<String?> areaUid = const Value.absent(),
+                Value<bool?> urgent = const Value.absent(),
+                Value<bool?> important = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                required String createdTs,
+                Value<String?> completedTs = const Value.absent(),
+                Value<int?> scheduledTs = const Value.absent(),
+                Value<String?> calendarEventId = const Value.absent(),
+                Value<String?> calendarHtmlLink = const Value.absent(),
+                Value<String?> repeatDays = const Value.absent(),
+                Value<int?> remindFiredForTs = const Value.absent(),
+                Value<int?> remindSnoozedUntil = const Value.absent(),
+                Value<String?> boardEventId = const Value.absent(),
+                Value<int?> legacyDesktopId = const Value.absent(),
+                required int updatedTs,
+              }) => TasksCompanion.insert(
+                id: id,
+                uid: uid,
+                title: title,
+                note: note,
+                areaUid: areaUid,
+                urgent: urgent,
+                important: important,
+                sortOrder: sortOrder,
+                status: status,
+                createdTs: createdTs,
+                completedTs: completedTs,
+                scheduledTs: scheduledTs,
+                calendarEventId: calendarEventId,
+                calendarHtmlLink: calendarHtmlLink,
+                repeatDays: repeatDays,
+                remindFiredForTs: remindFiredForTs,
+                remindSnoozedUntil: remindSnoozedUntil,
+                boardEventId: boardEventId,
+                legacyDesktopId: legacyDesktopId,
+                updatedTs: updatedTs,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$TasksTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $TasksTable,
+      TaskRow,
+      $$TasksTableFilterComposer,
+      $$TasksTableOrderingComposer,
+      $$TasksTableAnnotationComposer,
+      $$TasksTableCreateCompanionBuilder,
+      $$TasksTableUpdateCompanionBuilder,
+      (TaskRow, BaseReferences<_$AppDatabase, $TasksTable, TaskRow>),
+      TaskRow,
+      PrefetchHooks Function()
+    >;
+typedef $$AreasTableCreateCompanionBuilder =
+    AreasCompanion Function({
+      required String uid,
+      required String name,
+      required int sortOrder,
+      required int updatedTs,
+      Value<int> rowid,
+    });
+typedef $$AreasTableUpdateCompanionBuilder =
+    AreasCompanion Function({
+      Value<String> uid,
+      Value<String> name,
+      Value<int> sortOrder,
+      Value<int> updatedTs,
+      Value<int> rowid,
+    });
+
+class $$AreasTableFilterComposer extends Composer<_$AppDatabase, $AreasTable> {
+  $$AreasTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedTs => $composableBuilder(
+    column: $table.updatedTs,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$AreasTableOrderingComposer
+    extends Composer<_$AppDatabase, $AreasTable> {
+  $$AreasTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get uid => $composableBuilder(
+    column: $table.uid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedTs => $composableBuilder(
+    column: $table.updatedTs,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$AreasTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AreasTable> {
+  $$AreasTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get uid =>
+      $composableBuilder(column: $table.uid, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  GeneratedColumn<int> get updatedTs =>
+      $composableBuilder(column: $table.updatedTs, builder: (column) => column);
+}
+
+class $$AreasTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AreasTable,
+          AreaRow,
+          $$AreasTableFilterComposer,
+          $$AreasTableOrderingComposer,
+          $$AreasTableAnnotationComposer,
+          $$AreasTableCreateCompanionBuilder,
+          $$AreasTableUpdateCompanionBuilder,
+          (AreaRow, BaseReferences<_$AppDatabase, $AreasTable, AreaRow>),
+          AreaRow,
+          PrefetchHooks Function()
+        > {
+  $$AreasTableTableManager(_$AppDatabase db, $AreasTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AreasTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AreasTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AreasTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> uid = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
+                Value<int> updatedTs = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AreasCompanion(
+                uid: uid,
+                name: name,
+                sortOrder: sortOrder,
+                updatedTs: updatedTs,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String uid,
+                required String name,
+                required int sortOrder,
+                required int updatedTs,
+                Value<int> rowid = const Value.absent(),
+              }) => AreasCompanion.insert(
+                uid: uid,
+                name: name,
+                sortOrder: sortOrder,
+                updatedTs: updatedTs,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$AreasTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AreasTable,
+      AreaRow,
+      $$AreasTableFilterComposer,
+      $$AreasTableOrderingComposer,
+      $$AreasTableAnnotationComposer,
+      $$AreasTableCreateCompanionBuilder,
+      $$AreasTableUpdateCompanionBuilder,
+      (AreaRow, BaseReferences<_$AppDatabase, $AreasTable, AreaRow>),
+      AreaRow,
+      PrefetchHooks Function()
+    >;
+typedef $$SettingsKVTableCreateCompanionBuilder =
+    SettingsKVCompanion Function({
+      required String key,
+      required String value,
+      Value<int> rowid,
+    });
+typedef $$SettingsKVTableUpdateCompanionBuilder =
+    SettingsKVCompanion Function({
+      Value<String> key,
+      Value<String> value,
+      Value<int> rowid,
+    });
+
+class $$SettingsKVTableFilterComposer
+    extends Composer<_$AppDatabase, $SettingsKVTable> {
+  $$SettingsKVTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get key => $composableBuilder(
+    column: $table.key,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get value => $composableBuilder(
+    column: $table.value,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SettingsKVTableOrderingComposer
+    extends Composer<_$AppDatabase, $SettingsKVTable> {
+  $$SettingsKVTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get key => $composableBuilder(
+    column: $table.key,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get value => $composableBuilder(
+    column: $table.value,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SettingsKVTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SettingsKVTable> {
+  $$SettingsKVTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get key =>
+      $composableBuilder(column: $table.key, builder: (column) => column);
+
+  GeneratedColumn<String> get value =>
+      $composableBuilder(column: $table.value, builder: (column) => column);
+}
+
+class $$SettingsKVTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SettingsKVTable,
+          SettingsKVData,
+          $$SettingsKVTableFilterComposer,
+          $$SettingsKVTableOrderingComposer,
+          $$SettingsKVTableAnnotationComposer,
+          $$SettingsKVTableCreateCompanionBuilder,
+          $$SettingsKVTableUpdateCompanionBuilder,
+          (
+            SettingsKVData,
+            BaseReferences<_$AppDatabase, $SettingsKVTable, SettingsKVData>,
+          ),
+          SettingsKVData,
+          PrefetchHooks Function()
+        > {
+  $$SettingsKVTableTableManager(_$AppDatabase db, $SettingsKVTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SettingsKVTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SettingsKVTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SettingsKVTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> key = const Value.absent(),
+                Value<String> value = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SettingsKVCompanion(key: key, value: value, rowid: rowid),
+          createCompanionCallback:
+              ({
+                required String key,
+                required String value,
+                Value<int> rowid = const Value.absent(),
+              }) => SettingsKVCompanion.insert(
+                key: key,
+                value: value,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SettingsKVTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SettingsKVTable,
+      SettingsKVData,
+      $$SettingsKVTableFilterComposer,
+      $$SettingsKVTableOrderingComposer,
+      $$SettingsKVTableAnnotationComposer,
+      $$SettingsKVTableCreateCompanionBuilder,
+      $$SettingsKVTableUpdateCompanionBuilder,
+      (
+        SettingsKVData,
+        BaseReferences<_$AppDatabase, $SettingsKVTable, SettingsKVData>,
+      ),
+      SettingsKVData,
+      PrefetchHooks Function()
+    >;
+
+class $AppDatabaseManager {
+  final _$AppDatabase _db;
+  $AppDatabaseManager(this._db);
+  $$TasksTableTableManager get tasks =>
+      $$TasksTableTableManager(_db, _db.tasks);
+  $$AreasTableTableManager get areas =>
+      $$AreasTableTableManager(_db, _db.areas);
+  $$SettingsKVTableTableManager get settingsKV =>
+      $$SettingsKVTableTableManager(_db, _db.settingsKV);
+}
