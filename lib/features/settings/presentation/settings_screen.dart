@@ -174,10 +174,15 @@ class _GoogleSectionState extends ConsumerState<_GoogleSection> {
                 working: _busy),
           ),
         ] else ...[
-          Row(
+          // Wrap, not Row: a chip whose label grows while working
+          // ('Disconnecting…' + spinner) flows to the next line instead
+          // of walking off the screen.
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               _chip(c, 'Connected', accent: true),
-              const SizedBox(width: AppSpacing.sm),
               PressableScale(
                 onPressed: _busy
                     ? null
@@ -190,7 +195,6 @@ class _GoogleSectionState extends ConsumerState<_GoogleSection> {
                   dimmed: _busy && _busyAction != 'sync',
                 ),
               ),
-              const SizedBox(width: AppSpacing.sm),
               PressableScale(
                 onPressed: _busy
                     ? null
