@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/theme/theme.dart';
+import '../../../core/widgets/arrive_in.dart';
 import '../../../core/widgets/caps_label.dart';
 import '../../../core/widgets/pressable_scale.dart';
 import '../../calendar_sync/presentation/sync_providers.dart';
@@ -57,8 +58,14 @@ class WeekScreen extends ConsumerWidget {
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.all(AppSpacing.lg),
         children: [
-          for (final day in days) ...[
-            Builder(builder: (context) {
+          for (final (dayIndex, day) in days.indexed) ...[
+            // "A full calendar never feels slower than an empty one" — the
+            // 12ms week step, first mount only; syncs never replay it.
+            ArriveIn(
+                index: dayIndex,
+                step: AppDurations.weekStaggerStep,
+                cap: AppDurations.weekStaggerCap,
+                child: Builder(builder: (context) {
               final dayStart = day.millisecondsSinceEpoch ~/ 1000;
               final dayEnd = dayStart + 86400;
               final own = [
@@ -143,7 +150,7 @@ class WeekScreen extends ConsumerWidget {
                   ],
                 ],
               );
-            }),
+            })),
           ],
           if (!anything)
             Padding(

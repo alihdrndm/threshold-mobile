@@ -167,9 +167,20 @@ class TaskCard extends ConsumerWidget {
                     width: done ? 1 : 1.5,
                   ),
                 ),
-                child: done
-                    ? const Icon(Icons.check, size: 13, color: Colors.white)
-                    : null,
+                // The check rides the fill: both properties move together,
+                // or the moment reads as a glitch in slow motion.
+                child: AnimatedScale(
+                  scale: done ? 1 : 0.6,
+                  duration: AppDurations.base,
+                  curve: AppCurves.out,
+                  child: AnimatedOpacity(
+                    opacity: done ? 1 : 0,
+                    duration: AppDurations.base,
+                    curve: Curves.ease,
+                    child: const Icon(Icons.check,
+                        size: 13, color: Colors.white),
+                  ),
+                ),
               ),
             ),
           ),
@@ -266,11 +277,19 @@ class TaskCard extends ConsumerWidget {
               style: AppTypography.taskTitle.copyWith(color: c.ink)),
         ),
       ),
-      childWhenDragging: Container(
-        height: 44,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(AppRadii.card),
-          border: Border.all(color: c.accent.withValues(alpha: 0.4)),
+      // The slot the drag leaves behind fades in rather than snapping —
+      // the one hard cut left in the lift gesture.
+      childWhenDragging: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0, end: 1),
+        duration: AppDurations.press,
+        curve: Curves.ease,
+        builder: (context, t, child) => Opacity(opacity: t, child: child),
+        child: Container(
+          height: 44,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppRadii.card),
+            border: Border.all(color: c.accent.withValues(alpha: 0.4)),
+          ),
         ),
       ),
       child: card,

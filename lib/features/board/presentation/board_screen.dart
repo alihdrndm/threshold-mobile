@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/theme.dart';
+import '../../../core/widgets/arrive_in.dart';
 import '../../../core/widgets/caps_label.dart';
 import '../../../core/widgets/pressable_scale.dart';
 import '../../tasks/domain/areas_syntax.dart';
@@ -132,11 +133,19 @@ class _BoardScreenState extends ConsumerState<BoardScreen> {
                 onChanged: (v) => setState(() => _query = v),
                 onSubmitted: (_) {},
               ),
-              if (notice != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: AppSpacing.sm),
-                  child: _NoticeLine(notice: notice),
-                ),
+              // AnimatedSize glides the layout as the notice claims and
+              // releases its row; the line itself fades and rises within.
+              AnimatedSize(
+                duration: AppDurations.notice,
+                curve: AppCurves.out,
+                alignment: Alignment.topCenter,
+                child: notice == null
+                    ? const SizedBox(width: double.infinity)
+                    : Padding(
+                        padding: const EdgeInsets.only(top: AppSpacing.sm),
+                        child: _NoticeLine(notice: notice),
+                      ),
+              ),
             ],
           ),
         ),
@@ -158,11 +167,11 @@ class _Zones extends ConsumerWidget {
       padding: const EdgeInsets.all(AppSpacing.lg),
       children: [
         for (final (i, q) in placeOrder.indexed) ...[
-          _ArriveIn(index: i, child: _ZoneSection(quadrant: q)),
+          ArriveIn(index: i, child: _ZoneSection(quadrant: q)),
           const SizedBox(height: AppSpacing.zoneGap),
         ],
         if (doneToday.isNotEmpty)
-          _ArriveIn(
+          ArriveIn(
               index: placeOrder.length, child: _DoneToday(tasks: doneToday)),
         const SizedBox(height: AppSpacing.xxl),
       ],
@@ -259,7 +268,13 @@ class _ZoneSection extends ConsumerWidget {
                         .copyWith(color: c.zoneInkMuted))
               else ...[
                 for (final (i, t) in tasks.indexed) ...[
-                  TaskCard(task: t, ordinal: i + 1),
+                  // Keyed by uid: a task that just arrived (quick-add, undo,
+                  // a sync pull, a drop from another zone) fades into place;
+                  // ones already here keep their state and never replay.
+                  ArriveIn(
+                      key: ValueKey(t.uid),
+                      rise: 4,
+                      child: TaskCard(task: t, ordinal: i + 1)),
                   if (i < tasks.length - 1)
                     const SizedBox(height: AppSpacing.cardGap),
                 ],
@@ -276,62 +291,6 @@ class _ZoneSection extends ConsumerWidget {
           ),
         );
       },
-    );
-  }
-}
-
-/// The board's once-per-open entrance: each zone fades in and rises 8px,
-/// 40ms apart (capped) on the house curve. Occasional-tier motion — it
-/// runs when the screen mounts, never on rebuilds — and reduced motion
-/// skips the travel entirely.
-class _ArriveIn extends StatefulWidget {
-  const _ArriveIn({required this.index, required this.child});
-
-  final int index;
-  final Widget child;
-
-  @override
-  State<_ArriveIn> createState() => _ArriveInState();
-}
-
-class _ArriveInState extends State<_ArriveIn>
-    with SingleTickerProviderStateMixin {
-  late final _controller =
-      AnimationController(vsync: this, duration: AppDurations.cardIn);
-
-  @override
-  void initState() {
-    super.initState();
-    final delay = AppDurations.staggerStep * widget.index;
-    final capped =
-        delay > AppDurations.staggerCap ? AppDurations.staggerCap : delay;
-    Future<void>.delayed(capped, () {
-      if (mounted) _controller.forward();
-    });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (MediaQuery.disableAnimationsOf(context)) return widget.child;
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, child) {
-        final t = AppCurves.out.transform(_controller.value);
-        return Opacity(
-          opacity: t,
-          child: Transform.translate(
-            offset: Offset(0, 8 * (1 - t)),
-            child: child,
-          ),
-        );
-      },
-      child: widget.child,
     );
   }
 }
@@ -424,12 +383,24 @@ class _NoticeLine extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
-    return AnimatedOpacity(
-      // Self-dismissal fades; user-triggered removal is instant.
-      duration: AppDurations.cardIn,
+    return TweenAnimationBuilder<double>(
+      // The entrance: fade + a 6px settle downward into place, mount-only.
+      tween: Tween(begin: 0, end: 1),
+      duration: AppDurations.notice,
       curve: AppCurves.out,
-      opacity: notice.leaving ? 0 : 1,
-      child: Container(
+      builder: (context, t, child) => Opacity(
+        opacity: t,
+        child: MediaQuery.disableAnimationsOf(context)
+            ? child
+            : Transform.translate(
+                offset: Offset(0, -6 * (1 - t)), child: child),
+      ),
+      child: AnimatedOpacity(
+        // Self-dismissal fades; user-triggered removal is instant.
+        duration: AppDurations.cardIn,
+        curve: AppCurves.out,
+        opacity: notice.leaving ? 0 : 1,
+        child: Container(
         padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
         decoration: BoxDecoration(
@@ -466,6 +437,7 @@ class _NoticeLine extends ConsumerWidget {
                 ),
               ),
           ],
+        ),
         ),
       ),
     );
