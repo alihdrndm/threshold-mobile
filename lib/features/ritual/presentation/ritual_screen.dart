@@ -299,7 +299,7 @@ class _RitualScreenState extends ConsumerState<RitualScreen> {
           Text('$_minutes minutes',
               style: AppTypography.headline.copyWith(color: _ink)),
           Slider(
-            value: _minutes.toDouble(),
+            value: _minutes.clamp(10, 120).toDouble(),
             min: 10,
             max: 120,
             divisions: 22,
@@ -308,8 +308,45 @@ class _RitualScreenState extends ConsumerState<RitualScreen> {
             onChanged: (v) => setState(() => _minutes = v.round()),
           ),
         ],
+        const SizedBox(height: AppSpacing.lg),
+        // Self-set limits are the ones people keep: any number of minutes,
+        // 1-120, however the theme offers its presets.
+        Row(children: [
+          Text('or exactly',
+              style: AppTypography.caption.copyWith(color: _inkMuted)),
+          const SizedBox(width: AppSpacing.md),
+          SizedBox(
+            width: 72,
+            child: TextField(
+              keyboardType: TextInputType.number,
+              maxLength: 3,
+              textAlign: TextAlign.center,
+              style: AppTypography.body.copyWith(color: _ink),
+              cursorColor: theme.accent,
+              decoration: InputDecoration(
+                hintText: 'min',
+                counterText: '',
+                hintStyle:
+                    AppTypography.caption.copyWith(color: _inkMuted),
+                enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: theme.glow)),
+                focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: theme.accent)),
+              ),
+              onChanged: (v) {
+                final n = int.tryParse(v);
+                if (n != null && n >= 1) {
+                  setState(() => _minutes = n.clamp(1, 120));
+                }
+              },
+            ),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Text('minutes',
+              style: AppTypography.caption.copyWith(color: _inkMuted)),
+        ]),
         const SizedBox(height: AppSpacing.xxl),
-        _primary('Start', _commit),
+        _primary('Start $_minutes min', _commit),
       ],
     );
   }
