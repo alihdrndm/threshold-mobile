@@ -188,12 +188,6 @@ class _GoogleSectionState extends ConsumerState<_GoogleSection> {
               ),
             ],
           ),
-          if (status.thresholdCalendarId != null) ...[
-            const SizedBox(height: AppSpacing.sm),
-            Text('Board calendar ready.',
-                style:
-                    AppTypography.caption.copyWith(color: c.inkMuted)),
-          ],
         ],
         if ((settings['google_last_sync_status'] ?? '').isNotEmpty) ...[
           const SizedBox(height: AppSpacing.sm),

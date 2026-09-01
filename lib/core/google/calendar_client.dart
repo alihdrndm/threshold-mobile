@@ -209,29 +209,6 @@ class CalendarClient {
         '${two(abs.inMinutes % 60)}';
   }
 
-  /// Find the app-created "Threshold" calendar, or make it. Patched
-  /// unselected so it stays out of the user's normal Google views.
-  Future<String> findOrCreateThresholdCalendar() async {
-    final list = await _request('GET', '/users/me/calendarList');
-    for (final raw in (list['items'] as List? ?? const [])) {
-      final cal = raw as Map<String, dynamic>;
-      if (cal['summary'] == 'Threshold') return cal['id'] as String;
-    }
-    final created = await _request('POST', '/calendars',
-        body: {'summary': 'Threshold'});
-    final id = created['id'] as String;
-    try {
-      await _request(
-        'PATCH',
-        '/users/me/calendarList/${Uri.encodeComponent(id)}',
-        body: {'selected': false},
-      );
-    } on CalendarApiException {
-      // Cosmetic; the calendar works either way.
-    }
-    return id;
-  }
-
   void close() => _http.close();
 }
 
