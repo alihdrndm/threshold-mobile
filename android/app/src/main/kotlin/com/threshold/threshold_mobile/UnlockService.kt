@@ -68,17 +68,18 @@ class UnlockService : Service() {
         if (!prefs().getBoolean(KEY_ENABLED, true)) return
         if (!Settings.canDrawOverlays(this)) return
         val lockedAt = prefs().getLong(KEY_LOCKED_AT, 0L)
-        if (lockedAt == 0L) return
         val away = System.currentTimeMillis() - lockedAt
         // A pocket-bounce is not a threshold.
-        if (away < 3_000) return
-        val route = if (away >= QUIET_GAP_MS) "ritual" else "quote"
+        if (lockedAt != 0L && away < 3_000) return
+        // The user's decision, in full: the ENTIRE ritual meets every
+        // unlock. (A running session or an owed check-in still outranks
+        // it — that judgment lives on the Dart side.)
         val launch = Intent(this, MainActivity::class.java).apply {
             addFlags(
                 Intent.FLAG_ACTIVITY_NEW_TASK or
                     Intent.FLAG_ACTIVITY_SINGLE_TOP
             )
-            putExtra(ROUTE_EXTRA, route)
+            putExtra(ROUTE_EXTRA, "ritual")
         }
         startActivity(launch)
     }
