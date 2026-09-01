@@ -72,6 +72,16 @@ dev_dependencies:
   freezed: ^3.2.3
   json_serializable: ^6.11.2
   mocktail: ^1.0.5
+  flutter_launcher_icons: ^0.14.3
+
+# The desktop's own mark, verbatim: the doorframe with the blue threshold
+# bar on the dark base — one identity on both home screens.
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: assets/icon/icon.png
+  adaptive_icon_background: "#0D0E11"
+  adaptive_icon_foreground: assets/icon/icon_foreground.png
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
