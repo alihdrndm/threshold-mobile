@@ -136,7 +136,9 @@ class _RitualScreenState extends ConsumerState<RitualScreen> {
       children: [
         _BreathingRing(accent: theme.accent, glow: theme.glow),
         const SizedBox(height: AppSpacing.xxl),
-        Text(theme.greeting,
+        // The door opens with the question, not a greeting — the user's
+        // explicit call, on both apps.
+        Text('What are you here for?',
             style: _display.copyWith(color: _ink)),
         if (_quote != null) ...[
           const SizedBox(height: AppSpacing.xl),

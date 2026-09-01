@@ -53,7 +53,10 @@ const ritualThemes = <RitualTheme>[
     intentionMode: IntentionMode.type,
     durationMode: DurationMode.chips,
     greeting: 'Fresh session.',
-    intentionPrompt: 'What are you here for?',
+    // The arrival now opens with "What are you here for?" on every theme
+    // (user's call), so ash's intention step invites the answer instead of
+    // repeating the question.
+    intentionPrompt: 'Say it in a few words.',
     ifThenPrompt: 'If I feel the urge to open a feed, then I will…',
     durationPrompt: 'How long?',
   ),
