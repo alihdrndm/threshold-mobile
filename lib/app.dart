@@ -44,6 +44,9 @@ class _ThresholdAppState extends ConsumerState<ThresholdApp> {
       onResume: () async {
         final route = await Doorkeeper.consumeRoute();
         if (route != null) _arrive(route);
+        // Every resume re-asserts the doorkeeper — cheap when it is
+        // already standing, decisive when OneUI took it down.
+        await Doorkeeper.start();
         await _settleSessions();
         await ref.read(taskRepositoryProvider).rollPastRepeats();
         await ref.read(calendarStatusProvider.notifier).syncNow();

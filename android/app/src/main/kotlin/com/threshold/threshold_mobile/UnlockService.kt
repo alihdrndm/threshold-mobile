@@ -1,5 +1,6 @@
 package com.threshold.threshold_mobile
 
+import android.app.AlarmManager
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -127,7 +128,30 @@ class UnlockService : Service() {
 
     override fun onStartCommand(
         intent: Intent?, flags: Int, startId: Int
-    ): Int = START_STICKY
+    ): Int {
+        // The periodic keeper survives what kills this process.
+        KeeperJobService.schedule(this)
+        return START_STICKY
+    }
+
+    /// Swiping Threshold out of recents takes this service down with it on
+    /// OneUI. Come straight back: an alarm restarts the doorkeeper about a
+    /// second later, before the next unlock can slip past unheard.
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        if (prefs().getBoolean(KEY_ENABLED, true)) {
+            val restart = PendingIntent.getForegroundService(
+                this, 1,
+                Intent(this, UnlockService::class.java),
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_ONE_SHOT
+            )
+            getSystemService(AlarmManager::class.java).set(
+                AlarmManager.RTC_WAKEUP,
+                System.currentTimeMillis() + 1_500,
+                restart
+            )
+        }
+        super.onTaskRemoved(rootIntent)
+    }
 
     override fun onDestroy() {
         runCatching { unregisterReceiver(receiver) }

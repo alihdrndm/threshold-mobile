@@ -42,6 +42,10 @@
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="Listens for screen unlock to open the user's focus ritual at their request"/>
         </service>
+        <service
+            android:name=".KeeperJobService"
+            android:exported="false"
+            android:permission="android.permission.BIND_JOB_SERVICE"/>
         <receiver
             android:name=".BootReceiver"
             android:exported="true">

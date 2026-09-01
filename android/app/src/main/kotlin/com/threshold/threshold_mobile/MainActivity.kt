@@ -48,12 +48,16 @@ class MainActivity : FlutterActivity() {
                             .putBoolean(UnlockService.KEY_ENABLED, true)
                             .apply()
                         UnlockService.start(this@MainActivity)
+                        KeeperJobService.schedule(this@MainActivity)
                         result.success(null)
                     }
                     "stopDoorkeeper" -> {
                         doorPrefs().edit()
                             .putBoolean(UnlockService.KEY_ENABLED, false)
                             .apply()
+                        // The keeper would only resurrect a door the user
+                        // just closed.
+                        KeeperJobService.cancel(this@MainActivity)
                         UnlockService.stop(this@MainActivity)
                         result.success(null)
                     }
