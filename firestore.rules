@@ -1,15 +1,14 @@
 rules_version = '2';
 
-// The whole tree is pinned to ONE human: the owner's Firebase Auth UID.
-// 'OWNER_UID' is a deliberate lockout placeholder — after the first mobile
-// sign-in, replace it with FirebaseAuth.currentUser.uid and redeploy
-// (firebase deploy --only firestore:rules). Desktop is unaffected either
-// way: its REST path authenticates via project-owner IAM, not these rules.
+// The whole tree is pinned to ONE human: the owner's Firebase Auth UID,
+// captured from the first live sign-in on the A56 (2026-09-01). Desktop
+// is unaffected: its REST path authenticates via project-owner IAM, not
+// these rules.
 service cloud.firestore {
   match /databases/{database}/documents {
     match /boards/{document=**} {
       allow read, write: if request.auth != null
-                         && request.auth.uid == 'OWNER_UID';
+                         && request.auth.uid == 'Gw7Cr5OB2TVucnSUNAFOhXEB7hW2';
     }
   }
 }

@@ -65,6 +65,21 @@ class GoogleAuthService {
     }
   }
 
+  /// The Google ID token for the signed-in account — the bridge into
+  /// Firebase Auth (channel 2). Null when never connected or Play
+  /// Services can't produce one silently.
+  Future<String?> idToken() async {
+    if (await _storage.read(key: _connectedKey) != '1') return null;
+    await _ensureInitialized();
+    try {
+      final account = _account ??=
+          await GoogleSignIn.instance.attemptLightweightAuthentication();
+      return account?.authentication.idToken;
+    } on Object {
+      return null;
+    }
+  }
+
   Future<bool> get connected async {
     try {
       return await _storage.read(key: _connectedKey) == '1';
