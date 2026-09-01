@@ -115,10 +115,15 @@ class TaskCard extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.only(top: 3),
               child: SizedBox(
-                width: 16,
+                // Wide enough for two tabular digits — a 16px box wrapped
+                // "14" into two stacked lines.
+                width: 22,
                 child: Text(
                   '$ordinal',
                   textAlign: TextAlign.right,
+                  maxLines: 1,
+                  softWrap: false,
+                  overflow: TextOverflow.visible,
                   style: AppTypography.caption.copyWith(
                     color: c.zoneInkMuted,
                     fontFeatures: AppTypography.tabular,

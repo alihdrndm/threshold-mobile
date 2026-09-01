@@ -10,7 +10,8 @@ final googleAuthProvider = Provider<GoogleAuthService>((_) => GoogleAuthService(
 
 final calendarClientProvider = Provider<CalendarClient>((ref) {
   final auth = ref.watch(googleAuthProvider);
-  final client = CalendarClient(auth.accessToken);
+  final client =
+      CalendarClient(auth.accessToken, onUnauthorized: auth.dropSession);
   ref.onDispose(client.close);
   return client;
 });

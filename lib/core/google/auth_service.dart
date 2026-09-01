@@ -80,6 +80,12 @@ class GoogleAuthService {
     }
   }
 
+  /// Forget the cached account so the next token fetch starts fresh -
+  /// the 401-retry path. Local only; the grant is untouched.
+  Future<void> dropSession() async {
+    _account = null;
+  }
+
   Future<bool> get connected async {
     try {
       return await _storage.read(key: _connectedKey) == '1';
