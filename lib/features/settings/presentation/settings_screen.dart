@@ -170,7 +170,8 @@ class _GoogleSectionState extends ConsumerState<_GoogleSection> {
                 ? null
                 : () => act('connect', () =>
                     ref.read(calendarStatusProvider.notifier).connect()),
-            child: _chip(c, _busy ? 'Opening your browser…' : 'Connect'),
+            child: _chip(c, _busy ? 'Opening your browser…' : 'Connect',
+                working: _busy),
           ),
         ] else ...[
           Row(
@@ -183,7 +184,11 @@ class _GoogleSectionState extends ConsumerState<_GoogleSection> {
                     : () => act('sync', () =>
                         ref.read(calendarStatusProvider.notifier).syncNow()),
                 child: _chip(
-                    c, _busyAction == 'sync' ? 'Syncing…' : 'Sync now'),
+                  c,
+                  _busyAction == 'sync' ? 'Syncing…' : 'Sync now',
+                  working: _busyAction == 'sync',
+                  dimmed: _busy && _busyAction != 'sync',
+                ),
               ),
               const SizedBox(width: AppSpacing.sm),
               PressableScale(
@@ -192,7 +197,14 @@ class _GoogleSectionState extends ConsumerState<_GoogleSection> {
                     : () => act('disconnect', () => ref
                         .read(calendarStatusProvider.notifier)
                         .disconnect()),
-                child: _chip(c, 'Disconnect'),
+                child: _chip(
+                  c,
+                  _busyAction == 'disconnect'
+                      ? 'Disconnecting…'
+                      : 'Disconnect',
+                  working: _busyAction == 'disconnect',
+                  dimmed: _busy && _busyAction != 'disconnect',
+                ),
               ),
             ],
           ),
@@ -220,17 +232,42 @@ class _GoogleSectionState extends ConsumerState<_GoogleSection> {
     );
   }
 
-  Widget _chip(ThresholdColors c, String label, {bool accent = false}) =>
-      Container(
-        padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(AppRadii.full),
-          border: Border.all(color: accent ? c.accent : c.borderSubtle),
-          color: accent ? c.accent.withValues(alpha: 0.12) : c.fillSubtle,
+  /// [dimmed] is the visible half of "disabled" — a chip that merely stops
+  /// responding looks identical, which reads as broken, not busy.
+  /// [working] shows a small inline spinner beside the label.
+  Widget _chip(ThresholdColors c, String label,
+          {bool accent = false, bool dimmed = false, bool working = false}) =>
+      AnimatedOpacity(
+        duration: AppDurations.base,
+        curve: Curves.ease,
+        opacity: dimmed ? 0.45 : 1,
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppRadii.full),
+            border: Border.all(color: accent ? c.accent : c.borderSubtle),
+            color: accent ? c.accent.withValues(alpha: 0.12) : c.fillSubtle,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (working) ...[
+                SizedBox(
+                  width: 12,
+                  height: 12,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 1.6,
+                    color: c.inkMuted,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+              ],
+              Text(label,
+                  style: AppTypography.body.copyWith(color: c.ink)),
+            ],
+          ),
         ),
-        child:
-            Text(label, style: AppTypography.body.copyWith(color: c.ink)),
       );
 }
 
