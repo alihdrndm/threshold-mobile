@@ -2,16 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/board/presentation/board_screen.dart';
+import '../../features/ritual/presentation/checkin_screen.dart';
+import '../../features/ritual/presentation/quote_screen.dart';
+import '../../features/ritual/presentation/ritual_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
 import '../../features/week/presentation/week_screen.dart';
 import '../theme/theme.dart';
 import '../widgets/caps_label.dart';
 
-/// Four tabs in a stateful shell; fullscreen routes (/ritual, /checkin,
-/// /reminder) join outside the shell in their milestones.
+/// Four tabs in a stateful shell; the threshold surfaces (/ritual, /quote,
+/// /checkin) live outside it, fullscreen and always dark.
 final appRouter = GoRouter(
   initialLocation: '/board',
   routes: [
+    GoRoute(path: '/ritual', builder: (_, _) => const RitualScreen()),
+    GoRoute(path: '/quote', builder: (_, _) => const QuoteScreen()),
+    GoRoute(
+      path: '/checkin/:id',
+      builder: (_, state) => CheckinScreen(
+        sessionId: int.tryParse(state.pathParameters['id'] ?? '') ?? -1,
+      ),
+    ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, shell) => _Shell(shell: shell),
       branches: [

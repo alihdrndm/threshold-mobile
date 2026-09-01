@@ -100,20 +100,83 @@ class PendingOps extends Table {
   TextColumn get lastError => text().nullable()();
 }
 
-@DriftDatabase(
-    tables: [Tasks, Areas, SettingsKV, GoogleEventMap, SyncState, PendingOps])
+/// The quote reservoir — user-added only, synced with the desktop's through
+/// the board channel. Text is the identity (the desktop enforces the same:
+/// "the same words twice is a mistake, not a preference").
+@DataClassName('QuoteRow')
+class Quotes extends Table {
+  // Getter `body`, column `text`: a column named text would shadow the
+  // builder inside this class; .named keeps SQL parity with the desktop.
+  TextColumn get body => text().named('text')();
+  TextColumn get author => text().nullable()();
+  TextColumn get createdTs => text()();
+
+  @override
+  Set<Column> get primaryKey => {body};
+}
+
+/// An intention is append-only: "what you said at the start". Overwriting it
+/// to hold a session's life would destroy the before/after pair that makes
+/// recording a prediction worth anything.
+@DataClassName('IntentionRow')
+class Intentions extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get ts => text()();
+  TextColumn get body => text().named('text').nullable()();
+  TextColumn get ifThen => text().nullable()();
+  IntColumn get predictedYes => integer().nullable()();
+  IntColumn get durationMin => integer().nullable()();
+  TextColumn get taskUid => text().nullable()();
+  TextColumn get outcome =>
+      text().nullable()(); // completed|skipped|drifted|browsing
+}
+
+/// A session has a life: it runs, it ends, and someone answers for it.
+/// Timestamps are unix seconds — compared and subtracted, not read as text.
+@DataClassName('SessionRow')
+class Sessions extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get intentionId => integer()();
+  TextColumn get taskUid => text().nullable()();
+  // Snapshot, not a join: renaming or deleting the task later must not
+  // rewrite what a past session was about.
+  TextColumn get taskTitle => text().nullable()();
+  IntColumn get startedTs => integer()();
+  IntColumn get endsTs => integer()();
+  IntColumn get durationMin => integer()();
+  IntColumn get predictedYes => integer().nullable()();
+  TextColumn get state => text().withDefault(const Constant('running'))();
+  IntColumn get endedTs => integer().nullable()();
+  IntColumn get answeredTs => integer().nullable()();
+  IntColumn get taskDone => integer().withDefault(const Constant(0))();
+}
+
+@DriftDatabase(tables: [
+  Tasks,
+  Areas,
+  SettingsKV,
+  GoogleEventMap,
+  SyncState,
+  PendingOps,
+  Quotes,
+  Intentions,
+  Sessions,
+])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(driftDatabase(name: 'threshold'));
 
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (m) async {
           await m.createAll();
+          await customStatement(
+              'CREATE UNIQUE INDEX IF NOT EXISTS idx_sessions_one_running '
+              "ON sessions(state) WHERE state = 'running'");
           // Seeded areas, like desktop's migration v2: "Contexts are data,
           // not code."
           final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
@@ -135,6 +198,17 @@ class AppDatabase extends _$AppDatabase {
           // v3: the offline outbox.
           if (from < 3) {
             await m.createTable(pendingOps);
+          }
+          // v4: the ritual's furniture — the quote reservoir, append-only
+          // intentions, and sessions. At most one session may run: two is a
+          // bug, and an insert that fails loudly beats two check-ins.
+          if (from < 4) {
+            await m.createTable(quotes);
+            await m.createTable(intentions);
+            await m.createTable(sessions);
+            await customStatement(
+                'CREATE UNIQUE INDEX IF NOT EXISTS idx_sessions_one_running '
+                "ON sessions(state) WHERE state = 'running'");
           }
         },
       );
