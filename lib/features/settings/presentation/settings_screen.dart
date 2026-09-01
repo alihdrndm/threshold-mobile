@@ -98,7 +98,10 @@ class _GoogleSection extends ConsumerStatefulWidget {
 class _GoogleSectionState extends ConsumerState<_GoogleSection> {
   final _clientId = TextEditingController();
   String? _error;
-  bool _busy = false;
+  /// Which action is in flight ('connect' | 'sync' | 'disconnect'), so
+  /// each chip can wear its own busy label instead of a shared flag.
+  String? _busyAction;
+  bool get _busy => _busyAction != null;
   bool _seeded = false;
 
   @override
@@ -118,10 +121,10 @@ class _GoogleSectionState extends ConsumerState<_GoogleSection> {
       _seeded = true;
     }
 
-    Future<void> act(Future<void> Function() action) async {
+    Future<void> act(String name, Future<void> Function() action) async {
       if (_busy) return;
       setState(() {
-        _busy = true;
+        _busyAction = name;
         _error = null;
       });
       try {
@@ -129,7 +132,7 @@ class _GoogleSectionState extends ConsumerState<_GoogleSection> {
       } on Object catch (e) {
         setState(() => _error = '$e');
       } finally {
-        if (mounted) setState(() => _busy = false);
+        if (mounted) setState(() => _busyAction = null);
       }
     }
 
@@ -165,35 +168,50 @@ class _GoogleSectionState extends ConsumerState<_GoogleSection> {
           PressableScale(
             onPressed: _busy
                 ? null
-                : () => act(() =>
+                : () => act('connect', () =>
                     ref.read(calendarStatusProvider.notifier).connect()),
-            child: _chip(c, _busy ? 'Opening your browser…' : 'Connect'),
+            child: _chip(c, _busy ? 'Opening your browser…' : 'Connect',
+                working: _busy),
           ),
         ] else ...[
-          Row(
+          // Wrap, not Row: a chip whose label grows while working
+          // ('Disconnecting…' + spinner) flows to the next line instead
+          // of walking off the screen.
+          Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               _chip(c, 'Connected', accent: true),
-              const SizedBox(width: AppSpacing.sm),
               PressableScale(
-                onPressed: () => act(() =>
-                    ref.read(calendarStatusProvider.notifier).syncNow()),
-                child: _chip(c, 'Sync now'),
+                onPressed: _busy
+                    ? null
+                    : () => act('sync', () =>
+                        ref.read(calendarStatusProvider.notifier).syncNow()),
+                child: _chip(
+                  c,
+                  _busyAction == 'sync' ? 'Syncing…' : 'Sync now',
+                  working: _busyAction == 'sync',
+                  dimmed: _busy && _busyAction != 'sync',
+                ),
               ),
-              const SizedBox(width: AppSpacing.sm),
               PressableScale(
-                onPressed: () => act(() => ref
-                    .read(calendarStatusProvider.notifier)
-                    .disconnect()),
-                child: _chip(c, 'Disconnect'),
+                onPressed: _busy
+                    ? null
+                    : () => act('disconnect', () => ref
+                        .read(calendarStatusProvider.notifier)
+                        .disconnect()),
+                child: _chip(
+                  c,
+                  _busyAction == 'disconnect'
+                      ? 'Disconnecting…'
+                      : 'Disconnect',
+                  working: _busyAction == 'disconnect',
+                  dimmed: _busy && _busyAction != 'disconnect',
+                ),
               ),
             ],
           ),
-          if (status.thresholdCalendarId != null) ...[
-            const SizedBox(height: AppSpacing.sm),
-            Text('Board calendar ready.',
-                style:
-                    AppTypography.caption.copyWith(color: c.inkMuted)),
-          ],
         ],
         if ((settings['google_last_sync_status'] ?? '').isNotEmpty) ...[
           const SizedBox(height: AppSpacing.sm),
@@ -218,17 +236,42 @@ class _GoogleSectionState extends ConsumerState<_GoogleSection> {
     );
   }
 
-  Widget _chip(ThresholdColors c, String label, {bool accent = false}) =>
-      Container(
-        padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(AppRadii.full),
-          border: Border.all(color: accent ? c.accent : c.borderSubtle),
-          color: accent ? c.accent.withValues(alpha: 0.12) : c.fillSubtle,
+  /// [dimmed] is the visible half of "disabled" — a chip that merely stops
+  /// responding looks identical, which reads as broken, not busy.
+  /// [working] shows a small inline spinner beside the label.
+  Widget _chip(ThresholdColors c, String label,
+          {bool accent = false, bool dimmed = false, bool working = false}) =>
+      AnimatedOpacity(
+        duration: AppDurations.base,
+        curve: Curves.ease,
+        opacity: dimmed ? 0.45 : 1,
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppRadii.full),
+            border: Border.all(color: accent ? c.accent : c.borderSubtle),
+            color: accent ? c.accent.withValues(alpha: 0.12) : c.fillSubtle,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (working) ...[
+                SizedBox(
+                  width: 12,
+                  height: 12,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 1.6,
+                    color: c.inkMuted,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+              ],
+              Text(label,
+                  style: AppTypography.body.copyWith(color: c.ink)),
+            ],
+          ),
         ),
-        child:
-            Text(label, style: AppTypography.body.copyWith(color: c.ink)),
       );
 }
 

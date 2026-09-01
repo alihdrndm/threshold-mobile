@@ -17,6 +17,14 @@ Future<void> showTaskSheet(BuildContext context, String uid) {
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
+    // A gesture-born surface arrives on the drawer curve and leaves
+    // faster than it came — the exit is the user's decision, already made.
+    sheetAnimationStyle: const AnimationStyle(
+      duration: Duration(milliseconds: 280),
+      reverseDuration: Duration(milliseconds: 200),
+      curve: AppCurves.drawer,
+      reverseCurve: AppCurves.drawer,
+    ),
     builder: (_) => _TaskSheet(uid: uid),
   );
 }
@@ -54,6 +62,18 @@ class _TaskSheet extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
+            // The grab handle: the sheet admits it can be dragged.
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: AppSpacing.lg),
+                decoration: BoxDecoration(
+                  color: c.inkMuted.withValues(alpha: 0.35),
+                  borderRadius: BorderRadius.circular(AppRadii.full),
+                ),
+              ),
+            ),
             Text(task.title,
                 style: AppTypography.headline.copyWith(color: c.ink)),
             const SizedBox(height: AppSpacing.lg),

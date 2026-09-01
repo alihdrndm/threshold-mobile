@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/theme.dart';
+import '../../../core/widgets/arrive_in.dart';
 import '../../../core/widgets/caps_label.dart';
 import '../../../core/widgets/pressable_scale.dart';
 import '../../tasks/domain/areas_syntax.dart';
@@ -131,11 +133,19 @@ class _BoardScreenState extends ConsumerState<BoardScreen> {
                 onChanged: (v) => setState(() => _query = v),
                 onSubmitted: (_) {},
               ),
-              if (notice != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: AppSpacing.sm),
-                  child: _NoticeLine(notice: notice),
-                ),
+              // AnimatedSize glides the layout as the notice claims and
+              // releases its row; the line itself fades and rises within.
+              AnimatedSize(
+                duration: AppDurations.notice,
+                curve: AppCurves.out,
+                alignment: Alignment.topCenter,
+                child: notice == null
+                    ? const SizedBox(width: double.infinity)
+                    : Padding(
+                        padding: const EdgeInsets.only(top: AppSpacing.sm),
+                        child: _NoticeLine(notice: notice),
+                      ),
+              ),
             ],
           ),
         ),
@@ -156,11 +166,13 @@ class _Zones extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       children: [
-        for (final q in placeOrder) ...[
-          _ZoneSection(quadrant: q),
+        for (final (i, q) in placeOrder.indexed) ...[
+          ArriveIn(index: i, child: _ZoneSection(quadrant: q)),
           const SizedBox(height: AppSpacing.zoneGap),
         ],
-        if (doneToday.isNotEmpty) _DoneToday(tasks: doneToday),
+        if (doneToday.isNotEmpty)
+          ArriveIn(
+              index: placeOrder.length, child: _DoneToday(tasks: doneToday)),
         const SizedBox(height: AppSpacing.xxl),
       ],
     );
@@ -181,26 +193,40 @@ class _ZoneSection extends ConsumerWidget {
         quadrant == Quadrant.doFirst && tasks.length > doFirstSoftCap;
 
     return DragTarget<String>(
-      onAcceptWithDetails: (details) => ref
-          .read(taskRepositoryProvider)
-          .moveToQuadrant(details.data, quadrant),
+      onAcceptWithDetails: (details) {
+        HapticFeedback.selectionClick();
+        ref.read(taskRepositoryProvider).moveToQuadrant(details.data, quadrant);
+      },
       builder: (context, candidates, _) {
         final over = candidates.isNotEmpty;
+        final wash = over
+            ? Color.alphaBlend(c.ink.withValues(alpha: 0.05), c.zone(zone))
+            : c.zone(zone);
         return AnimatedContainer(
           duration: AppDurations.base,
           curve: AppCurves.out,
           padding: const EdgeInsets.all(AppSpacing.lg),
           decoration: BoxDecoration(
-            color: over
-                ? Color.alphaBlend(
-                    c.ink.withValues(alpha: 0.05), c.zone(zone))
-                : c.zone(zone),
+            // The wash breathes toward the page at the bottom, so a zone
+            // reads as a lit surface, not a flat swatch.
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                wash,
+                Color.alphaBlend(c.surface.withValues(alpha: 0.35), wash),
+              ],
+            ),
             borderRadius: BorderRadius.circular(AppRadii.zone),
             border: Border.all(
               color: over ? c.accent : c.borderOn(zone),
             ),
           ),
-          child: Column(
+          child: AnimatedSize(
+            duration: AppDurations.notice,
+            curve: AppCurves.out,
+            alignment: Alignment.topCenter,
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Semantics(
@@ -216,12 +242,21 @@ class _ZoneSection extends ConsumerWidget {
                     if (tasks.isNotEmpty) ...[
                       const SizedBox(width: AppSpacing.sm),
                       // "The count is a mirror, not a meter" — only when
-                      // non-zero.
-                      Text('${tasks.length}',
-                          style: AppTypography.caption.copyWith(
-                            color: c.zoneInkMuted,
-                            fontFeatures: AppTypography.tabular,
-                          )),
+                      // non-zero, and worn as a quiet pill.
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 7, vertical: 1),
+                        decoration: BoxDecoration(
+                          color: c.ink.withValues(alpha: 0.06),
+                          borderRadius:
+                              BorderRadius.circular(AppRadii.full),
+                        ),
+                        child: Text('${tasks.length}',
+                            style: AppTypography.caption.copyWith(
+                              color: c.zoneInkMuted,
+                              fontFeatures: AppTypography.tabular,
+                            )),
+                      ),
                     ],
                   ],
                 ),
@@ -233,7 +268,13 @@ class _ZoneSection extends ConsumerWidget {
                         .copyWith(color: c.zoneInkMuted))
               else ...[
                 for (final (i, t) in tasks.indexed) ...[
-                  TaskCard(task: t, ordinal: i + 1),
+                  // Keyed by uid: a task that just arrived (quick-add, undo,
+                  // a sync pull, a drop from another zone) fades into place;
+                  // ones already here keep their state and never replay.
+                  ArriveIn(
+                      key: ValueKey(t.uid),
+                      rise: 4,
+                      child: TaskCard(task: t, ordinal: i + 1)),
                   if (i < tasks.length - 1)
                     const SizedBox(height: AppSpacing.cardGap),
                 ],
@@ -246,6 +287,7 @@ class _ZoneSection extends ConsumerWidget {
                 ],
               ],
             ],
+            ),
           ),
         );
       },
@@ -341,12 +383,24 @@ class _NoticeLine extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final c = context.colors;
-    return AnimatedOpacity(
-      // Self-dismissal fades; user-triggered removal is instant.
-      duration: AppDurations.cardIn,
+    return TweenAnimationBuilder<double>(
+      // The entrance: fade + a 6px settle downward into place, mount-only.
+      tween: Tween(begin: 0, end: 1),
+      duration: AppDurations.notice,
       curve: AppCurves.out,
-      opacity: notice.leaving ? 0 : 1,
-      child: Container(
+      builder: (context, t, child) => Opacity(
+        opacity: t,
+        child: MediaQuery.disableAnimationsOf(context)
+            ? child
+            : Transform.translate(
+                offset: Offset(0, -6 * (1 - t)), child: child),
+      ),
+      child: AnimatedOpacity(
+        // Self-dismissal fades; user-triggered removal is instant.
+        duration: AppDurations.cardIn,
+        curve: AppCurves.out,
+        opacity: notice.leaving ? 0 : 1,
+        child: Container(
         padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
         decoration: BoxDecoration(
@@ -383,6 +437,7 @@ class _NoticeLine extends ConsumerWidget {
                 ),
               ),
           ],
+        ),
         ),
       ),
     );

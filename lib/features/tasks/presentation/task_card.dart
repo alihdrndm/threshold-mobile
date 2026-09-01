@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -71,6 +74,8 @@ class TaskCard extends ConsumerWidget {
         await repo.setStatus(task.uid, domain.TaskStatus.open);
         return;
       }
+      // Finishing is the one moment that earns a physical answer.
+      unawaited(HapticFeedback.lightImpact());
       final advancedTo = await repo.complete(task.uid);
       if (advancedTo != null) {
         final old = task.scheduledTs;
@@ -99,12 +104,19 @@ class TaskCard extends ConsumerWidget {
         color: done ? Colors.transparent : c.cardOn(zone),
         borderRadius: BorderRadius.circular(AppRadii.card),
         border: Border.all(color: c.borderOn(zone)),
+        // Two soft layers read as one material sitting on the board — a
+        // single hairline shadow read as a border, not depth.
         boxShadow: !done && c.brightness == Brightness.light
             ? const [
                 BoxShadow(
-                    color: Color(0x0D000000),
+                    color: Color(0x0F000000),
                     offset: Offset(0, 1),
                     blurRadius: 2),
+                BoxShadow(
+                    color: Color(0x14000000),
+                    offset: Offset(0, 6),
+                    blurRadius: 16,
+                    spreadRadius: -6),
               ]
             : null,
       ),
@@ -115,10 +127,15 @@ class TaskCard extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.only(top: 3),
               child: SizedBox(
-                width: 16,
+                // Wide enough for two tabular digits — a 16px box wrapped
+                // "14" into two stacked lines.
+                width: 22,
                 child: Text(
                   '$ordinal',
                   textAlign: TextAlign.right,
+                  maxLines: 1,
+                  softWrap: false,
+                  overflow: TextOverflow.visible,
                   style: AppTypography.caption.copyWith(
                     color: c.zoneInkMuted,
                     fontFeatures: AppTypography.tabular,
@@ -133,21 +150,37 @@ class TaskCard extends ConsumerWidget {
             child: PressableScale(
               onPressed: toggleDone,
               semanticLabel: done ? 'Mark as not done' : 'Mark as done',
-              child: Container(
+              child: AnimatedContainer(
+                duration: AppDurations.base,
+                curve: Curves.ease,
                 width: 20,
                 height: 20,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: done ? c.accent.withValues(alpha: 0.2) : null,
+                  // Done fills solid: the state change is the reward, and a
+                  // tinted ghost of a checkmark under-sells it.
+                  color: done ? c.accent : null,
                   border: Border.all(
                     color: done
                         ? c.accent
                         : c.zoneInkMuted.withValues(alpha: 0.7),
+                    width: done ? 1 : 1.5,
                   ),
                 ),
-                child: done
-                    ? Icon(Icons.check, size: 12, color: c.accent)
-                    : null,
+                // The check rides the fill: both properties move together,
+                // or the moment reads as a glitch in slow motion.
+                child: AnimatedScale(
+                  scale: done ? 1 : 0.6,
+                  duration: AppDurations.base,
+                  curve: AppCurves.out,
+                  child: AnimatedOpacity(
+                    opacity: done ? 1 : 0,
+                    duration: AppDurations.base,
+                    curve: Curves.ease,
+                    child: const Icon(Icons.check,
+                        size: 13, color: Colors.white),
+                  ),
+                ),
               ),
             ),
           ),
@@ -155,6 +188,8 @@ class TaskCard extends ConsumerWidget {
           Expanded(
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
+              // The whole content column opens the sheet — a tap target the
+              // width of the card, not the width of the title.
               onTap: () => showTaskSheet(context, task.uid),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -173,16 +208,16 @@ class TaskCard extends ConsumerWidget {
                   if (showPlace ||
                       areaName != null ||
                       (task.inSchedule && !done)) ...[
-                    const SizedBox(height: AppSpacing.xs),
+                    const SizedBox(height: 6),
                     Wrap(
-                      spacing: AppSpacing.md,
-                      runSpacing: 2,
+                      spacing: AppSpacing.sm,
+                      runSpacing: AppSpacing.xs,
                       children: [
                         if (task.inSchedule && !done)
-                          CapsLabel(
+                          _SlotPill(
                             formatSlot(task.scheduledTs, DateTime.now(),
                                 repeating: task.repeating),
-                            onZone: true,
+                            live: task.scheduledTs != null,
                           ),
                         if (areaName != null)
                           CapsLabel(areaName, onZone: true),
@@ -220,6 +255,7 @@ class TaskCard extends ConsumerWidget {
     // leaves a slot rather than a ghost."
     return LongPressDraggable<String>(
       data: task.uid,
+      onDragStarted: HapticFeedback.selectionClick,
       feedback: Material(
         color: Colors.transparent,
         child: Container(
@@ -241,14 +277,50 @@ class TaskCard extends ConsumerWidget {
               style: AppTypography.taskTitle.copyWith(color: c.ink)),
         ),
       ),
-      childWhenDragging: Container(
-        height: 44,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(AppRadii.card),
-          border: Border.all(color: c.accent.withValues(alpha: 0.4)),
+      // The slot the drag leaves behind fades in rather than snapping —
+      // the one hard cut left in the lift gesture.
+      childWhenDragging: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0, end: 1),
+        duration: AppDurations.press,
+        curve: Curves.ease,
+        builder: (context, t, child) => Opacity(opacity: t, child: child),
+        child: Container(
+          height: 44,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppRadii.card),
+            border: Border.all(color: c.accent.withValues(alpha: 0.4)),
+          ),
         ),
       ),
       child: card,
+    );
+  }
+}
+
+/// A booked slot wears the accent as a quiet pill; a dateless one wears
+/// plain zone ink. One tinted element per card, and this is it — the slot
+/// is the card's one live fact.
+class _SlotPill extends StatelessWidget {
+  const _SlotPill(this.label, {required this.live});
+
+  final String label;
+  final bool live;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: live
+            ? c.accent.withValues(alpha: 0.12)
+            : c.ink.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(AppRadii.full),
+      ),
+      child: CapsLabel(
+        label,
+        color: live ? c.accent : c.zoneInkMuted,
+      ),
     );
   }
 }

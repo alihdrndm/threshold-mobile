@@ -10,7 +10,8 @@ final googleAuthProvider = Provider<GoogleAuthService>((_) => GoogleAuthService(
 
 final calendarClientProvider = Provider<CalendarClient>((ref) {
   final auth = ref.watch(googleAuthProvider);
-  final client = CalendarClient(auth.accessToken);
+  final client =
+      CalendarClient(auth.accessToken, onUnauthorized: auth.dropSession);
   ref.onDispose(client.close);
   return client;
 });
@@ -32,11 +33,9 @@ class CalendarStatus {
   const CalendarStatus({
     required this.connected,
     this.lastStatus,
-    this.thresholdCalendarId,
   });
   final bool connected;
   final String? lastStatus;
-  final String? thresholdCalendarId;
 }
 
 class CalendarStatusNotifier extends AsyncNotifier<CalendarStatus> {
@@ -49,7 +48,6 @@ class CalendarStatusNotifier extends AsyncNotifier<CalendarStatus> {
     return CalendarStatus(
       connected: connected,
       lastStatus: await repo.setting('google_last_sync_status'),
-      thresholdCalendarId: await repo.setting('threshold_calendar_id'),
     );
   }
 
@@ -60,17 +58,8 @@ class CalendarStatusNotifier extends AsyncNotifier<CalendarStatus> {
     await ref.read(googleAuthProvider).connect(clientId);
     await repo.setSetting('google_last_sync_status', 'Connected');
     ref.invalidateSelf();
-    // The calendar.app.created spike, on the spot: find or create the
-    // hidden board calendar and record the answer.
-    try {
-      final id = await ref
-          .read(calendarClientProvider)
-          .findOrCreateThresholdCalendar();
-      await repo.setSetting('threshold_calendar_id', id);
-    } on Object catch (e) {
-      await repo.setSetting(
-          'google_last_sync_status', 'Connected; board calendar failed: $e');
-    }
+    // Channel 2 (the board) went to Firestore; the hidden-calendar spike
+    // that used to run here died with the pivot.
     await syncNow();
   }
 

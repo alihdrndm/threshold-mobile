@@ -25,24 +25,11 @@ class SyncCoordinator {
     _running = true;
     try {
       await _repo.rollPastRepeats(); // queues patches via setSchedule
-      await _ensureBoardCalendar();
       await _drainOutbox();
       await _pullPrimary();
       return 'Synced';
     } finally {
       _running = false;
-    }
-  }
-
-  /// The hidden board calendar, bootstrapped lazily so a failed connect-time
-  /// spike self-heals on any later pass.
-  Future<void> _ensureBoardCalendar() async {
-    if (await _repo.setting('threshold_calendar_id') != null) return;
-    try {
-      final id = await _client.findOrCreateThresholdCalendar();
-      await _repo.setSetting('threshold_calendar_id', id);
-    } on Object {
-      // Channel 2 is optional until M4; channel 1 works without it.
     }
   }
 

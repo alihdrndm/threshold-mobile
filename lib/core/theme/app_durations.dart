@@ -10,6 +10,10 @@ abstract final class AppDurations {
   /// Press feedback and menu entrances.
   static const press = Duration(milliseconds: 160);
 
+  /// The press DIP — faster than the release, so even the quickest tap
+  /// shows a full pulse (snappy down, soft up).
+  static const pressDown = Duration(milliseconds: 100);
+
   /// Card fade-in.
   static const cardIn = Duration(milliseconds: 180);
 

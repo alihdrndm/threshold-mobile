@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/router/app_router.dart';
 import 'core/theme/theme.dart';
+import 'features/board_sync/presentation/board_sync_providers.dart';
 import 'features/calendar_sync/presentation/sync_providers.dart';
 import 'features/tasks/presentation/providers.dart';
 
@@ -26,11 +27,17 @@ class _ThresholdAppState extends ConsumerState<ThresholdApp> {
     Future(() async {
       await ref.read(taskRepositoryProvider).rollPastRepeats();
       await ref.read(calendarStatusProvider.notifier).syncNow();
+      if (ref.read(firebaseReadyProvider)) {
+        await ref.read(boardSyncProvider).start();
+      }
     });
     _lifecycle = AppLifecycleListener(
       onResume: () async {
         await ref.read(taskRepositoryProvider).rollPastRepeats();
         await ref.read(calendarStatusProvider.notifier).syncNow();
+        if (ref.read(firebaseReadyProvider)) {
+          await ref.read(boardSyncProvider).start();
+        }
       },
     );
   }

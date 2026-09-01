@@ -8,20 +8,31 @@ import 'package:http/http.dart' as http;
 /// persistence only from the final page, 410 → SYNC_TOKEN_EXPIRED, and
 /// the extendedProperties that carry Threshold's identity.
 class CalendarClient {
-  CalendarClient(this._tokenProvider, {http.Client? inner})
-      : _http = inner ?? http.Client();
+  CalendarClient(this._tokenProvider,
+      {http.Client? inner, Future<void> Function()? onUnauthorized})
+      : _http = inner ?? http.Client(),
+        _onUnauthorized = onUnauthorized;
 
   final Future<String?> Function() _tokenProvider;
   final http.Client _http;
 
+  /// Called on a 401 so the token cache can be dropped before ONE retry —
+  /// Play Services occasionally hands back a token that just expired.
+  final Future<void> Function()? _onUnauthorized;
+
   static const _base = 'https://www.googleapis.com/calendar/v3';
 
-  Future<Map<String, dynamic>> _request(
+  /// Nothing here may hang: a wedged socket used to latch the app's
+  /// one-sync-at-a-time and one-action-at-a-time guards closed forever,
+  /// which read as "the buttons stopped working".
+  static const _timeout = Duration(seconds: 30);
+
+  Future<http.Response> _send(
     String method,
-    String path, {
+    String path,
     Map<String, String>? query,
     Object? body,
-  }) async {
+  ) async {
     final token = await _tokenProvider();
     if (token == null) throw const NotConnected();
     final uri = Uri.parse('$_base$path').replace(queryParameters: query);
@@ -31,7 +42,21 @@ class CalendarClient {
       req.headers['Content-Type'] = 'application/json';
       req.body = jsonEncode(body);
     }
-    final res = await http.Response.fromStream(await _http.send(req));
+    final streamed = await _http.send(req).timeout(_timeout);
+    return http.Response.fromStream(streamed).timeout(_timeout);
+  }
+
+  Future<Map<String, dynamic>> _request(
+    String method,
+    String path, {
+    Map<String, String>? query,
+    Object? body,
+  }) async {
+    var res = await _send(method, path, query, body);
+    if (res.statusCode == 401 && _onUnauthorized != null) {
+      await _onUnauthorized();
+      res = await _send(method, path, query, body);
+    }
     if (res.statusCode == 410) throw const SyncTokenExpired();
     // Idempotent deletes: 404 on DELETE is success (desktop rule; 410 was
     // already surfaced above as the sync-token signal).
@@ -207,29 +232,6 @@ class CalendarClient {
         '${two(local.day)}T${two(local.hour)}:${two(local.minute)}:'
         '${two(local.second)}$sign${two(abs.inHours)}:'
         '${two(abs.inMinutes % 60)}';
-  }
-
-  /// Find the app-created "Threshold" calendar, or make it. Patched
-  /// unselected so it stays out of the user's normal Google views.
-  Future<String> findOrCreateThresholdCalendar() async {
-    final list = await _request('GET', '/users/me/calendarList');
-    for (final raw in (list['items'] as List? ?? const [])) {
-      final cal = raw as Map<String, dynamic>;
-      if (cal['summary'] == 'Threshold') return cal['id'] as String;
-    }
-    final created = await _request('POST', '/calendars',
-        body: {'summary': 'Threshold'});
-    final id = created['id'] as String;
-    try {
-      await _request(
-        'PATCH',
-        '/users/me/calendarList/${Uri.encodeComponent(id)}',
-        body: {'selected': false},
-      );
-    } on CalendarApiException {
-      // Cosmetic; the calendar works either way.
-    }
-    return id;
   }
 
   void close() => _http.close();

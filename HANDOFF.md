@@ -88,7 +88,7 @@ Mirror of desktop SQLite (through migration v7), plus mobile's sync additions:
 | `repeatDays` | "1,3,5" (Mon=1..Sun=7)? | NULL = off; empty string is illegal. Schedule-only: cleared when leaving the quadrant (kept through delete for undo) |
 | `remindFiredForTs` | unix? | reminder spent iff `== scheduledTs` — a move re-arms with zero clearing code |
 | `remindSnoozedUntil` | unix? | consumes the base fire; survives a same-time write, dies on a real move |
-| `boardEventId` | text? | channel-2 event id cache |
+| `boardEventId` | text? | unused since the Firestore pivot (channel-2 docs are keyed by `uid`); drop in a later migration |
 | `legacyDesktopId` | int? | rowid seen in a desktop-era `thresholdTaskId` |
 | `updatedTs` | unix NOT NULL | LWW clock, bumped on every user-meaningful mutation |
 
@@ -372,24 +372,33 @@ route transition.
 
 ## 4. Sync architecture
 
-Google Calendar is the hub. Two channels, one engine. The user's own Google Cloud project
-supplies OAuth clients (desktop client exists; an **Android client** — package
-`com.threshold.mobile` + the signing SHA-1s — must be added to the same project).
+Two channels, one engine. **Channel 1** stays on Google Calendar: scheduled tasks as real
+events on the user's primary calendar (visibility + Google's own notifications are the
+product). **Channel 2** — the whole board — lives in **Cloud Firestore** (Spark free tier)
+inside the user's existing GCP project `jovial-world-505914-t4`, the same project that
+holds the OAuth clients. No new accounts, no server to run; the free quota exceeds this
+app's traffic by orders of magnitude.
+
+> History: channel 2 was originally specced as a hidden "Threshold" Google calendar
+> carrying the board in `extendedProperties`. Superseded 2026-09-01 by user decision
+> ("go Firebase") before any implementation shipped. Rationale: no 1024-byte field caps,
+> real queries, live snapshot streaming on mobile, and room for future task bodies —
+> at the cost of one extra integration per app.
 
 ### 4.1 OAuth (mobile)
 
-- `flutter_appauth` (custom-scheme redirect `com.threshold.mobile:/oauth2redirect`; no
-  client secret — Android clients are public; PKCE S256 mandatory).
-- Scopes: `https://www.googleapis.com/auth/calendar.events` +
-  `https://www.googleapis.com/auth/calendar.freebusy` +
-  `https://www.googleapis.com/auth/calendar.app.created` (granular scope for creating and
-  managing app-created secondary calendars — channel 2). Both platforms' clients live in
-  one GCP project so both see the same "Threshold" calendar. Fallback if `app.created`
-  misbehaves: full `calendar` scope (documented, acceptable for a personal app).
-- Request `access_type=offline&prompt=consent` on connect; store tokens in
-  `flutter_secure_storage`; refresh transparently; treat `invalid_grant` as a first-class
-  visible "Reconnect" state (outbox keeps queueing). **Never call `/revoke` on sign-out**
-  (it can kill the other device's grant); just wipe local tokens.
+- **`google_sign_in` 7.x** (native Credential Manager dialog; Play Services mints and
+  refreshes access tokens — no refresh token to store). The original `flutter_appauth`
+  custom-tab route failed three ways on OneUI (M2 postmortem in the project memory);
+  do not go back. Requires the **Web-type client id as `serverClientId`**
+  (`kServerClientId` in `lib/core/google/client_config.dart`).
+- Calendar scopes (channel 1): `calendar.events` + `calendar.freebusy`.
+- Channel 2 auth is Firebase (see §4.3): the same `google_sign_in` session's `idToken`
+  is exchanged via `firebase_auth`'s `signInWithCredential` — one sign-in dialog covers
+  both channels.
+- Treat a dead grant as a first-class visible "Reconnect" state (outbox keeps queueing).
+  **Never call `/revoke` or `GoogleSignIn.disconnect()` on sign-out** (it can kill the
+  other device's grant); sign-out is local only.
 
 ### 4.2 Channel 1 — scheduled tasks on the primary calendar (existing desktop ABI)
 
@@ -431,44 +440,57 @@ Rules (each learned from the desktop audit — violating any breaks the other de
   durations snap back to 30 min on the next patch; all-day conversions are invisible to
   desktop.
 
-### 4.3 Channel 2 — the whole board on a hidden "Threshold" calendar (CANONICAL SPEC)
+### 4.3 Channel 2 — the whole board in Firestore (CANONICAL SPEC)
 
-A secondary calendar named **"Threshold"**, created via `calendars.insert` under the
-`calendar.app.created` scope, `calendarList` entry patched `selected=false` (hidden from
-normal Google views). One event per task; the event is a metadata carrier, not a real
-calendar entry:
+One Firestore database — `(default)`, Native mode — in the user's GCP project. The board
+is a single-board, single-user document tree:
 
 ```
-summary        = task title                 (mirror for debugging; NOT parsed)
-description    = task note or ""
-start/end      = all-day {date: createdTs local date} .. +1 day   (never moves)
-transparency   = "transparent"              (never blocks free/busy)
-reminders      = { useDefault: false, overrides: [] }
-extendedProperties.private:
-  thresholdTaskUid : UUIDv4                 REQUIRED — identity
-  thresholdKind    : "board"                REQUIRED — discriminator
-  schemaV          : "1"
-  title            : canonical title        (≤1KB by construction)
-  quadrant         : inbox|do_first|schedule|delegate|eliminate
-  status           : open|done|archived|deleted     (deleted = tombstone; PATCH, don't delete)
-  sortOrder        : "<int>"
-  area             : area NAME (not id) or absent
-  repeatDays       : "1,3,5" or absent
-  scheduledTs      : "<unix>" or absent     (informational mirror; channel 1 owns the slot)
-  createdTs        : RFC3339
-  completedTs      : RFC3339 or absent
-  updatedTs        : "<unix>"               REQUIRED — LWW clock
-  thresholdTaskId  : "<rowid>"              optional legacy bridge (desktop writes it)
+boards/main                          # ONE meta document
+  schemaV     : 1
+  areas       : [ {name: "Job", sortOrder: 0}, ... ]
+  updatedTs   : int (unix seconds)   # LWW clock for the areas list
 
-Plus ONE meta event:  thresholdKind:"meta", thresholdMetaId:"board",
-  areas: JSON [{"name":"Job","sortOrder":0},...]   (≤8 areas × ≤24 chars — fits the 1024-byte
-  per-value cap), updatedTs.
+boards/main/tasks/{thresholdTaskUid} # ONE document per task, keyed by UUIDv4
+  schemaV     : 1
+  title       : string
+  quadrant    : "inbox"|"do_first"|"schedule"|"delegate"|"eliminate"
+  status      : "open"|"done"|"archived"|"deleted"   # deleted = tombstone; SET, never doc-delete
+  sortOrder   : int
+  area        : string|null          # area NAME (not id)
+  repeatDays  : string|null          # "1,3,5" weekday set, desktop encoding
+  scheduledTs : int|null             # informational mirror; channel 1 OWNS the slot
+  createdTs   : int (unix seconds)
+  completedTs : int|null
+  updatedTs   : int (unix seconds)   # REQUIRED — the LWW clock
+  legacyDesktopId : int|null         # desktop rowid bridge (desktop writes it)
 ```
 
-Conflict rule: **whole-record last-writer-wins on `updatedTs` (seconds); ties → remote
-wins.** Tombstones garbage-collected (real delete) 30 days after `updatedTs` by whichever
-device notices. Every board mutation enqueues a channel-2 upsert; the pull loop uses the
-same pageToken/syncToken machinery as channel 1 against the Threshold calendar id.
+Field names and encodings are deliberately identical to the old calendar spec so the
+codecs stay one-to-one with the drift/SQLite columns. `calendarEventId` is **never**
+synced — channel-1 links are per-device state.
+
+**Auth — asymmetric by design:**
+- **Mobile**: Firebase Auth, Google provider, bridged from the existing `google_sign_in`
+  session (`GoogleAuthProvider.credential(idToken)` → `signInWithCredential`). Security
+  rules pin the whole tree to the owner's Firebase UID (captured at first sign-in, then
+  rules redeployed — see `firestore.rules` in this repo).
+- **Desktop**: no Firebase SDK exists for Rust; it uses the **Firestore REST API** with
+  the user's existing OAuth refresh token plus the added scope
+  `https://www.googleapis.com/auth/datastore` (one-time re-consent). As project owner
+  that path authenticates via IAM and bypasses rules — acceptable: same human, own project.
+
+**Conflict rule (unchanged): whole-document last-writer-wins on `updatedTs` (seconds);
+ties → remote wins.** Tombstones garbage-collected (real doc delete) 30 days after
+`updatedTs` by whichever device notices.
+
+**Transport per platform:**
+- Mobile uses the `cloud_firestore` SDK: local mutations write through to Firestore
+  directly (the SDK's offline persistence queues them — **no PendingOps outbox for
+  channel 2**), and a snapshot listener on `boards/main/tasks` applies remote changes
+  into drift via LWW while the app is foregrounded. Channel 1 keeps its outbox.
+- Desktop pushes dirty rows and pulls `tasks where updatedTs > lastPullTs` inside its
+  existing 2-minute poll tick (REST has no offline queue, so desktop keeps a dirty flag).
 
 **This section is the contract the desktop companion change implements too. If it ever
 changes, bump `schemaV` and keep reading v1.**
@@ -483,11 +505,13 @@ channel-2 upsert. FreeBusy remains only an input to `next_free_slot`.
 
 ### 4.5 The engine
 
-One serialized `SyncCoordinator` (never two passes concurrently). Triggers: app resume ·
-pull-to-refresh · WorkManager ≥15 min (network constraint) · debounced 3 s outbox push
-after any local mutation. Pass order (desktop-proven): **roll-forward → drain outbox
-(coalesced per task, FIFO, 3-attempt backoff, never blocks the queue) → pull primary →
-pull Threshold calendar → recompute reminders → refresh UI providers.** UI is always
+One serialized `SyncCoordinator` (never two passes concurrently) for **channel 1**.
+Triggers: app resume · pull-to-refresh · WorkManager ≥15 min (network constraint) ·
+debounced 3 s outbox push after any local mutation. Pass order (desktop-proven):
+**roll-forward → drain outbox (coalesced per task, FIFO, 3-attempt backoff, never blocks
+the queue) → pull primary → recompute reminders → refresh UI providers.**
+**Channel 2 runs beside it, not inside it**: Firestore write-through on every board
+mutation (SDK queues offline) + a snapshot listener applying LWW into drift. UI is always
 optimistic-local; "a task move never waits on the calendar" — sync failures land in a
 status line, never block the board.
 
@@ -518,8 +542,9 @@ lib/
                                             # slot pure logic, repositories, TaskCard, #parser
     board/       presentation              # matrix screen, drag/reorder, undo, Done today
     week/        domain|data|presentation  # strip + expandable day, foreign tiles + adopt
-    calendar_sync/ domain|data|presentation# BoardEventCodec (THE codec), outbox, reconciler,
-                                            # hidden-calendar bootstrap, sync status UI
+    calendar_sync/ domain|data|presentation# channel 1: outbox, reconciler, sync status UI
+    board_sync/  domain|data               # channel 2: BoardDocCodec (THE codec),
+                                            # Firestore write-through + snapshot listener, LWW
     auth/                                  # AppAuth flow, secure token store
     ritual/      domain|data|presentation  # step machine, themes, express, intentions dao
     sessions/    domain|data|presentation  # 8-state machine, unique-running, banner
@@ -532,14 +557,16 @@ test/                       # mirrors lib/; goldens for all palettes; port-parit
 
 Rules: `board`/`week`/`overview`/`checkin` own no `data/` — they consume `tasks`/`sessions`
 repositories. The channel-2 wire schema exists in exactly one place
-(`calendar_sync/domain/board_event_codec.dart`).
+(`board_sync/domain/board_doc_codec.dart`).
 
 **Packages**: flutter_riverpod + riverpod_annotation (+generator/lints) · go_router ·
 freezed + json_serializable + build_runner · drift + drift_flutter + sqlite3_flutter_libs ·
-fpdart · flutter_appauth · flutter_secure_storage · googleapis + http · 
+fpdart · google_sign_in · flutter_secure_storage · http (hand-rolled Calendar v3 client) ·
+firebase_core + firebase_auth + cloud_firestore (channel 2) ·
 flutter_local_notifications · timezone + flutter_timezone · workmanager ·
 permission_handler · uuid · intl · collection · (dev) mocktail. Deliberately absent:
-flutter_animate, dio, google_sign_in (wrong token model), get_it. Inter as bundled assets.
+flutter_animate, dio, flutter_appauth (failed on OneUI — see §4.1), get_it.
+Inter as bundled assets.
 
 **Screen map**: shell tabs `/board` `/week` `/overview` `/settings`; fullscreen `/ritual`
 (`?express&taskUid=`), `/checkin/:sessionId` (notification-launched), `/reminder/:taskUid`
@@ -572,14 +599,22 @@ Each independently shippable to the target device (Samsung A56, USB, `flutter ru
   SyncCoordinator, insert/patch/delete per §4.2, duplicate guard, slot hunting on
   enter-Schedule, reschedule/pick/remove, roll-forward patches, 410 recovery, WorkManager,
   adopt-as-task. Soak test against the live desktop. Exit: both apps agree through Google.
-- **M4 (L)** — channel-2 board sync + **the desktop companion change** (separate branch in
-  `alihdrndm/threshold`): (1) migration v8 `tasks.uid` UUID backfill + unique index;
-  (2) add `calendar.app.created` scope → re-consent; (3) write `thresholdTaskUid` on
-  channel-1 inserts + lazily patch onto existing events; (4) pageToken loop in
-  `list_task_events`; (5) implement §4.3 codec + outbox mirroring of every board mutation +
-  pull loop with own syncToken; (6) accept mobile-born tasks (uid canonical, mint local
-  rowid); (7) `updated_ts` column + LWW; (8) tombstones + GC. Exit: full board converges
-  both directions.
+- **M4 (L)** — channel-2 Firestore board sync + **the desktop companion change**.
+  *Setup (once)*: add Firebase to GCP project `jovial-world-505914-t4`, create the
+  `(default)` Firestore DB, register the Android app (both SHA-1s) → `google-services.json`
+  (gitignored), enable the Google sign-in provider, deploy `firestore.rules` pinned to the
+  owner's UID after first sign-in.
+  *Mobile*: firebase_core/auth bootstrap bridged from google_sign_in, §4.3 BoardDocCodec,
+  write-through on every board mutation, snapshot listener → LWW into drift, areas meta
+  doc, remove the hidden-calendar bootstrap + `calendar.app.created` scope.
+  *Desktop* (separate branch in `alihdrndm/threshold`): (1) migration v8 `tasks.uid` UUID
+  backfill + unique index + `updated_ts` column; (2) add `datastore` scope → one-time
+  re-consent; (3) write `thresholdTaskUid` on channel-1 inserts + lazily patch onto
+  existing events; (4) pageToken loop in `list_task_events`; (5) Firestore REST client
+  (serde structs = §4.3) + dirty-flag push + `updatedTs > lastPullTs` delta pull in the
+  2-minute tick; (6) accept mobile-born tasks (uid canonical, mint local rowid);
+  (7) whole-doc LWW, ties → remote; (8) tombstones + 30-day GC.
+  Exit: full board converges both directions.
 - **M5 (M)** — reminders: notification permissions flows (POST_NOTIFICATIONS,
   SCHEDULE_EXACT_ALARM + OneUI battery settings deep-link), zonedSchedule exact,
   Done/Snooze-10m/More… actions handled without app launch, desktop-identical bookkeeping,
@@ -599,9 +634,12 @@ Effort share ≈ 6 / 18 / 10 / 18 / 18 / 10 / 14 / 6 (%).
 2. **OneUI Doze / exact-alarm revocation** → schedule-ahead + recompute-on-open self-heal,
    `exactAllowWhileIdle`, onboarding deep-links to Alarms & reminders + battery settings,
    graceful inexact fallback.
-3. **`calendar.app.created` behavior across two clients of one project** → M2 spike;
-   fallback to full `calendar` scope documented; channel 2 optional at runtime (channel 1 +
-   local board remain fully functional without it).
+3. **Firestore dependency risks** — Spark quota (a rounding error at this scale, but
+   `updatedTs > lastPullTs` delta pulls keep desktop reads bounded), rules lockout if the
+   pinned UID is wrong (owner can always fix in console; desktop's IAM path is immune),
+   and public-repo hygiene: `google-services.json` is not a secret by design but stays
+   gitignored; **security lives in `firestore.rules`, never in config obscurity**.
+   Channel 2 stays optional at runtime (channel 1 + local board work without it).
 4. **Two-writer races** (desktop 2-min poll vs mobile pushes; midnight roll-forward) →
    PATCH-only, LWW with remote-wins ties, duplicate guard, deterministic shared roll-forward
    math, M3/M4 soak tests. Accepted v1 caveat: cross-timezone roll-forward ping-pong
