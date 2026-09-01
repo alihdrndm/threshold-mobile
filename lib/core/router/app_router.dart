@@ -13,7 +13,9 @@ import '../widgets/caps_label.dart';
 /// Four tabs in a stateful shell; the threshold surfaces (/ritual, /quote,
 /// /checkin) live outside it, fullscreen and always dark.
 final appRouter = GoRouter(
-  initialLocation: '/board',
+  // The week greets you first — the user's call: the day's shape before
+  // the board's list.
+  initialLocation: '/week',
   routes: [
     GoRoute(path: '/ritual', builder: (_, _) => const RitualScreen()),
     GoRoute(path: '/quote', builder: (_, _) => const QuoteScreen()),

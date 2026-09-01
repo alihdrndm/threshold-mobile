@@ -32,12 +32,19 @@ Future<void> pumpApp(WidgetTester tester, AppDatabase db) async {
 }
 
 void main() {
-  testWidgets('the shell boots to the board with the zone invitations',
+  testWidgets('the shell boots to the week; the board is one tab away',
       (tester) async {
     final db = AppDatabase.forTesting(NativeDatabase.memory());
     addTearDown(db.close);
     await pumpApp(tester, db);
 
+    // The week greets first (unconnected here, so it says how to fill it).
+    expect(
+        find.text('Connect Google Calendar in Settings to see your week.'),
+        findsOneWidget);
+
+    await tester.tap(find.text('BOARD'));
+    await tester.pump(const Duration(milliseconds: 300));
     expect(find.text('INBOX'), findsOneWidget);
     expect(find.text('New tasks land here'), findsOneWidget);
     expect(find.text('For what you can let go'), findsOneWidget);
@@ -49,6 +56,8 @@ void main() {
     final db = AppDatabase.forTesting(NativeDatabase.memory());
     addTearDown(db.close);
     await pumpApp(tester, db);
+    await tester.tap(find.text('BOARD'));
+    await tester.pump(const Duration(milliseconds: 300));
 
     await tester.enterText(
         find.byType(TextField).first, 'call mom #personal');
