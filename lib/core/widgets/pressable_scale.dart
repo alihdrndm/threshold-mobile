@@ -32,12 +32,24 @@ class _PressableScaleState extends State<PressableScale>
     with SingleTickerProviderStateMixin {
   late final _controller = AnimationController(
     vsync: this,
-    duration: AppDurations.press,
+    duration: AppDurations.pressDown,
+    reverseDuration: AppDurations.press,
   );
   late final _scale = Tween<double>(
     begin: 1.0,
     end: widget.large ? AppPress.scaleLarge : AppPress.scale,
   ).animate(CurvedAnimation(parent: _controller, curve: AppPress.curve));
+
+  /// A quick tap inside a scrollable delivers tap-down and tap-up a frame
+  /// apart (the gesture arena defers the down), so an immediate reverse
+  /// showed nothing. Let the dip land, then release — the button always
+  /// answers, however fast the finger.
+  Future<void> _release() async {
+    if (_controller.status == AnimationStatus.forward) {
+      await _controller.forward().orCancel.catchError((Object _) {});
+    }
+    if (mounted) await _controller.reverse();
+  }
 
   @override
   void dispose() {
@@ -56,11 +68,12 @@ class _PressableScaleState extends State<PressableScale>
         onTapDown: enabled ? (_) => _controller.forward() : null,
         onTapUp: enabled
             ? (_) {
-                _controller.reverse();
+                // The action never waits on the animation.
                 widget.onPressed!();
+                _release();
               }
             : null,
-        onTapCancel: enabled ? _controller.reverse : null,
+        onTapCancel: enabled ? _release : null,
         child: ScaleTransition(scale: _scale, child: widget.child),
       ),
     );

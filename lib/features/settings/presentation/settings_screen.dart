@@ -98,7 +98,10 @@ class _GoogleSection extends ConsumerStatefulWidget {
 class _GoogleSectionState extends ConsumerState<_GoogleSection> {
   final _clientId = TextEditingController();
   String? _error;
-  bool _busy = false;
+  /// Which action is in flight ('connect' | 'sync' | 'disconnect'), so
+  /// each chip can wear its own busy label instead of a shared flag.
+  String? _busyAction;
+  bool get _busy => _busyAction != null;
   bool _seeded = false;
 
   @override
@@ -118,10 +121,10 @@ class _GoogleSectionState extends ConsumerState<_GoogleSection> {
       _seeded = true;
     }
 
-    Future<void> act(Future<void> Function() action) async {
+    Future<void> act(String name, Future<void> Function() action) async {
       if (_busy) return;
       setState(() {
-        _busy = true;
+        _busyAction = name;
         _error = null;
       });
       try {
@@ -129,7 +132,7 @@ class _GoogleSectionState extends ConsumerState<_GoogleSection> {
       } on Object catch (e) {
         setState(() => _error = '$e');
       } finally {
-        if (mounted) setState(() => _busy = false);
+        if (mounted) setState(() => _busyAction = null);
       }
     }
 
@@ -165,7 +168,7 @@ class _GoogleSectionState extends ConsumerState<_GoogleSection> {
           PressableScale(
             onPressed: _busy
                 ? null
-                : () => act(() =>
+                : () => act('connect', () =>
                     ref.read(calendarStatusProvider.notifier).connect()),
             child: _chip(c, _busy ? 'Opening your browser…' : 'Connect'),
           ),
@@ -175,15 +178,20 @@ class _GoogleSectionState extends ConsumerState<_GoogleSection> {
               _chip(c, 'Connected', accent: true),
               const SizedBox(width: AppSpacing.sm),
               PressableScale(
-                onPressed: () => act(() =>
-                    ref.read(calendarStatusProvider.notifier).syncNow()),
-                child: _chip(c, 'Sync now'),
+                onPressed: _busy
+                    ? null
+                    : () => act('sync', () =>
+                        ref.read(calendarStatusProvider.notifier).syncNow()),
+                child: _chip(
+                    c, _busyAction == 'sync' ? 'Syncing…' : 'Sync now'),
               ),
               const SizedBox(width: AppSpacing.sm),
               PressableScale(
-                onPressed: () => act(() => ref
-                    .read(calendarStatusProvider.notifier)
-                    .disconnect()),
+                onPressed: _busy
+                    ? null
+                    : () => act('disconnect', () => ref
+                        .read(calendarStatusProvider.notifier)
+                        .disconnect()),
                 child: _chip(c, 'Disconnect'),
               ),
             ],
