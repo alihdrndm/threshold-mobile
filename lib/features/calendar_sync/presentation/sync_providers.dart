@@ -4,7 +4,7 @@ import '../../../core/google/auth_service.dart';
 import '../../../core/google/calendar_client.dart';
 import '../../../core/google/client_config.dart';
 import '../../tasks/presentation/providers.dart';
-import '../data/pull_service.dart';
+import '../data/sync_coordinator.dart';
 
 final googleAuthProvider = Provider<GoogleAuthService>((_) => GoogleAuthService());
 
@@ -15,10 +15,12 @@ final calendarClientProvider = Provider<CalendarClient>((ref) {
   return client;
 });
 
-final pullServiceProvider = Provider<PullService>((ref) => PullService(
-      ref.watch(databaseProvider),
-      ref.watch(calendarClientProvider),
-    ));
+final syncCoordinatorProvider =
+    Provider<SyncCoordinator>((ref) => SyncCoordinator(
+          ref.watch(databaseProvider),
+          ref.watch(calendarClientProvider),
+          ref.watch(taskRepositoryProvider),
+        ));
 
 /// The connection + sync status surface. One serialized pass at a time;
 /// failures land in the status line, never in the way of the board.
@@ -82,10 +84,11 @@ class CalendarStatusNotifier extends AsyncNotifier<CalendarStatus> {
 
   Future<void> syncNow() async {
     if (_syncing) return;
+    if (!await ref.read(googleAuthProvider).connected) return;
     _syncing = true;
     final repo = ref.read(taskRepositoryProvider);
     try {
-      final status = await ref.read(pullServiceProvider).pullPrimary();
+      final status = await ref.read(syncCoordinatorProvider).pass();
       await repo.setSetting('google_last_sync_status', status);
       await repo.setSetting('google_last_sync_ts',
           '${DateTime.now().millisecondsSinceEpoch ~/ 1000}');

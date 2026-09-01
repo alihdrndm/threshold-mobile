@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/router/app_router.dart';
 import 'core/theme/theme.dart';
+import 'features/calendar_sync/presentation/sync_providers.dart';
 import 'features/tasks/presentation/providers.dart';
 
 class ThresholdApp extends ConsumerStatefulWidget {
@@ -19,12 +20,18 @@ class _ThresholdAppState extends ConsumerState<ThresholdApp> {
   @override
   void initState() {
     super.initState();
-    // Missed repeats come forward at the day boundary — on open and on
-    // every return, the mobile stand-in for the desktop's resident clock.
-    Future(() => ref.read(taskRepositoryProvider).rollPastRepeats());
+    // On open and on every return: missed repeats roll forward and a sync
+    // pass runs — the mobile stand-in for the desktop's resident clock.
+    // (The pass itself rolls first, then drains the outbox, then pulls.)
+    Future(() async {
+      await ref.read(taskRepositoryProvider).rollPastRepeats();
+      await ref.read(calendarStatusProvider.notifier).syncNow();
+    });
     _lifecycle = AppLifecycleListener(
-      onResume: () =>
-          ref.read(taskRepositoryProvider).rollPastRepeats(),
+      onResume: () async {
+        await ref.read(taskRepositoryProvider).rollPastRepeats();
+        await ref.read(calendarStatusProvider.notifier).syncNow();
+      },
     );
   }
 

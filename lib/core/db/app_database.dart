@@ -85,14 +85,30 @@ class SyncState extends Table {
   Set<Column> get primaryKey => {calendarId};
 }
 
-@DriftDatabase(tables: [Tasks, Areas, SettingsKV, GoogleEventMap, SyncState])
+/// The offline outbox: every calendar-affecting mutation queues here and a
+/// serialized sync pass drains it. UI never waits on the network — "a task
+/// move never waits on the calendar."
+@DataClassName('PendingOpRow')
+class PendingOps extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get taskUid => text()();
+  TextColumn get kind =>
+      text()(); // schedule | patchTime | deleteEvent
+  TextColumn get payload => text().withDefault(const Constant('{}'))();
+  IntColumn get createdTs => integer()();
+  IntColumn get attempts => integer().withDefault(const Constant(0))();
+  TextColumn get lastError => text().nullable()();
+}
+
+@DriftDatabase(
+    tables: [Tasks, Areas, SettingsKV, GoogleEventMap, SyncState, PendingOps])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(driftDatabase(name: 'threshold'));
 
   AppDatabase.forTesting(super.executor);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -115,6 +131,10 @@ class AppDatabase extends _$AppDatabase {
           if (from < 2) {
             await m.createTable(googleEventMap);
             await m.createTable(syncState);
+          }
+          // v3: the offline outbox.
+          if (from < 3) {
+            await m.createTable(pendingOps);
           }
         },
       );

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
@@ -21,6 +23,18 @@ class TaskRepository {
 
   int get _now => _clock().millisecondsSinceEpoch ~/ 1000;
   String get _nowRfc => _clock().toIso8601String();
+
+  /// Queue a calendar op for the sync pass. The UI never waits on the
+  /// network; the outbox drains before every pull, which is what keeps a
+  /// queued patch from being dragged back by its own stale remote.
+  Future<void> _enqueue(String taskUid, String kind,
+          [Map<String, Object?> payload = const {}]) =>
+      _db.into(_db.pendingOps).insert(PendingOpsCompanion.insert(
+            taskUid: taskUid,
+            kind: kind,
+            payload: Value(jsonEncode(payload)),
+            createdTs: _now,
+          ));
 
   Stream<List<domain.Task>> watchAll() =>
       (_db.select(_db.tasks)
@@ -76,6 +90,16 @@ class TaskRepository {
     await _db.transaction(() async {
       final row = await _byUid(uid);
       if (row == null) return;
+      final was = quadrantOf(row.urgent, row.important);
+      // Entering Schedule books a slot; leaving deletes the lingering
+      // event — the desktop's enter/leave lifecycle, queued not awaited.
+      if (q == Quadrant.schedule && was != Quadrant.schedule) {
+        await _enqueue(uid, 'schedule');
+      } else if (q != Quadrant.schedule &&
+          was == Quadrant.schedule &&
+          row.calendarEventId != null) {
+        await _enqueue(uid, 'deleteEvent', {'eventId': row.calendarEventId});
+      }
       final max = await (_db.selectOnly(_db.tasks)
             ..addColumns([_db.tasks.sortOrder.max()])
             ..where(_db.tasks.status.equals('open') &
@@ -139,11 +163,9 @@ class TaskRepository {
             after, dayMask(t.repeatDays!), anchor.hour, anchor.minute);
         if (next != null) {
           final nextTs = next.millisecondsSinceEpoch ~/ 1000;
-          await (_db.update(_db.tasks)..where((r) => r.uid.equals(uid)))
-              .write(TasksCompanion(
-            scheduledTs: Value(nextTs),
-            updatedTs: Value(_now),
-          ));
+          // setSchedule queues the calendar patch too — the advance must
+          // reach Google the same way any move does.
+          await setSchedule(uid, nextTs);
           return nextTs;
         }
       }
@@ -157,15 +179,30 @@ class TaskRepository {
     });
   }
 
-  Future<void> setStatus(String uid, domain.TaskStatus status) =>
-      (_db.update(_db.tasks)..where((t) => t.uid.equals(uid)))
-          .write(TasksCompanion(
-        status: Value(status.name),
-        completedTs: status == domain.TaskStatus.done
-            ? Value(_nowRfc)
-            : const Value(null),
-        updatedTs: Value(_now),
-      ));
+  Future<void> setStatus(String uid, domain.TaskStatus status) async {
+    // A task leaving the living board (done/deleted) takes its event with
+    // it, the desktop's cleanup rule. Undo re-schedules explicitly.
+    if (status == domain.TaskStatus.done ||
+        status == domain.TaskStatus.deleted) {
+      final row = await _byUid(uid);
+      if (row?.calendarEventId != null) {
+        await _enqueue(
+            uid, 'deleteEvent', {'eventId': row!.calendarEventId});
+        await (_db.update(_db.tasks)..where((t) => t.uid.equals(uid)))
+            .write(const TasksCompanion(
+          calendarEventId: Value(null),
+        ));
+      }
+    }
+    await (_db.update(_db.tasks)..where((t) => t.uid.equals(uid)))
+        .write(TasksCompanion(
+      status: Value(status.name),
+      completedTs: status == domain.TaskStatus.done
+          ? Value(_nowRfc)
+          : const Value(null),
+      updatedTs: Value(_now),
+    ));
+  }
 
   Future<void> setTitleAndNote(String uid, String title, String? note) =>
       (_db.update(_db.tasks)..where((t) => t.uid.equals(uid)))
@@ -192,7 +229,11 @@ class TaskRepository {
   /// Record the slot. A snooze survives only a write that confirms the same
   /// time; the fired marker is left alone — "keyed to the old slot, it goes
   /// stale by itself and the new slot re-arms with no clearing code."
-  Future<void> setSchedule(String uid, int? scheduledTs) async {
+  ///
+  /// [fromRemote] marks a write that ADOPTS Google's time — it must not
+  /// queue a patch back, or two devices echo each other forever.
+  Future<void> setSchedule(String uid, int? scheduledTs,
+      {bool fromRemote = false}) async {
     final row = await _byUid(uid);
     if (row == null) return;
     final moved = row.scheduledTs != scheduledTs;
@@ -203,6 +244,80 @@ class TaskRepository {
           moved ? const Value(null) : const Value.absent(),
       updatedTs: Value(_now),
     ));
+    if (!fromRemote && moved && scheduledTs != null) {
+      if (row.calendarEventId != null) {
+        await _enqueue(uid, 'patchTime',
+            {'eventId': row.calendarEventId, 'start': scheduledTs});
+      } else {
+        await _enqueue(uid, 'schedule', {'at': scheduledTs});
+      }
+    }
+  }
+
+  /// The pull's adoption write: Google's time wins, silently.
+  Future<void> applyRemoteSchedule(String uid, int? ts) =>
+      setSchedule(uid, ts, fromRemote: true);
+
+  /// Link an event to a task without queueing anything (insert results,
+  /// adoption).
+  Future<void> linkEvent(String uid, String eventId, String? htmlLink) =>
+      (_db.update(_db.tasks)..where((t) => t.uid.equals(uid)))
+          .write(TasksCompanion(
+        calendarEventId: Value(eventId),
+        calendarHtmlLink: htmlLink == null
+            ? const Value.absent()
+            : Value(htmlLink),
+        updatedTs: Value(_now),
+      ));
+
+  /// The pull's cancelled-branch: forget the slot and the link, never
+  /// recreate.
+  Future<void> clearScheduleFromRemote(String uid) =>
+      (_db.update(_db.tasks)..where((t) => t.uid.equals(uid)))
+          .write(TasksCompanion(
+        scheduledTs: const Value(null),
+        calendarEventId: const Value(null),
+        calendarHtmlLink: const Value(null),
+        remindFiredForTs: const Value(null),
+        remindSnoozedUntil: const Value(null),
+        updatedTs: Value(_now),
+      ));
+
+  Future<domain.Task?> byUid(String uid) async {
+    final row = await _byUid(uid);
+    return row == null ? null : _toDomain(row);
+  }
+
+  /// Adoption: a Google event the user claims as a task. The local row is
+  /// born already linked; the caller patches the uid onto the event.
+  Future<String> adoptEvent({
+    required String title,
+    required String eventId,
+    required int startTs,
+  }) async {
+    final uid = _uuid.v4();
+    await _db.transaction(() async {
+      final max = await (_db.selectOnly(_db.tasks)
+            ..addColumns([_db.tasks.sortOrder.max()])
+            ..where(_db.tasks.status.equals('open') &
+                _db.tasks.urgent.equals(false) &
+                _db.tasks.important.equals(true)))
+          .getSingle();
+      await _db.into(_db.tasks).insert(TasksCompanion.insert(
+            uid: uid,
+            title: title,
+            urgent: const Value(false),
+            important: const Value(true),
+            sortOrder:
+                Value((max.read(_db.tasks.sortOrder.max()) ?? -1) + 1),
+            status: const Value('open'),
+            createdTs: _nowRfc,
+            scheduledTs: Value(startTs),
+            calendarEventId: Value(eventId),
+            updatedTs: _now,
+          ));
+    });
+    return uid;
   }
 
   /// Missed repeats come forward at the day boundary — same math as the

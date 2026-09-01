@@ -1,4 +1,6 @@
 import 'package:drift/drift.dart' show OrderingTerm;
+
+import '../../../core/db/app_database.dart' show GoogleEventRow;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -126,10 +128,17 @@ class WeekScreen extends ConsumerWidget {
                         repeating: t.repeating,
                       ),
                     for (final e in remote)
-                      _Entry(
-                        time: e.isAllDay ? 'All day' : _clock(e.startTs!),
-                        title: e.summary.isEmpty ? '(untitled)' : e.summary,
-                        own: e.isThreshold,
+                      GestureDetector(
+                        onTap: e.isThreshold
+                            ? null
+                            : () => _offerAdopt(context, ref, e),
+                        child: _Entry(
+                          time:
+                              e.isAllDay ? 'All day' : _clock(e.startTs!),
+                          title:
+                              e.summary.isEmpty ? '(untitled)' : e.summary,
+                          own: e.isThreshold,
+                        ),
                       ),
                   ],
                 ],
@@ -170,6 +179,60 @@ class WeekScreen extends ConsumerWidget {
 
   static String _clock(int ts) => DateFormat.jm()
       .format(DateTime.fromMillisecondsSinceEpoch(ts * 1000));
+
+  /// Adoption is offered, never automatic: "one-tap adopt; nothing is
+  /// imported without you asking."
+  void _offerAdopt(BuildContext context, WidgetRef ref, GoogleEventRow e) {
+    final c = context.colors;
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) => Container(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        decoration: BoxDecoration(
+          color: c.surfaceRaised,
+          borderRadius:
+              const BorderRadius.vertical(top: Radius.circular(AppRadii.zone)),
+          border: Border.all(color: c.borderSubtle),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(e.summary.isEmpty ? '(untitled)' : e.summary,
+                style: AppTypography.headline.copyWith(color: c.ink)),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              'A Google Calendar event. Adopting makes it a Threshold task '
+              'in Schedule, holding this slot.',
+              style: AppTypography.caption.copyWith(color: c.inkMuted),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            PressableScale(
+              onPressed: () async {
+                Navigator.of(sheetContext).pop();
+                await ref.read(syncCoordinatorProvider).adopt(e);
+                ref
+                    .read(noticeProvider.notifier)
+                    .say('Adopted \u{201C}${e.summary}\u{201D}');
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.xl, vertical: AppSpacing.sm),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(AppRadii.full),
+                  border: Border.all(color: c.accent),
+                  color: c.accent.withValues(alpha: 0.12),
+                ),
+                child: Text('Adopt as task',
+                    style: AppTypography.body.copyWith(color: c.ink)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _Entry extends StatelessWidget {

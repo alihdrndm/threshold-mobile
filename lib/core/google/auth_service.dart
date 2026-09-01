@@ -65,8 +65,15 @@ class GoogleAuthService {
     }
   }
 
-  Future<bool> get connected async =>
-      await _storage.read(key: _connectedKey) == '1';
+  Future<bool> get connected async {
+    try {
+      return await _storage.read(key: _connectedKey) == '1';
+    } on Object {
+      // No keystore (tests, first boot on a broken profile) reads as
+      // "not connected", never as a crash.
+      return false;
+    }
+  }
 
   Future<void> disconnect() async {
     await _storage.delete(key: _connectedKey);

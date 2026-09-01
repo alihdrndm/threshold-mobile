@@ -80,6 +80,135 @@ class CalendarClient {
     return (items: items, nextSyncToken: nextSyncToken);
   }
 
+  /// Channel-1 insert, byte-compatible with the desktop's ABI (§4.2 of the
+  /// handoff): offset datetimes with no timeZone key, a 30-minute slot, the
+  /// popup-10 reminder, and thresholdTaskUid (plus the legacy rowid when
+  /// this task was born on the desktop).
+  Future<({String id, String? htmlLink})> insertEvent({
+    required String calendarId,
+    required String title,
+    required DateTime start,
+    required String taskUid,
+    int? legacyDesktopId,
+  }) async {
+    final res = await _request(
+      'POST',
+      '/calendars/${Uri.encodeComponent(calendarId)}/events',
+      body: {
+        'summary': title,
+        'description': 'Scheduled by Threshold.',
+        'start': {'dateTime': _rfc3339(start)},
+        'end': {
+          'dateTime': _rfc3339(start.add(const Duration(minutes: 30))),
+        },
+        'extendedProperties': {
+          'private': {
+            'thresholdTaskUid': taskUid,
+            if (legacyDesktopId != null)
+              'thresholdTaskId': '$legacyDesktopId',
+          },
+        },
+        'reminders': {
+          'useDefault': false,
+          'overrides': [
+            {'method': 'popup', 'minutes': 10},
+          ],
+        },
+      },
+    );
+    final id = res['id'] as String?;
+    if (id == null) throw const CalendarApiException(500, 'no event id');
+    return (id: id, htmlLink: res['htmlLink'] as String?);
+  }
+
+  /// Moves are PATCH, start/end only — never delete+recreate, which breaks
+  /// the desktop's cancelled-branch forever.
+  Future<void> patchEventTime(
+          String calendarId, String eventId, DateTime start) =>
+      _request(
+        'PATCH',
+        '/calendars/${Uri.encodeComponent(calendarId)}/events/${Uri.encodeComponent(eventId)}',
+        body: {
+          'start': {'dateTime': _rfc3339(start)},
+          'end': {
+            'dateTime': _rfc3339(start.add(const Duration(minutes: 30))),
+          },
+        },
+      );
+
+  /// Claim an event as a Threshold task (adoption): patch the uid on,
+  /// leaving everything else the user made intact.
+  Future<void> claimEvent(
+          String calendarId, String eventId, String taskUid) =>
+      _request(
+        'PATCH',
+        '/calendars/${Uri.encodeComponent(calendarId)}/events/${Uri.encodeComponent(eventId)}',
+        body: {
+          'extendedProperties': {
+            'private': {'thresholdTaskUid': taskUid},
+          },
+        },
+      );
+
+  Future<void> deleteEvent(String calendarId, String eventId) => _request(
+        'DELETE',
+        '/calendars/${Uri.encodeComponent(calendarId)}/events/${Uri.encodeComponent(eventId)}',
+      );
+
+  /// The duplicate guard: does an event for this task already exist? Two
+  /// writers deciding "this task needs an event" must converge on one.
+  Future<String?> findEventByUid(String calendarId, String taskUid) async {
+    final res = await _request(
+      'GET',
+      '/calendars/${Uri.encodeComponent(calendarId)}/events',
+      query: {
+        'privateExtendedProperty': 'thresholdTaskUid=$taskUid',
+        'maxResults': '2',
+        'showDeleted': 'false',
+      },
+    );
+    final items = res['items'] as List? ?? const [];
+    if (items.isEmpty) return null;
+    return (items.first as Map<String, dynamic>)['id'] as String?;
+  }
+
+  /// Busy intervals for the slotter, primary only, merged and opaque.
+  Future<List<(DateTime, DateTime)>> freeBusy(
+      DateTime min, DateTime max) async {
+    final res = await _request('POST', '/freeBusy', body: {
+      'timeMin': _rfc3339(min),
+      'timeMax': _rfc3339(max),
+      'items': [
+        {'id': 'primary'},
+      ],
+    });
+    final busy = (((res['calendars'] as Map<String, dynamic>?)?['primary']
+                as Map<String, dynamic>?)?['busy'] as List?) ??
+        const [];
+    return [
+      for (final b in busy)
+        (
+          DateTime.parse((b as Map<String, dynamic>)['start'] as String)
+              .toLocal(),
+          DateTime.parse(b['end'] as String).toLocal(),
+        ),
+    ];
+  }
+
+  /// Local time with its UTC offset, seconds precision, no timeZone key —
+  /// the desktop's exact serialization.
+  static String _rfc3339(DateTime t) {
+    final local = t.toLocal();
+    final offset = local.timeZoneOffset;
+    final sign = offset.isNegative ? '-' : '+';
+    final abs = offset.abs();
+    String two(int n) => n.toString().padLeft(2, '0');
+    return '${local.year.toString().padLeft(4, '0')}-${two(local.month)}-'
+        '${two(local.day)}T${two(local.hour)}:${two(local.minute)}:'
+        '${two(local.second)}$sign${two(abs.inHours)}:'
+        '${two(abs.inMinutes % 60)}';
+  }
+
   /// Find the app-created "Threshold" calendar, or make it. Patched
   /// unselected so it stays out of the user's normal Google views.
   Future<String> findOrCreateThresholdCalendar() async {

@@ -2655,6 +2655,448 @@ class SyncStateCompanion extends UpdateCompanion<SyncStateRow> {
   }
 }
 
+class $PendingOpsTable extends PendingOps
+    with TableInfo<$PendingOpsTable, PendingOpRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PendingOpsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _taskUidMeta = const VerificationMeta(
+    'taskUid',
+  );
+  @override
+  late final GeneratedColumn<String> taskUid = GeneratedColumn<String>(
+    'task_uid',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _payloadMeta = const VerificationMeta(
+    'payload',
+  );
+  @override
+  late final GeneratedColumn<String> payload = GeneratedColumn<String>(
+    'payload',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('{}'),
+  );
+  static const VerificationMeta _createdTsMeta = const VerificationMeta(
+    'createdTs',
+  );
+  @override
+  late final GeneratedColumn<int> createdTs = GeneratedColumn<int>(
+    'created_ts',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _attemptsMeta = const VerificationMeta(
+    'attempts',
+  );
+  @override
+  late final GeneratedColumn<int> attempts = GeneratedColumn<int>(
+    'attempts',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _lastErrorMeta = const VerificationMeta(
+    'lastError',
+  );
+  @override
+  late final GeneratedColumn<String> lastError = GeneratedColumn<String>(
+    'last_error',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    taskUid,
+    kind,
+    payload,
+    createdTs,
+    attempts,
+    lastError,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'pending_ops';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PendingOpRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('task_uid')) {
+      context.handle(
+        _taskUidMeta,
+        taskUid.isAcceptableOrUnknown(data['task_uid']!, _taskUidMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_taskUidMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('payload')) {
+      context.handle(
+        _payloadMeta,
+        payload.isAcceptableOrUnknown(data['payload']!, _payloadMeta),
+      );
+    }
+    if (data.containsKey('created_ts')) {
+      context.handle(
+        _createdTsMeta,
+        createdTs.isAcceptableOrUnknown(data['created_ts']!, _createdTsMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdTsMeta);
+    }
+    if (data.containsKey('attempts')) {
+      context.handle(
+        _attemptsMeta,
+        attempts.isAcceptableOrUnknown(data['attempts']!, _attemptsMeta),
+      );
+    }
+    if (data.containsKey('last_error')) {
+      context.handle(
+        _lastErrorMeta,
+        lastError.isAcceptableOrUnknown(data['last_error']!, _lastErrorMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PendingOpRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PendingOpRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      taskUid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}task_uid'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      payload: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}payload'],
+      )!,
+      createdTs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_ts'],
+      )!,
+      attempts: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}attempts'],
+      )!,
+      lastError: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_error'],
+      ),
+    );
+  }
+
+  @override
+  $PendingOpsTable createAlias(String alias) {
+    return $PendingOpsTable(attachedDatabase, alias);
+  }
+}
+
+class PendingOpRow extends DataClass implements Insertable<PendingOpRow> {
+  final int id;
+  final String taskUid;
+  final String kind;
+  final String payload;
+  final int createdTs;
+  final int attempts;
+  final String? lastError;
+  const PendingOpRow({
+    required this.id,
+    required this.taskUid,
+    required this.kind,
+    required this.payload,
+    required this.createdTs,
+    required this.attempts,
+    this.lastError,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['task_uid'] = Variable<String>(taskUid);
+    map['kind'] = Variable<String>(kind);
+    map['payload'] = Variable<String>(payload);
+    map['created_ts'] = Variable<int>(createdTs);
+    map['attempts'] = Variable<int>(attempts);
+    if (!nullToAbsent || lastError != null) {
+      map['last_error'] = Variable<String>(lastError);
+    }
+    return map;
+  }
+
+  PendingOpsCompanion toCompanion(bool nullToAbsent) {
+    return PendingOpsCompanion(
+      id: Value(id),
+      taskUid: Value(taskUid),
+      kind: Value(kind),
+      payload: Value(payload),
+      createdTs: Value(createdTs),
+      attempts: Value(attempts),
+      lastError: lastError == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastError),
+    );
+  }
+
+  factory PendingOpRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PendingOpRow(
+      id: serializer.fromJson<int>(json['id']),
+      taskUid: serializer.fromJson<String>(json['taskUid']),
+      kind: serializer.fromJson<String>(json['kind']),
+      payload: serializer.fromJson<String>(json['payload']),
+      createdTs: serializer.fromJson<int>(json['createdTs']),
+      attempts: serializer.fromJson<int>(json['attempts']),
+      lastError: serializer.fromJson<String?>(json['lastError']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'taskUid': serializer.toJson<String>(taskUid),
+      'kind': serializer.toJson<String>(kind),
+      'payload': serializer.toJson<String>(payload),
+      'createdTs': serializer.toJson<int>(createdTs),
+      'attempts': serializer.toJson<int>(attempts),
+      'lastError': serializer.toJson<String?>(lastError),
+    };
+  }
+
+  PendingOpRow copyWith({
+    int? id,
+    String? taskUid,
+    String? kind,
+    String? payload,
+    int? createdTs,
+    int? attempts,
+    Value<String?> lastError = const Value.absent(),
+  }) => PendingOpRow(
+    id: id ?? this.id,
+    taskUid: taskUid ?? this.taskUid,
+    kind: kind ?? this.kind,
+    payload: payload ?? this.payload,
+    createdTs: createdTs ?? this.createdTs,
+    attempts: attempts ?? this.attempts,
+    lastError: lastError.present ? lastError.value : this.lastError,
+  );
+  PendingOpRow copyWithCompanion(PendingOpsCompanion data) {
+    return PendingOpRow(
+      id: data.id.present ? data.id.value : this.id,
+      taskUid: data.taskUid.present ? data.taskUid.value : this.taskUid,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      payload: data.payload.present ? data.payload.value : this.payload,
+      createdTs: data.createdTs.present ? data.createdTs.value : this.createdTs,
+      attempts: data.attempts.present ? data.attempts.value : this.attempts,
+      lastError: data.lastError.present ? data.lastError.value : this.lastError,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PendingOpRow(')
+          ..write('id: $id, ')
+          ..write('taskUid: $taskUid, ')
+          ..write('kind: $kind, ')
+          ..write('payload: $payload, ')
+          ..write('createdTs: $createdTs, ')
+          ..write('attempts: $attempts, ')
+          ..write('lastError: $lastError')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, taskUid, kind, payload, createdTs, attempts, lastError);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PendingOpRow &&
+          other.id == this.id &&
+          other.taskUid == this.taskUid &&
+          other.kind == this.kind &&
+          other.payload == this.payload &&
+          other.createdTs == this.createdTs &&
+          other.attempts == this.attempts &&
+          other.lastError == this.lastError);
+}
+
+class PendingOpsCompanion extends UpdateCompanion<PendingOpRow> {
+  final Value<int> id;
+  final Value<String> taskUid;
+  final Value<String> kind;
+  final Value<String> payload;
+  final Value<int> createdTs;
+  final Value<int> attempts;
+  final Value<String?> lastError;
+  const PendingOpsCompanion({
+    this.id = const Value.absent(),
+    this.taskUid = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.payload = const Value.absent(),
+    this.createdTs = const Value.absent(),
+    this.attempts = const Value.absent(),
+    this.lastError = const Value.absent(),
+  });
+  PendingOpsCompanion.insert({
+    this.id = const Value.absent(),
+    required String taskUid,
+    required String kind,
+    this.payload = const Value.absent(),
+    required int createdTs,
+    this.attempts = const Value.absent(),
+    this.lastError = const Value.absent(),
+  }) : taskUid = Value(taskUid),
+       kind = Value(kind),
+       createdTs = Value(createdTs);
+  static Insertable<PendingOpRow> custom({
+    Expression<int>? id,
+    Expression<String>? taskUid,
+    Expression<String>? kind,
+    Expression<String>? payload,
+    Expression<int>? createdTs,
+    Expression<int>? attempts,
+    Expression<String>? lastError,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (taskUid != null) 'task_uid': taskUid,
+      if (kind != null) 'kind': kind,
+      if (payload != null) 'payload': payload,
+      if (createdTs != null) 'created_ts': createdTs,
+      if (attempts != null) 'attempts': attempts,
+      if (lastError != null) 'last_error': lastError,
+    });
+  }
+
+  PendingOpsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? taskUid,
+    Value<String>? kind,
+    Value<String>? payload,
+    Value<int>? createdTs,
+    Value<int>? attempts,
+    Value<String?>? lastError,
+  }) {
+    return PendingOpsCompanion(
+      id: id ?? this.id,
+      taskUid: taskUid ?? this.taskUid,
+      kind: kind ?? this.kind,
+      payload: payload ?? this.payload,
+      createdTs: createdTs ?? this.createdTs,
+      attempts: attempts ?? this.attempts,
+      lastError: lastError ?? this.lastError,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (taskUid.present) {
+      map['task_uid'] = Variable<String>(taskUid.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (payload.present) {
+      map['payload'] = Variable<String>(payload.value);
+    }
+    if (createdTs.present) {
+      map['created_ts'] = Variable<int>(createdTs.value);
+    }
+    if (attempts.present) {
+      map['attempts'] = Variable<int>(attempts.value);
+    }
+    if (lastError.present) {
+      map['last_error'] = Variable<String>(lastError.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PendingOpsCompanion(')
+          ..write('id: $id, ')
+          ..write('taskUid: $taskUid, ')
+          ..write('kind: $kind, ')
+          ..write('payload: $payload, ')
+          ..write('createdTs: $createdTs, ')
+          ..write('attempts: $attempts, ')
+          ..write('lastError: $lastError')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2663,6 +3105,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $SettingsKVTable settingsKV = $SettingsKVTable(this);
   late final $GoogleEventMapTable googleEventMap = $GoogleEventMapTable(this);
   late final $SyncStateTable syncState = $SyncStateTable(this);
+  late final $PendingOpsTable pendingOps = $PendingOpsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2673,6 +3116,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     settingsKV,
     googleEventMap,
     syncState,
+    pendingOps,
   ];
 }
 
@@ -3988,6 +4432,238 @@ typedef $$SyncStateTableProcessedTableManager =
       SyncStateRow,
       PrefetchHooks Function()
     >;
+typedef $$PendingOpsTableCreateCompanionBuilder =
+    PendingOpsCompanion Function({
+      Value<int> id,
+      required String taskUid,
+      required String kind,
+      Value<String> payload,
+      required int createdTs,
+      Value<int> attempts,
+      Value<String?> lastError,
+    });
+typedef $$PendingOpsTableUpdateCompanionBuilder =
+    PendingOpsCompanion Function({
+      Value<int> id,
+      Value<String> taskUid,
+      Value<String> kind,
+      Value<String> payload,
+      Value<int> createdTs,
+      Value<int> attempts,
+      Value<String?> lastError,
+    });
+
+class $$PendingOpsTableFilterComposer
+    extends Composer<_$AppDatabase, $PendingOpsTable> {
+  $$PendingOpsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get taskUid => $composableBuilder(
+    column: $table.taskUid,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get payload => $composableBuilder(
+    column: $table.payload,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get createdTs => $composableBuilder(
+    column: $table.createdTs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get attempts => $composableBuilder(
+    column: $table.attempts,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastError => $composableBuilder(
+    column: $table.lastError,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PendingOpsTableOrderingComposer
+    extends Composer<_$AppDatabase, $PendingOpsTable> {
+  $$PendingOpsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get taskUid => $composableBuilder(
+    column: $table.taskUid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get payload => $composableBuilder(
+    column: $table.payload,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdTs => $composableBuilder(
+    column: $table.createdTs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get attempts => $composableBuilder(
+    column: $table.attempts,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lastError => $composableBuilder(
+    column: $table.lastError,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PendingOpsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PendingOpsTable> {
+  $$PendingOpsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get taskUid =>
+      $composableBuilder(column: $table.taskUid, builder: (column) => column);
+
+  GeneratedColumn<String> get kind =>
+      $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get payload =>
+      $composableBuilder(column: $table.payload, builder: (column) => column);
+
+  GeneratedColumn<int> get createdTs =>
+      $composableBuilder(column: $table.createdTs, builder: (column) => column);
+
+  GeneratedColumn<int> get attempts =>
+      $composableBuilder(column: $table.attempts, builder: (column) => column);
+
+  GeneratedColumn<String> get lastError =>
+      $composableBuilder(column: $table.lastError, builder: (column) => column);
+}
+
+class $$PendingOpsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PendingOpsTable,
+          PendingOpRow,
+          $$PendingOpsTableFilterComposer,
+          $$PendingOpsTableOrderingComposer,
+          $$PendingOpsTableAnnotationComposer,
+          $$PendingOpsTableCreateCompanionBuilder,
+          $$PendingOpsTableUpdateCompanionBuilder,
+          (
+            PendingOpRow,
+            BaseReferences<_$AppDatabase, $PendingOpsTable, PendingOpRow>,
+          ),
+          PendingOpRow,
+          PrefetchHooks Function()
+        > {
+  $$PendingOpsTableTableManager(_$AppDatabase db, $PendingOpsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PendingOpsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PendingOpsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PendingOpsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> taskUid = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<String> payload = const Value.absent(),
+                Value<int> createdTs = const Value.absent(),
+                Value<int> attempts = const Value.absent(),
+                Value<String?> lastError = const Value.absent(),
+              }) => PendingOpsCompanion(
+                id: id,
+                taskUid: taskUid,
+                kind: kind,
+                payload: payload,
+                createdTs: createdTs,
+                attempts: attempts,
+                lastError: lastError,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String taskUid,
+                required String kind,
+                Value<String> payload = const Value.absent(),
+                required int createdTs,
+                Value<int> attempts = const Value.absent(),
+                Value<String?> lastError = const Value.absent(),
+              }) => PendingOpsCompanion.insert(
+                id: id,
+                taskUid: taskUid,
+                kind: kind,
+                payload: payload,
+                createdTs: createdTs,
+                attempts: attempts,
+                lastError: lastError,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PendingOpsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PendingOpsTable,
+      PendingOpRow,
+      $$PendingOpsTableFilterComposer,
+      $$PendingOpsTableOrderingComposer,
+      $$PendingOpsTableAnnotationComposer,
+      $$PendingOpsTableCreateCompanionBuilder,
+      $$PendingOpsTableUpdateCompanionBuilder,
+      (
+        PendingOpRow,
+        BaseReferences<_$AppDatabase, $PendingOpsTable, PendingOpRow>,
+      ),
+      PendingOpRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -4002,4 +4678,6 @@ class $AppDatabaseManager {
       $$GoogleEventMapTableTableManager(_db, _db.googleEventMap);
   $$SyncStateTableTableManager get syncState =>
       $$SyncStateTableTableManager(_db, _db.syncState);
+  $$PendingOpsTableTableManager get pendingOps =>
+      $$PendingOpsTableTableManager(_db, _db.pendingOps);
 }
