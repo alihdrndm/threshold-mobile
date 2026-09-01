@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/theme.dart';
@@ -156,11 +157,13 @@ class _Zones extends ConsumerWidget {
     return ListView(
       padding: const EdgeInsets.all(AppSpacing.lg),
       children: [
-        for (final q in placeOrder) ...[
-          _ZoneSection(quadrant: q),
+        for (final (i, q) in placeOrder.indexed) ...[
+          _ArriveIn(index: i, child: _ZoneSection(quadrant: q)),
           const SizedBox(height: AppSpacing.zoneGap),
         ],
-        if (doneToday.isNotEmpty) _DoneToday(tasks: doneToday),
+        if (doneToday.isNotEmpty)
+          _ArriveIn(
+              index: placeOrder.length, child: _DoneToday(tasks: doneToday)),
         const SizedBox(height: AppSpacing.xxl),
       ],
     );
@@ -181,26 +184,40 @@ class _ZoneSection extends ConsumerWidget {
         quadrant == Quadrant.doFirst && tasks.length > doFirstSoftCap;
 
     return DragTarget<String>(
-      onAcceptWithDetails: (details) => ref
-          .read(taskRepositoryProvider)
-          .moveToQuadrant(details.data, quadrant),
+      onAcceptWithDetails: (details) {
+        HapticFeedback.selectionClick();
+        ref.read(taskRepositoryProvider).moveToQuadrant(details.data, quadrant);
+      },
       builder: (context, candidates, _) {
         final over = candidates.isNotEmpty;
+        final wash = over
+            ? Color.alphaBlend(c.ink.withValues(alpha: 0.05), c.zone(zone))
+            : c.zone(zone);
         return AnimatedContainer(
           duration: AppDurations.base,
           curve: AppCurves.out,
           padding: const EdgeInsets.all(AppSpacing.lg),
           decoration: BoxDecoration(
-            color: over
-                ? Color.alphaBlend(
-                    c.ink.withValues(alpha: 0.05), c.zone(zone))
-                : c.zone(zone),
+            // The wash breathes toward the page at the bottom, so a zone
+            // reads as a lit surface, not a flat swatch.
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                wash,
+                Color.alphaBlend(c.surface.withValues(alpha: 0.35), wash),
+              ],
+            ),
             borderRadius: BorderRadius.circular(AppRadii.zone),
             border: Border.all(
               color: over ? c.accent : c.borderOn(zone),
             ),
           ),
-          child: Column(
+          child: AnimatedSize(
+            duration: AppDurations.notice,
+            curve: AppCurves.out,
+            alignment: Alignment.topCenter,
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Semantics(
@@ -216,12 +233,21 @@ class _ZoneSection extends ConsumerWidget {
                     if (tasks.isNotEmpty) ...[
                       const SizedBox(width: AppSpacing.sm),
                       // "The count is a mirror, not a meter" — only when
-                      // non-zero.
-                      Text('${tasks.length}',
-                          style: AppTypography.caption.copyWith(
-                            color: c.zoneInkMuted,
-                            fontFeatures: AppTypography.tabular,
-                          )),
+                      // non-zero, and worn as a quiet pill.
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 7, vertical: 1),
+                        decoration: BoxDecoration(
+                          color: c.ink.withValues(alpha: 0.06),
+                          borderRadius:
+                              BorderRadius.circular(AppRadii.full),
+                        ),
+                        child: Text('${tasks.length}',
+                            style: AppTypography.caption.copyWith(
+                              color: c.zoneInkMuted,
+                              fontFeatures: AppTypography.tabular,
+                            )),
+                      ),
                     ],
                   ],
                 ),
@@ -246,9 +272,66 @@ class _ZoneSection extends ConsumerWidget {
                 ],
               ],
             ],
+            ),
           ),
         );
       },
+    );
+  }
+}
+
+/// The board's once-per-open entrance: each zone fades in and rises 8px,
+/// 40ms apart (capped) on the house curve. Occasional-tier motion — it
+/// runs when the screen mounts, never on rebuilds — and reduced motion
+/// skips the travel entirely.
+class _ArriveIn extends StatefulWidget {
+  const _ArriveIn({required this.index, required this.child});
+
+  final int index;
+  final Widget child;
+
+  @override
+  State<_ArriveIn> createState() => _ArriveInState();
+}
+
+class _ArriveInState extends State<_ArriveIn>
+    with SingleTickerProviderStateMixin {
+  late final _controller =
+      AnimationController(vsync: this, duration: AppDurations.cardIn);
+
+  @override
+  void initState() {
+    super.initState();
+    final delay = AppDurations.staggerStep * widget.index;
+    final capped =
+        delay > AppDurations.staggerCap ? AppDurations.staggerCap : delay;
+    Future<void>.delayed(capped, () {
+      if (mounted) _controller.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (MediaQuery.disableAnimationsOf(context)) return widget.child;
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        final t = AppCurves.out.transform(_controller.value);
+        return Opacity(
+          opacity: t,
+          child: Transform.translate(
+            offset: Offset(0, 8 * (1 - t)),
+            child: child,
+          ),
+        );
+      },
+      child: widget.child,
     );
   }
 }

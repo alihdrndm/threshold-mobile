@@ -12,4 +12,8 @@ import 'package:flutter/animation.dart';
 abstract final class AppCurves {
   static const Cubic out = Cubic(0.23, 1.0, 0.32, 1.0);
   static const Cubic inOut = Cubic(0.77, 0.0, 0.175, 1.0);
+
+  /// Sheets only: the iOS drawer curve (Ionic's) — a gesture-born surface
+  /// arrives the way a dragged one would settle. Still no bounce.
+  static const Cubic drawer = Cubic(0.32, 0.72, 0.0, 1.0);
 }
