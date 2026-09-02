@@ -239,30 +239,33 @@ class _RitualScreenState extends ConsumerState<RitualScreen> {
           ],
         ],
         const SizedBox(height: AppSpacing.xxxl),
-        _primary('Begin', () => _advance(_Step.intention)),
+        // Three answers to the question above, in the order the truth
+        // usually arrives: nothing, browsing, and — reached past both —
+        // the commitment. One vocabulary at one width; only the fill
+        // carries the hierarchy, so the set reads as a set.
+        _exit('For nothing', _forNothing,
+            semantic: 'Picked it up for nothing — lock the phone again'),
+        const SizedBox(height: AppSpacing.sm),
+        _exit('Just browsing today', _browse),
         const SizedBox(height: AppSpacing.lg),
-        // Three ways out, three weights. Begin is full-width and lit;
-        // this one has a shape because it is the only control here that
-        // does something to the phone; browsing stays bare text. It sits
-        // above browsing on purpose — it will be the most-used exit by
-        // far, and the most-used control should be the easiest to reach.
-        _forNothingButton(),
-        const SizedBox(height: AppSpacing.md),
-        _quiet('Just browsing today', _browse),
+        _primary('Begin', () => _advance(_Step.intention)),
       ],
     );
   }
 
-  /// The light going out, as a button.
+  /// An honest way out.
   ///
-  /// A hairline that is brightest at the top and dissolves toward the
-  /// bottom: the one place on this screen where the app spends a detail,
-  /// and it says what the button does. Content-width, so it reads as
-  /// subordinate to Begin without needing a duller colour.
-  Widget _forNothingButton() => PressableScale(
-        onPressed: _forNothing,
-        semanticLabel: 'Picked it up for nothing — lock the phone again',
+  /// The one detail this screen spends: a hairline brightest along the top
+  /// and dissolving toward the bottom, the way light catches a real edge.
+  /// It costs nothing, it is the same on both exits so they read as a
+  /// pair, and on the one that sleeps the phone it happens to say exactly
+  /// what the button does.
+  Widget _exit(String label, VoidCallback onTap, {String? semantic}) =>
+      PressableScale(
+        onPressed: onTap,
+        semanticLabel: semantic,
         child: Container(
+          width: double.infinity,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppRadii.full),
             gradient: const LinearGradient(
@@ -273,14 +276,14 @@ class _RitualScreenState extends ConsumerState<RitualScreen> {
           ),
           padding: const EdgeInsets.all(1),
           child: Container(
-            padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.xl, vertical: 11),
+            padding: const EdgeInsets.symmetric(vertical: 11),
             decoration: BoxDecoration(
               color: theme.surface,
               borderRadius: BorderRadius.circular(AppRadii.full),
             ),
             child: Text(
-              'For nothing',
+              label,
+              textAlign: TextAlign.center,
               style: AppTypography.body.copyWith(
                 color: _ink.withValues(alpha: 0.88),
               ),
@@ -537,15 +540,6 @@ class _RitualScreenState extends ConsumerState<RitualScreen> {
           child: Text(label,
               textAlign: TextAlign.center,
               style: AppTypography.body.copyWith(color: _ink)),
-        ),
-      );
-
-  Widget _quiet(String label, VoidCallback onTap) => PressableScale(
-        onPressed: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.sm),
-          child: Text(label,
-              style: AppTypography.caption.copyWith(color: _inkMuted)),
         ),
       );
 
