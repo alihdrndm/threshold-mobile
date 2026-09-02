@@ -269,7 +269,7 @@ class _RitualScreenState extends ConsumerState<RitualScreen> {
             ),
           ],
         ],
-        const SizedBox(height: AppSpacing.xxxl),
+        const SizedBox(height: AppSpacing.xxl),
         // Three answers to the question above, in the order the truth
         // usually arrives: nothing, browsing, and — reached past both —
         // the commitment. Only Begin is a button, because only Begin is a
@@ -290,30 +290,28 @@ class _RitualScreenState extends ConsumerState<RitualScreen> {
   /// An honest way out, as words rather than furniture.
   ///
   /// No border, no fill — a border here would make an exit look like a
-  /// destination. What makes it feel alive instead is the answer under the
-  /// finger: it lifts out of the dark to full ink as you press, and settles
-  /// back when you let go. Purpose is feedback and nothing else, so it is
-  /// fast (the press dip) and cheap (opacity only). The padding is the tap
-  /// target — 48dp tall, though only the words are visible.
+  /// destination. Small and tracked, in the label voice the rest of the
+  /// app already speaks, so the two ways out read as quiet next to a
+  /// sentence-case Begin.
+  ///
+  /// The press answers in the day's own colour: muted ink lights to the
+  /// accent under the finger and cools back on release. The earlier
+  /// version only lifted opacity on already-white text, which is a real
+  /// change the eye simply cannot see — a colour shift can.
   Widget _textAction(String label, VoidCallback onTap, {String? semantic}) =>
       PressableScale.builder(
         onPressed: onTap,
         semanticLabel: semantic,
         builder: (context, pressed) => Padding(
           padding: const EdgeInsets.symmetric(
-              vertical: 14, horizontal: AppSpacing.lg),
-          child: AnimatedOpacity(
+              vertical: 11, horizontal: AppSpacing.lg),
+          child: AnimatedDefaultTextStyle(
             duration: AppDurations.base,
             curve: Curves.ease,
-            opacity: pressed ? 1 : 0.68,
-            child: Text(
-              label,
-              textAlign: TextAlign.center,
-              style: AppTypography.body.copyWith(
-                color: _ink,
-                fontSize: 15,
-              ),
+            style: AppTypography.labelCaps(size: 11).copyWith(
+              color: pressed ? theme.accent : _inkMuted,
             ),
+            child: Text(label.toUpperCase(), textAlign: TextAlign.center),
           ),
         ),
       );
