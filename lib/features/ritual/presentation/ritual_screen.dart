@@ -39,6 +39,9 @@ class _RitualScreenState extends ConsumerState<RitualScreen> {
   int _minutes = 50;
   Timer? _confirmTimer;
 
+  /// The screen on its way out, so the lock lands on darkness we caused.
+  bool _dimming = false;
+
   static const _ifThenDefaults = [
     'take one breath and return to my task',
     'write the urge on the scratchpad',
@@ -76,9 +79,24 @@ class _RitualScreenState extends ConsumerState<RitualScreen> {
   }
 
   /// The admission: picked up for nothing, put back down. Recorded first —
-  /// the count is the point — then the screen goes back to sleep.
+  /// the count is the point — then the screen dims and sleeps.
+  ///
+  /// One beat, three senses on it: the press, a soft knock, and the light
+  /// going out. The dim is what makes the lock feel caused by the tap
+  /// rather than coincidental with it.
+  ///
+  /// Deliberately a single tap and not a hold-to-confirm: this button
+  /// exists to make an honest admission cheap. Charge two seconds for it
+  /// and the phone gets put down with the home button instead, and the
+  /// count — the whole reason the button is here — stops being true.
   Future<void> _forNothing() async {
+    unawaited(HapticFeedback.lightImpact());
     await ref.read(ritualRepositoryProvider).recordPickup();
+    if (!mounted) return;
+    if (!MediaQuery.disableAnimationsOf(context)) {
+      setState(() => _dimming = true);
+      await Future<void>.delayed(AppDurations.notice);
+    }
     if (mounted) context.pop();
     await Phone.lockNow();
   }
@@ -115,7 +133,11 @@ class _RitualScreenState extends ConsumerState<RitualScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: theme.surface,
-      body: SafeArea(
+      body: AnimatedOpacity(
+        opacity: _dimming ? 0 : 1,
+        duration: AppDurations.notice,
+        curve: AppCurves.out,
+        child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
           child: AnimatedSwitcher(
@@ -144,6 +166,7 @@ class _RitualScreenState extends ConsumerState<RitualScreen> {
               },
             ),
           ),
+        ),
         ),
       ),
     );
@@ -218,11 +241,53 @@ class _RitualScreenState extends ConsumerState<RitualScreen> {
         const SizedBox(height: AppSpacing.xxxl),
         _primary('Begin', () => _advance(_Step.intention)),
         const SizedBox(height: AppSpacing.lg),
+        // Three ways out, three weights. Begin is full-width and lit;
+        // this one has a shape because it is the only control here that
+        // does something to the phone; browsing stays bare text. It sits
+        // above browsing on purpose — it will be the most-used exit by
+        // far, and the most-used control should be the easiest to reach.
+        _forNothingButton(),
+        const SizedBox(height: AppSpacing.md),
         _quiet('Just browsing today', _browse),
-        _quiet('For nothing', _forNothing),
       ],
     );
   }
+
+  /// The light going out, as a button.
+  ///
+  /// A hairline that is brightest at the top and dissolves toward the
+  /// bottom: the one place on this screen where the app spends a detail,
+  /// and it says what the button does. Content-width, so it reads as
+  /// subordinate to Begin without needing a duller colour.
+  Widget _forNothingButton() => PressableScale(
+        onPressed: _forNothing,
+        semanticLabel: 'Picked it up for nothing — lock the phone again',
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppRadii.full),
+            gradient: const LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Color(0x3DFFFFFF), Color(0x0AFFFFFF)],
+            ),
+          ),
+          padding: const EdgeInsets.all(1),
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.xl, vertical: 11),
+            decoration: BoxDecoration(
+              color: theme.surface,
+              borderRadius: BorderRadius.circular(AppRadii.full),
+            ),
+            child: Text(
+              'For nothing',
+              style: AppTypography.body.copyWith(
+                color: _ink.withValues(alpha: 0.88),
+              ),
+            ),
+          ),
+        ),
+      );
 
   Widget _intentionStep() {
     final typing = theme.intentionMode == IntentionMode.type;
