@@ -46,6 +46,19 @@
             android:name=".KeeperJobService"
             android:exported="false"
             android:permission="android.permission.BIND_JOB_SERVICE"/>
+        <!-- The screen-lock power behind "For nothing". Its policy file
+             declares force-lock and nothing else. -->
+        <receiver
+            android:name=".LockAdminReceiver"
+            android:exported="true"
+            android:permission="android.permission.BIND_DEVICE_ADMIN">
+            <meta-data
+                android:name="android.app.device_admin"
+                android:resource="@xml/device_admin"/>
+            <intent-filter>
+                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED"/>
+            </intent-filter>
+        </receiver>
         <receiver
             android:name=".BootReceiver"
             android:exported="true">
@@ -69,5 +82,13 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+        <!-- The ritual's two errand exits. On targetSdk 30+ an app cannot
+             see another package without asking first. -->
+        <intent>
+            <action android:name="android.intent.action.DIAL"/>
+            <data android:scheme="tel"/>
+        </intent>
+        <package android:name="com.whatsapp"/>
+        <package android:name="com.whatsapp.w4b"/>
     </queries>
 </manifest>

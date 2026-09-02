@@ -1,5 +1,8 @@
 package com.threshold.threshold_mobile
 
+import android.app.admin.DevicePolicyManager
+import android.content.ActivityNotFoundException
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -17,6 +20,8 @@ class MainActivity : FlutterActivity() {
         super.configureFlutterEngine(flutterEngine)
         intent?.getStringExtra(UnlockService.ROUTE_EXTRA)?.let {
             pendingRoute = it
+            // Same reason as onNewIntent: read once, never replayed.
+            intent.removeExtra(UnlockService.ROUTE_EXTRA)
         }
         channel = MethodChannel(
             flutterEngine.dartExecutor.binaryMessenger, "threshold/unlock"
@@ -64,6 +69,63 @@ class MainActivity : FlutterActivity() {
                     "doorkeeperEnabled" -> result.success(
                         doorPrefs().getBoolean(UnlockService.KEY_ENABLED, true)
                     )
+
+                    // ---- the screen-lock power behind "For nothing" ----
+                    "canLock" -> result.success(dpm().isAdminActive(admin()))
+                    "requestLock" -> {
+                        val intent = Intent(
+                            DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN
+                        ).apply {
+                            putExtra(
+                                DevicePolicyManager.EXTRA_DEVICE_ADMIN,
+                                admin()
+                            )
+                            putExtra(
+                                DevicePolicyManager.EXTRA_ADD_EXPLANATION,
+                                "So \"For nothing\" can put the screen back " +
+                                    "to sleep for you. Threshold asks for " +
+                                    "nothing else."
+                            )
+                        }
+                        result.success(launch(intent))
+                    }
+                    "lockNow" -> {
+                        if (dpm().isAdminActive(admin())) {
+                            runCatching { dpm().lockNow() }
+                                .onSuccess { result.success(true) }
+                                .onFailure { result.success(false) }
+                        } else {
+                            // No grant: go home rather than pretend.
+                            moveTaskToBack(true)
+                            result.success(false)
+                        }
+                    }
+                    "revokeLock" -> {
+                        runCatching { dpm().removeActiveAdmin(admin()) }
+                        result.success(null)
+                    }
+
+                    // ---- the ritual's errand exits ----
+                    "openDialer" -> result.success(
+                        launch(
+                            Intent(Intent.ACTION_DIAL)
+                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        )
+                    )
+                    "openWhatsApp" -> {
+                        val direct = packageManager
+                            .getLaunchIntentForPackage("com.whatsapp")
+                            ?: packageManager
+                                .getLaunchIntentForPackage("com.whatsapp.w4b")
+                        val intent = direct?.addFlags(
+                            Intent.FLAG_ACTIVITY_NEW_TASK
+                        ) ?: Intent(
+                            Intent.ACTION_VIEW,
+                            Uri.parse("https://wa.me")
+                        ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        result.success(launch(intent))
+                    }
+
                     else -> result.notImplemented()
                 }
             }
@@ -73,10 +135,29 @@ class MainActivity : FlutterActivity() {
     private fun doorPrefs() =
         getSharedPreferences(UnlockService.PREFS, Context.MODE_PRIVATE)
 
+    private fun dpm() = getSystemService(DevicePolicyManager::class.java)
+
+    private fun admin() = ComponentName(this, LockAdminReceiver::class.java)
+
+    /// Every outward-facing launch answers honestly: false when nothing on
+    /// the phone can handle it, so Dart can say so instead of failing mute.
+    private fun launch(intent: Intent): Boolean = try {
+        startActivity(intent)
+        true
+    } catch (_: ActivityNotFoundException) {
+        false
+    } catch (_: SecurityException) {
+        false
+    }
+
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
         intent.getStringExtra(UnlockService.ROUTE_EXTRA)?.let { route ->
+            // Consume it: the activity's intent is sticky, and a route left
+            // on it replays the ritual on some later engine attach the user
+            // never unlocked into.
+            intent.removeExtra(UnlockService.ROUTE_EXTRA)
             // The app was already alive: hand the route straight over.
             channel?.invokeMethod("route", route) ?: run {
                 pendingRoute = route

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/theme.dart';
 import 'core/unlock/doorkeeper.dart';
+import 'core/unlock/threshold_gate.dart';
 import 'features/board_sync/presentation/board_sync_providers.dart';
 import 'features/calendar_sync/presentation/sync_providers.dart';
 import 'features/ritual/presentation/ritual_providers.dart';
@@ -19,6 +22,12 @@ class ThresholdApp extends ConsumerStatefulWidget {
 
 class _ThresholdAppState extends ConsumerState<ThresholdApp> {
   AppLifecycleListener? _lifecycle;
+
+  /// One door at a time, and it closes when the phone does.
+  late final _gate = ThresholdGate(
+    push: (location) => appRouter.push(location),
+    pop: appRouter.pop,
+  );
 
   @override
   void initState() {
@@ -41,6 +50,11 @@ class _ThresholdAppState extends ConsumerState<ThresholdApp> {
       }
     });
     _lifecycle = AppLifecycleListener(
+      // The phone locked (or the app left): the threshold dies with it.
+      // onPause, not onInactive — locking runs inactive→hidden→paused,
+      // while pulling the notification shade stops at inactive, and a
+      // shade pull must never kill a ritual mid-answer.
+      onPause: _gate.dismiss,
       onResume: () async {
         final route = await Doorkeeper.consumeRoute();
         if (route != null) _arrive(route);
@@ -57,24 +71,15 @@ class _ThresholdAppState extends ConsumerState<ThresholdApp> {
     );
   }
 
-  /// Already standing at a threshold surface? Then no other may stack.
-  bool get _atThreshold {
-    final uri =
-        appRouter.routerDelegate.currentConfiguration.uri.toString();
-    return uri.startsWith('/checkin') ||
-        uri.startsWith('/ritual') ||
-        uri.startsWith('/quote');
-  }
-
   /// Route an unlock to its threshold — unless a check-in is owed, which
   /// outranks both doors.
   void _arrive(String route) {
     Future(() async {
-      if (_atThreshold) return;
+      if (_gate.isOpen) return;
       final awaiting =
           await ref.read(ritualRepositoryProvider).settle();
       if (awaiting != null) {
-        appRouter.push('/checkin/${awaiting.id}');
+        await _gate.open('/checkin/${awaiting.id}');
         return;
       }
       // A running session already holds the commitment: no new ritual on
@@ -83,9 +88,9 @@ class _ThresholdAppState extends ConsumerState<ThresholdApp> {
           await ref.read(ritualRepositoryProvider).runningSession();
       if (running != null) return;
       if (route == 'ritual') {
-        appRouter.push('/ritual');
+        await _gate.open('/ritual');
       } else if (route == 'quote') {
-        appRouter.push('/quote');
+        await _gate.open('/quote');
       }
     });
   }
@@ -95,8 +100,11 @@ class _ThresholdAppState extends ConsumerState<ThresholdApp> {
   /// check-in is auto-opened ("also auto-routed on app open").
   Future<void> _settleSessions() async {
     final awaiting = await ref.read(ritualRepositoryProvider).settle();
-    if (awaiting != null && !_atThreshold) {
-      appRouter.push('/checkin/${awaiting.id}');
+    if (awaiting != null) {
+      // Never awaited: the gate's future lives as long as the surface is
+      // on screen, and the startup chain behind this (roll-forward, sync)
+      // must not wait for the user to answer a check-in.
+      unawaited(_gate.open('/checkin/${awaiting.id}'));
     }
   }
 

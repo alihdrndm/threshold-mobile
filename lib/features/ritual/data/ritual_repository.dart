@@ -7,6 +7,50 @@ import '../../../core/db/app_database.dart';
 /// prediction is worse than no answer at all."
 const checkinGraceSecs = 600;
 
+/// The record, counted. Every field is a mirror, never a meter: there is
+/// no target here and there will never be a graph.
+class OverviewStats {
+  const OverviewStats({
+    required this.pickupsToday,
+    required this.pickupsWeek,
+    required this.pickupsAll,
+    required this.browsing,
+    required this.errands,
+    required this.sessionsCommitted,
+    required this.sessionsCompleted,
+    required this.said,
+    required this.kept,
+    required this.reclaimedMinutes,
+  });
+
+  /// Times the phone came up for no reason at all.
+  final int pickupsToday;
+  final int pickupsWeek;
+  final int pickupsAll;
+
+  /// The honourable exit, admitted.
+  final int browsing;
+
+  /// A call, a message — a real errand, and the reason the pickup count
+  /// means something.
+  final int errands;
+
+  final int sessionsCommitted;
+  final int sessionsCompleted;
+
+  /// Answered sessions you predicted you would finish, and how many you did.
+  final int said;
+  final int kept;
+
+  final int reclaimedMinutes;
+
+  bool get isEmpty =>
+      pickupsAll == 0 &&
+      browsing == 0 &&
+      errands == 0 &&
+      sessionsCommitted == 0;
+}
+
 /// Quotes, intentions, sessions: the ritual's single writer, mirroring the
 /// desktop's invariants — intentions append-only, at most one running
 /// session (unique partial index backs it), snapshots not joins.
@@ -122,6 +166,23 @@ class RitualRepository {
             outcome: const Value('browsing'),
           ));
 
+  /// The phone picked up for no reason at all, admitted and put back down.
+  /// The one number this whole loop exists to make visible.
+  Future<void> recordPickup() =>
+      _db.into(_db.intentions).insert(IntentionsCompanion.insert(
+            ts: _nowRfc,
+            outcome: const Value('nothing'),
+          ));
+
+  /// A real errand — a call, a message. The honest counterpart to a
+  /// pickup for nothing: without it, every exit would look purposeless.
+  Future<void> recordErrand(String what) =>
+      _db.into(_db.intentions).insert(IntentionsCompanion.insert(
+            ts: _nowRfc,
+            body: Value(what),
+            outcome: const Value('errand'),
+          ));
+
   Future<SessionRow?> runningSession() => (_db.select(_db.sessions)
         ..where((s) => s.state.equals('running'))
         ..limit(1))
@@ -179,6 +240,73 @@ class RitualRepository {
       answeredTs: Value(_now),
       taskDone: Value(taskDone ? 1 : 0),
     ));
+  }
+
+  /// What the record says, counted. Aggregates in SQL rather than pulled
+  /// as rows: a phone answered fifty times a day fills this table fast.
+  Future<OverviewStats> stats() async {
+    final now = _clock();
+    final today = DateTime(now.year, now.month, now.day).toIso8601String();
+    final week = DateTime(now.year, now.month, now.day)
+        .subtract(const Duration(days: 6))
+        .toIso8601String();
+
+    Future<int> count(String outcome, {String? since}) async {
+      final row = await _db.customSelect(
+        'SELECT COUNT(*) AS n FROM intentions WHERE outcome = ?1'
+        '${since == null ? '' : ' AND ts >= ?2'}',
+        variables: [
+          Variable.withString(outcome),
+          if (since != null) Variable.withString(since),
+        ],
+      ).getSingle();
+      return row.read<int>('n');
+    }
+
+    // Sessions are counted from their own state, never from the
+    // intention's outcome: beginSession deliberately leaves outcome null
+    // (an intention records what you SAID, a session how it went), so
+    // reading 'completed' off intentions here would always find zero.
+    final sessionRows = await _db.select(_db.sessions).get();
+    final committed = sessionRows.length;
+    final completed =
+        sessionRows.where((s) => s.state == 'completed').length;
+
+    // The desktop's calibrate(), verbatim in spirit: only answered
+    // sessions where you predicted yes, and 'partly' is never promoted to
+    // kept — the point is whether your predictions can be trusted, not
+    // whether they look good.
+    final said = sessionRows.where((s) =>
+        s.predictedYes == 1 &&
+        (s.state == 'completed' ||
+            s.state == 'partly' ||
+            s.state == 'missed'));
+    final kept = said.where((s) => s.state == 'completed').length;
+
+    // Elapsed, clamped to what was committed: a session answered an hour
+    // late did not run for an extra hour.
+    var reclaimed = 0;
+    for (final s in sessionRows) {
+      if (s.state != 'completed' && s.state != 'partly') continue;
+      final ended = s.endedTs;
+      if (ended == null) continue;
+      final elapsed = ended - s.startedTs;
+      final committedSecs = s.durationMin * 60;
+      reclaimed += elapsed.clamp(0, committedSecs);
+    }
+
+    return OverviewStats(
+      pickupsToday: await count('nothing', since: today),
+      pickupsWeek: await count('nothing', since: week),
+      pickupsAll: await count('nothing'),
+      browsing: await count('browsing'),
+      errands: await count('errand'),
+      sessionsCommitted: committed,
+      sessionsCompleted: completed,
+      said: said.length,
+      kept: kept,
+      reclaimedMinutes: reclaimed ~/ 60,
+    );
   }
 
   /// Suggestions for the intention step: the top Do First tasks (carrying

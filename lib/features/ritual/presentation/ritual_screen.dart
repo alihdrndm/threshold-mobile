@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/db/app_database.dart';
 import '../../../core/theme/theme.dart';
+import '../../../core/unlock/phone.dart';
 import '../../../core/widgets/pressable_scale.dart';
 import 'ritual_providers.dart';
 
@@ -36,6 +37,7 @@ class _RitualScreenState extends ConsumerState<RitualScreen> {
   bool? _predictedYes;
   final _ifThen = TextEditingController();
   int _minutes = 50;
+  Timer? _confirmTimer;
 
   static const _ifThenDefaults = [
     'take one breath and return to my task',
@@ -60,6 +62,7 @@ class _RitualScreenState extends ConsumerState<RitualScreen> {
 
   @override
   void dispose() {
+    _confirmTimer?.cancel();
     _intention.dispose();
     _ifThen.dispose();
     super.dispose();
@@ -70,6 +73,21 @@ class _RitualScreenState extends ConsumerState<RitualScreen> {
   Future<void> _browse() async {
     await ref.read(ritualRepositoryProvider).recordBrowsing();
     if (mounted) context.pop();
+  }
+
+  /// The admission: picked up for nothing, put back down. Recorded first —
+  /// the count is the point — then the screen goes back to sleep.
+  Future<void> _forNothing() async {
+    await ref.read(ritualRepositoryProvider).recordPickup();
+    if (mounted) context.pop();
+    await Phone.lockNow();
+  }
+
+  /// A real errand. Recorded as one, so the pickup count keeps its meaning.
+  Future<void> _errand(String what, Future<bool> Function() open) async {
+    await ref.read(ritualRepositoryProvider).recordErrand(what);
+    if (mounted) context.pop();
+    await open();
   }
 
   Future<void> _commit() async {
@@ -85,7 +103,10 @@ class _RitualScreenState extends ConsumerState<RitualScreen> {
     );
     unawaited(HapticFeedback.mediumImpact());
     _advance(_Step.confirm);
-    Timer(const Duration(milliseconds: 1400), () {
+    // Held and cancelled in dispose: a lock mid-confirm used to leave this
+    // running, and it would pop whatever screen happened to be on top when
+    // it fired.
+    _confirmTimer = Timer(const Duration(milliseconds: 1400), () {
       if (mounted) context.pop();
     });
   }
@@ -131,6 +152,46 @@ class _RitualScreenState extends ConsumerState<RitualScreen> {
   // ---- steps ------------------------------------------------------------
 
   Widget _arrival() {
+    // A Stack only here: the two errands live in the screen's corners,
+    // out of the question's way but never hidden behind a menu.
+    return Stack(
+      children: [
+        Positioned.fill(child: _arrivalColumn()),
+        Positioned(
+          left: 0,
+          bottom: 0,
+          child: _corner(Icons.call_rounded, 'Call',
+              () => _errand('Call', Phone.openDialer)),
+        ),
+        Positioned(
+          right: 0,
+          bottom: 0,
+          child: _corner(Icons.chat_bubble_outline_rounded, 'WhatsApp',
+              () => _errand('WhatsApp', Phone.openWhatsApp)),
+        ),
+      ],
+    );
+  }
+
+  Widget _corner(IconData icon, String label, VoidCallback onTap) =>
+      PressableScale(
+        onPressed: onTap,
+        semanticLabel: 'Open $label',
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 15, color: _inkMuted),
+              const SizedBox(width: AppSpacing.xs),
+              Text(label,
+                  style: AppTypography.caption.copyWith(color: _inkMuted)),
+            ],
+          ),
+        ),
+      );
+
+  Widget _arrivalColumn() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -158,6 +219,7 @@ class _RitualScreenState extends ConsumerState<RitualScreen> {
         _primary('Begin', () => _advance(_Step.intention)),
         const SizedBox(height: AppSpacing.lg),
         _quiet('Just browsing today', _browse),
+        _quiet('For nothing', _forNothing),
       ],
     );
   }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/theme.dart';
 import '../../../core/unlock/doorkeeper.dart';
+import '../../../core/unlock/phone.dart';
 import '../../../core/widgets/caps_label.dart';
 import '../../../core/widgets/pressable_scale.dart';
 import '../../calendar_sync/presentation/sync_providers.dart';
@@ -555,6 +556,7 @@ class _ThresholdSectionState extends ConsumerState<_ThresholdSection>
     with WidgetsBindingObserver {
   bool _hasPermission = false;
   bool _enabled = true;
+  bool _canLock = false;
 
   @override
   void initState() {
@@ -578,10 +580,12 @@ class _ThresholdSectionState extends ConsumerState<_ThresholdSection>
   Future<void> _refresh() async {
     final has = await Doorkeeper.hasOverlayPermission();
     final enabled = await Doorkeeper.enabled();
+    final canLock = await Phone.canLock();
     if (mounted) {
       setState(() {
         _hasPermission = has;
         _enabled = enabled;
+        _canLock = canLock;
       });
     }
   }
@@ -640,6 +644,41 @@ class _ThresholdSectionState extends ConsumerState<_ThresholdSection>
               ),
             ]),
           ),
+        const SizedBox(height: AppSpacing.lg),
+        // "For nothing" needs one power: putting the screen back to sleep.
+        Text(
+          _canLock
+              ? 'Threshold can lock the screen, so "For nothing" can put '
+                  'the phone back down for you.'
+              : '"For nothing" can lock the phone for you — Android asks '
+                  'you to allow that once.',
+          style: AppTypography.caption.copyWith(color: c.inkMuted),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        PressableScale(
+          onPressed: () async {
+            if (_canLock) {
+              await Phone.revokeLock();
+            } else {
+              await Phone.requestLock();
+            }
+            await _refresh();
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppRadii.full),
+              border: Border.all(
+                  color: _canLock ? c.borderSubtle : c.accent),
+              color: _canLock
+                  ? c.fillSubtle
+                  : c.accent.withValues(alpha: 0.12),
+            ),
+            child: Text(_canLock ? 'Take it back' : 'Allow locking',
+                style: AppTypography.body.copyWith(color: c.ink)),
+          ),
+        ),
       ],
     );
   }
