@@ -22,7 +22,26 @@ class RitualScreen extends ConsumerStatefulWidget {
   ConsumerState<RitualScreen> createState() => _RitualScreenState();
 }
 
-enum _Step { arrival, intention, prediction, ifthen, commit, confirm }
+enum _Step { arrival, intention, prediction, ifthen, commit, confirm, browsing }
+
+/// The words the user chose to meet at the honourable exit.
+///
+/// Not the app moralising — the same rule the quote reservoir runs on: a
+/// line you picked yourself is not the app talking, and it is doing a
+/// different job. Set exactly as given; only the line breaks are ours,
+/// because the five are five and the eye should see them that way.
+const _browsingLeadIn =
+    'Narrated Ibn Abbas, who said: The Messenger of '
+    'Allah \u{FDFA} said to a man while advising him:';
+const _browsingSaying = 'Take advantage of five things before they’re gone:';
+const _browsingFive = [
+  'your youth before your old age,',
+  'your health before your illness,',
+  'your wealth before your poverty,',
+  'your free time before you become occupied,',
+  'and your life before your death.',
+];
+const _browsingSource = 'Al-Mustadrak ‘ala al-Sahihayn (7846)';
 
 class _RitualScreenState extends ConsumerState<RitualScreen> {
   late final theme = ritualThemeFor(DateTime.now());
@@ -73,9 +92,11 @@ class _RitualScreenState extends ConsumerState<RitualScreen> {
 
   void _advance(_Step next) => setState(() => _step = next);
 
+  /// The honourable exit: recorded first, so the record is the same
+  /// whether or not the words are read, and no blocks stand behind them.
   Future<void> _browse() async {
     await ref.read(ritualRepositoryProvider).recordBrowsing();
-    if (mounted) context.pop();
+    if (mounted) _advance(_Step.browsing);
   }
 
   /// The admission: picked up for nothing, put back down. Recorded first —
@@ -111,8 +132,9 @@ class _RitualScreenState extends ConsumerState<RitualScreen> {
   Future<void> _commit() async {
     final repo = ref.read(ritualRepositoryProvider);
     await repo.beginSession(
-      intentionText:
-          _intention.text.trim().isEmpty ? null : _intention.text.trim(),
+      intentionText: _intention.text.trim().isEmpty
+          ? null
+          : _intention.text.trim(),
       ifThen: _ifThen.text.trim().isEmpty ? null : _ifThen.text.trim(),
       predictedYes: _predictedYes,
       durationMin: _minutes,
@@ -138,35 +160,36 @@ class _RitualScreenState extends ConsumerState<RitualScreen> {
         duration: AppDurations.notice,
         curve: AppCurves.out,
         child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
-          child: AnimatedSwitcher(
-            duration: AppDurations.emphasis,
-            switchInCurve: AppCurves.out,
-            switchOutCurve: AppCurves.out,
-            transitionBuilder: (child, animation) => FadeTransition(
-              opacity: animation,
-              child: SlideTransition(
-                position: Tween(
-                  begin: const Offset(0, 0.02),
-                  end: Offset.zero,
-                ).animate(animation),
-                child: child,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
+            child: AnimatedSwitcher(
+              duration: AppDurations.emphasis,
+              switchInCurve: AppCurves.out,
+              switchOutCurve: AppCurves.out,
+              transitionBuilder: (child, animation) => FadeTransition(
+                opacity: animation,
+                child: SlideTransition(
+                  position: Tween(
+                    begin: const Offset(0, 0.02),
+                    end: Offset.zero,
+                  ).animate(animation),
+                  child: child,
+                ),
+              ),
+              child: KeyedSubtree(
+                key: ValueKey(_step),
+                child: switch (_step) {
+                  _Step.arrival => _arrival(),
+                  _Step.intention => _intentionStep(),
+                  _Step.prediction => _predictionStep(),
+                  _Step.ifthen => _ifThenStep(),
+                  _Step.commit => _commitStep(),
+                  _Step.confirm => _confirmStep(),
+                  _Step.browsing => _browsingStep(),
+                },
               ),
             ),
-            child: KeyedSubtree(
-              key: ValueKey(_step),
-              child: switch (_step) {
-                _Step.arrival => _arrival(),
-                _Step.intention => _intentionStep(),
-                _Step.prediction => _predictionStep(),
-                _Step.ifthen => _ifThenStep(),
-                _Step.commit => _commitStep(),
-                _Step.confirm => _confirmStep(),
-              },
-            ),
           ),
-        ),
         ),
       ),
     );
@@ -183,14 +206,20 @@ class _RitualScreenState extends ConsumerState<RitualScreen> {
         Positioned(
           left: 0,
           bottom: 0,
-          child: _corner(Icons.call_rounded, 'Call',
-              () => _errand('Call', Phone.openDialer)),
+          child: _corner(
+            Icons.call_rounded,
+            'Call',
+            () => _errand('Call', Phone.openDialer),
+          ),
         ),
         Positioned(
           right: 0,
           bottom: 0,
-          child: _corner(Icons.chat_bubble_outline_rounded, 'WhatsApp',
-              () => _errand('WhatsApp', Phone.openWhatsApp)),
+          child: _corner(
+            Icons.chat_bubble_outline_rounded,
+            'WhatsApp',
+            () => _errand('WhatsApp', Phone.openWhatsApp),
+          ),
         ),
       ],
     );
@@ -207,8 +236,10 @@ class _RitualScreenState extends ConsumerState<RitualScreen> {
             children: [
               Icon(icon, size: 15, color: _inkMuted),
               const SizedBox(width: AppSpacing.xs),
-              Text(label,
-                  style: AppTypography.caption.copyWith(color: _inkMuted)),
+              Text(
+                label,
+                style: AppTypography.caption.copyWith(color: _inkMuted),
+              ),
             ],
           ),
         ),
@@ -222,20 +253,20 @@ class _RitualScreenState extends ConsumerState<RitualScreen> {
         const SizedBox(height: AppSpacing.xxl),
         // The door opens with the question, not a greeting — the user's
         // explicit call, on both apps.
-        Text('What are you here for?',
-            style: _display.copyWith(color: _ink)),
+        Text('What are you here for?', style: _display.copyWith(color: _ink)),
         if (_quote != null) ...[
           const SizedBox(height: AppSpacing.xl),
           Text(
             _quote!.body,
             textAlign: TextAlign.center,
-            style: AppTypography.body
-                .copyWith(color: _inkMuted, height: 1.6),
+            style: AppTypography.body.copyWith(color: _inkMuted, height: 1.6),
           ),
           if (_quote!.author != null) ...[
             const SizedBox(height: AppSpacing.xs),
-            Text('— ${_quote!.author}',
-                style: AppTypography.caption.copyWith(color: theme.accent)),
+            Text(
+              '— ${_quote!.author}',
+              style: AppTypography.caption.copyWith(color: theme.accent),
+            ),
           ],
         ],
         const SizedBox(height: AppSpacing.xxxl),
@@ -243,8 +274,11 @@ class _RitualScreenState extends ConsumerState<RitualScreen> {
         // usually arrives: nothing, browsing, and — reached past both —
         // the commitment. One vocabulary at one width; only the fill
         // carries the hierarchy, so the set reads as a set.
-        _exit('For nothing', _forNothing,
-            semantic: 'Picked it up for nothing — lock the phone again'),
+        _exit(
+          'For nothing',
+          _forNothing,
+          semantic: 'Picked it up for nothing — lock the phone again',
+        ),
         const SizedBox(height: AppSpacing.sm),
         _exit('Just browsing today', _browse),
         const SizedBox(height: AppSpacing.lg),
@@ -298,8 +332,7 @@ class _RitualScreenState extends ConsumerState<RitualScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(theme.intentionPrompt,
-            style: _display.copyWith(color: _ink)),
+        Text(theme.intentionPrompt, style: _display.copyWith(color: _ink)),
         const SizedBox(height: AppSpacing.xl),
         if (typing) ...[
           _field(_intention, autofocus: true),
@@ -310,10 +343,10 @@ class _RitualScreenState extends ConsumerState<RitualScreen> {
                 (
                   s.text,
                   () => setState(() {
-                        _intention.text = s.text;
-                        _taskUid = s.taskUid;
-                        _taskTitle = s.taskUid == null ? null : s.text;
-                      })
+                    _intention.text = s.text;
+                    _taskUid = s.taskUid;
+                    _taskTitle = s.taskUid == null ? null : s.text;
+                  }),
                 ),
             ]),
         ] else ...[
@@ -326,7 +359,7 @@ class _RitualScreenState extends ConsumerState<RitualScreen> {
                   _taskUid = s.taskUid;
                   _taskTitle = s.taskUid == null ? null : s.text;
                   _advance(_Step.prediction);
-                }
+                },
               ),
           ]),
           const SizedBox(height: AppSpacing.lg),
@@ -352,24 +385,28 @@ class _RitualScreenState extends ConsumerState<RitualScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Never reworded, never pre-focused: the question is the mechanism.
-        Text(RitualTheme.predictionPrompt,
-            style: _display.copyWith(color: _ink)),
+        Text(
+          RitualTheme.predictionPrompt,
+          style: _display.copyWith(color: _ink),
+        ),
         const SizedBox(height: AppSpacing.xxl),
-        Row(children: [
-          Expanded(
-            child: _primary('Yes', () {
-              _predictedYes = true;
-              _advance(_Step.ifthen);
-            }),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: _secondary('No', () {
-              _predictedYes = false;
-              _advance(_Step.ifthen);
-            }),
-          ),
-        ]),
+        Row(
+          children: [
+            Expanded(
+              child: _primary('Yes', () {
+                _predictedYes = true;
+                _advance(_Step.ifthen);
+              }),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: _secondary('No', () {
+                _predictedYes = false;
+                _advance(_Step.ifthen);
+              }),
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -379,8 +416,7 @@ class _RitualScreenState extends ConsumerState<RitualScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(theme.ifThenPrompt,
-            style: _display.copyWith(color: _ink)),
+        Text(theme.ifThenPrompt, style: _display.copyWith(color: _ink)),
         const SizedBox(height: AppSpacing.xl),
         _chips([
           for (final d in _ifThenDefaults)
@@ -389,7 +425,7 @@ class _RitualScreenState extends ConsumerState<RitualScreen> {
               () {
                 _ifThen.text = d;
                 _advance(_Step.commit);
-              }
+              },
             ),
         ]),
         const SizedBox(height: AppSpacing.lg),
@@ -399,9 +435,7 @@ class _RitualScreenState extends ConsumerState<RitualScreen> {
           listenable: _ifThen,
           builder: (_, _) => _primary(
             'Continue',
-            _ifThen.text.trim().isEmpty
-                ? null
-                : () => _advance(_Step.commit),
+            _ifThen.text.trim().isEmpty ? null : () => _advance(_Step.commit),
           ),
         ),
       ],
@@ -414,20 +448,18 @@ class _RitualScreenState extends ConsumerState<RitualScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(theme.durationPrompt,
-            style: _display.copyWith(color: _ink)),
+        Text(theme.durationPrompt, style: _display.copyWith(color: _ink)),
         const SizedBox(height: AppSpacing.xl),
         if (chips)
           _chips([
             for (final m in const [25, 50, 90])
-              (
-                '$m min',
-                () => setState(() => _minutes = m)
-              ),
+              ('$m min', () => setState(() => _minutes = m)),
           ], selectedLabel: '$_minutes min')
         else ...[
-          Text('$_minutes minutes',
-              style: AppTypography.headline.copyWith(color: _ink)),
+          Text(
+            '$_minutes minutes',
+            style: AppTypography.headline.copyWith(color: _ink),
+          ),
           Slider(
             value: _minutes.clamp(10, 120).toDouble(),
             min: 10,
@@ -441,43 +473,111 @@ class _RitualScreenState extends ConsumerState<RitualScreen> {
         const SizedBox(height: AppSpacing.lg),
         // Self-set limits are the ones people keep: any number of minutes,
         // 1-120, however the theme offers its presets.
-        Row(children: [
-          Text('or exactly',
-              style: AppTypography.caption.copyWith(color: _inkMuted)),
-          const SizedBox(width: AppSpacing.md),
-          SizedBox(
-            width: 72,
-            child: TextField(
-              keyboardType: TextInputType.number,
-              maxLength: 3,
-              textAlign: TextAlign.center,
-              style: AppTypography.body.copyWith(color: _ink),
-              cursorColor: theme.accent,
-              decoration: InputDecoration(
-                hintText: 'min',
-                counterText: '',
-                hintStyle:
-                    AppTypography.caption.copyWith(color: _inkMuted),
-                enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: theme.glow)),
-                focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: theme.accent)),
-              ),
-              onChanged: (v) {
-                final n = int.tryParse(v);
-                if (n != null && n >= 1) {
-                  setState(() => _minutes = n.clamp(1, 120));
-                }
-              },
+        Row(
+          children: [
+            Text(
+              'or exactly',
+              style: AppTypography.caption.copyWith(color: _inkMuted),
             ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Text('minutes',
-              style: AppTypography.caption.copyWith(color: _inkMuted)),
-        ]),
+            const SizedBox(width: AppSpacing.md),
+            SizedBox(
+              width: 72,
+              child: TextField(
+                keyboardType: TextInputType.number,
+                maxLength: 3,
+                textAlign: TextAlign.center,
+                style: AppTypography.body.copyWith(color: _ink),
+                cursorColor: theme.accent,
+                decoration: InputDecoration(
+                  hintText: 'min',
+                  counterText: '',
+                  hintStyle: AppTypography.caption.copyWith(color: _inkMuted),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: theme.glow),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: theme.accent),
+                  ),
+                ),
+                onChanged: (v) {
+                  final n = int.tryParse(v);
+                  if (n != null && n >= 1) {
+                    setState(() => _minutes = n.clamp(1, 120));
+                  }
+                },
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Text(
+              'minutes',
+              style: AppTypography.caption.copyWith(color: _inkMuted),
+            ),
+          ],
+        ),
         const SizedBox(height: AppSpacing.xxl),
         _primary('Start $_minutes min', _commit),
       ],
+    );
+  }
+
+  /// Where the honourable exit leads. No timer, no gate, nothing to
+  /// dismiss past — the browsing is already recorded, and the way on is
+  /// right there. Scrollable so a long text and a large type setting can
+  /// both be read.
+  Widget _browsingStep() {
+    // Centred when it fits, scrolling when the type is large: a reading
+    // screen should sit in the middle of the page, not fall out of the top
+    // of it.
+    return LayoutBuilder(
+      builder: (context, constraints) => SingleChildScrollView(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: constraints.maxHeight),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: AppSpacing.xxl),
+              Text(
+                _browsingLeadIn,
+                style: AppTypography.caption.copyWith(
+                  color: _inkMuted,
+                  height: 1.6,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              Text(
+                _browsingSaying,
+                style: AppTypography.body.copyWith(color: _ink, height: 1.55),
+              ),
+              const SizedBox(height: AppSpacing.md),
+              // Five lines because they are five, and the parallel only reads
+              // when the eye can stack them.
+              for (final line in _browsingFive)
+                Padding(
+                  padding: const EdgeInsets.only(
+                    left: AppSpacing.md,
+                    bottom: 6,
+                  ),
+                  child: Text(
+                    line,
+                    style: AppTypography.body.copyWith(
+                      color: _ink.withValues(alpha: 0.9),
+                      height: 1.5,
+                    ),
+                  ),
+                ),
+              const SizedBox(height: AppSpacing.lg),
+              Text(
+                _browsingSource,
+                style: AppTypography.caption.copyWith(color: theme.accent),
+              ),
+              const SizedBox(height: AppSpacing.xxl),
+              _exit('Go on', () => context.pop()),
+              const SizedBox(height: AppSpacing.xxl),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -486,13 +586,14 @@ class _RitualScreenState extends ConsumerState<RitualScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Icon(Icons.check_circle_outline_rounded,
-            size: 40, color: theme.accent),
+        Icon(Icons.check_circle_outline_rounded, size: 40, color: theme.accent),
         const SizedBox(height: AppSpacing.lg),
         Text('Committed.', style: _display.copyWith(color: _ink)),
         const SizedBox(height: AppSpacing.sm),
-        Text('$_minutes minutes. The check-in will find you.',
-            style: AppTypography.caption.copyWith(color: _inkMuted)),
+        Text(
+          '$_minutes minutes. The check-in will find you.',
+          style: AppTypography.caption.copyWith(color: _inkMuted),
+        ),
       ],
     );
   }
@@ -502,67 +603,74 @@ class _RitualScreenState extends ConsumerState<RitualScreen> {
   static const _ink = Color(0xFFE8E9EB);
   static const _inkMuted = Color(0xFF8B8F96);
   TextStyle get _display => AppTypography.headline.copyWith(
-        fontWeight: FontWeight.w300,
-        fontSize: 26,
-        height: 1.3,
-      );
+    fontWeight: FontWeight.w300,
+    fontSize: 26,
+    height: 1.3,
+  );
 
   Widget _primary(String label, VoidCallback? onTap) => PressableScale(
-        onPressed: onTap,
-        child: AnimatedOpacity(
-          duration: AppDurations.base,
-          curve: Curves.ease,
-          opacity: onTap == null ? 0.4 : 1,
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-            decoration: BoxDecoration(
-              color: theme.accent.withValues(alpha: 0.16),
-              border: Border.all(color: theme.accent),
-              borderRadius: BorderRadius.circular(AppRadii.full),
-            ),
-            child: Text(label,
-                textAlign: TextAlign.center,
-                style: AppTypography.body.copyWith(color: _ink)),
-          ),
+    onPressed: onTap,
+    child: AnimatedOpacity(
+      duration: AppDurations.base,
+      curve: Curves.ease,
+      opacity: onTap == null ? 0.4 : 1,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+        decoration: BoxDecoration(
+          color: theme.accent.withValues(alpha: 0.16),
+          border: Border.all(color: theme.accent),
+          borderRadius: BorderRadius.circular(AppRadii.full),
         ),
-      );
+        child: Text(
+          label,
+          textAlign: TextAlign.center,
+          style: AppTypography.body.copyWith(color: _ink),
+        ),
+      ),
+    ),
+  );
 
   Widget _secondary(String label, VoidCallback onTap) => PressableScale(
-        onPressed: onTap,
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-          decoration: BoxDecoration(
-            border: Border.all(color: const Color(0x2EFFFFFF)),
-            borderRadius: BorderRadius.circular(AppRadii.full),
-          ),
-          child: Text(label,
-              textAlign: TextAlign.center,
-              style: AppTypography.body.copyWith(color: _ink)),
-        ),
-      );
-
-  Widget _field(TextEditingController controller,
-          {bool autofocus = false, String? hint}) =>
-      TextField(
-        controller: controller,
-        autofocus: autofocus,
+    onPressed: onTap,
+    child: Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+      decoration: BoxDecoration(
+        border: Border.all(color: const Color(0x2EFFFFFF)),
+        borderRadius: BorderRadius.circular(AppRadii.full),
+      ),
+      child: Text(
+        label,
+        textAlign: TextAlign.center,
         style: AppTypography.body.copyWith(color: _ink),
-        cursorColor: theme.accent,
-        decoration: InputDecoration(
-          hintText: hint ?? '',
-          hintStyle: AppTypography.body.copyWith(color: _inkMuted),
-          enabledBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: theme.glow)),
-          focusedBorder: UnderlineInputBorder(
-              borderSide: BorderSide(color: theme.accent)),
-        ),
-        onChanged: (_) => setState(() {}),
-      );
+      ),
+    ),
+  );
 
-  Widget _chips(List<(String, VoidCallback)> items,
-          {String? selectedLabel}) =>
+  Widget _field(
+    TextEditingController controller, {
+    bool autofocus = false,
+    String? hint,
+  }) => TextField(
+    controller: controller,
+    autofocus: autofocus,
+    style: AppTypography.body.copyWith(color: _ink),
+    cursorColor: theme.accent,
+    decoration: InputDecoration(
+      hintText: hint ?? '',
+      hintStyle: AppTypography.body.copyWith(color: _inkMuted),
+      enabledBorder: UnderlineInputBorder(
+        borderSide: BorderSide(color: theme.glow),
+      ),
+      focusedBorder: UnderlineInputBorder(
+        borderSide: BorderSide(color: theme.accent),
+      ),
+    ),
+    onChanged: (_) => setState(() {}),
+  );
+
+  Widget _chips(List<(String, VoidCallback)> items, {String? selectedLabel}) =>
       Wrap(
         spacing: AppSpacing.sm,
         runSpacing: AppSpacing.sm,
@@ -572,19 +680,24 @@ class _RitualScreenState extends ConsumerState<RitualScreen> {
               onPressed: onTap,
               child: Container(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
+                  horizontal: AppSpacing.lg,
+                  vertical: AppSpacing.sm,
+                ),
                 decoration: BoxDecoration(
                   color: label == selectedLabel
                       ? theme.accent.withValues(alpha: 0.2)
                       : Colors.transparent,
                   border: Border.all(
-                      color: label == selectedLabel
-                          ? theme.accent
-                          : const Color(0x2EFFFFFF)),
+                    color: label == selectedLabel
+                        ? theme.accent
+                        : const Color(0x2EFFFFFF),
+                  ),
                   borderRadius: BorderRadius.circular(AppRadii.full),
                 ),
-                child: Text(label,
-                    style: AppTypography.caption.copyWith(color: _ink)),
+                child: Text(
+                  label,
+                  style: AppTypography.caption.copyWith(color: _ink),
+                ),
               ),
             ),
         ],
