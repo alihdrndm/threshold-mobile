@@ -3097,6 +3097,1482 @@ class PendingOpsCompanion extends UpdateCompanion<PendingOpRow> {
   }
 }
 
+class $QuotesTable extends Quotes with TableInfo<$QuotesTable, QuoteRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $QuotesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _bodyMeta = const VerificationMeta('body');
+  @override
+  late final GeneratedColumn<String> body = GeneratedColumn<String>(
+    'text',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _authorMeta = const VerificationMeta('author');
+  @override
+  late final GeneratedColumn<String> author = GeneratedColumn<String>(
+    'author',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdTsMeta = const VerificationMeta(
+    'createdTs',
+  );
+  @override
+  late final GeneratedColumn<String> createdTs = GeneratedColumn<String>(
+    'created_ts',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [body, author, createdTs];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'quotes';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<QuoteRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('text')) {
+      context.handle(
+        _bodyMeta,
+        body.isAcceptableOrUnknown(data['text']!, _bodyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_bodyMeta);
+    }
+    if (data.containsKey('author')) {
+      context.handle(
+        _authorMeta,
+        author.isAcceptableOrUnknown(data['author']!, _authorMeta),
+      );
+    }
+    if (data.containsKey('created_ts')) {
+      context.handle(
+        _createdTsMeta,
+        createdTs.isAcceptableOrUnknown(data['created_ts']!, _createdTsMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdTsMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {body};
+  @override
+  QuoteRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return QuoteRow(
+      body: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}text'],
+      )!,
+      author: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}author'],
+      ),
+      createdTs: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_ts'],
+      )!,
+    );
+  }
+
+  @override
+  $QuotesTable createAlias(String alias) {
+    return $QuotesTable(attachedDatabase, alias);
+  }
+}
+
+class QuoteRow extends DataClass implements Insertable<QuoteRow> {
+  final String body;
+  final String? author;
+  final String createdTs;
+  const QuoteRow({required this.body, this.author, required this.createdTs});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['text'] = Variable<String>(body);
+    if (!nullToAbsent || author != null) {
+      map['author'] = Variable<String>(author);
+    }
+    map['created_ts'] = Variable<String>(createdTs);
+    return map;
+  }
+
+  QuotesCompanion toCompanion(bool nullToAbsent) {
+    return QuotesCompanion(
+      body: Value(body),
+      author: author == null && nullToAbsent
+          ? const Value.absent()
+          : Value(author),
+      createdTs: Value(createdTs),
+    );
+  }
+
+  factory QuoteRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return QuoteRow(
+      body: serializer.fromJson<String>(json['body']),
+      author: serializer.fromJson<String?>(json['author']),
+      createdTs: serializer.fromJson<String>(json['createdTs']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'body': serializer.toJson<String>(body),
+      'author': serializer.toJson<String?>(author),
+      'createdTs': serializer.toJson<String>(createdTs),
+    };
+  }
+
+  QuoteRow copyWith({
+    String? body,
+    Value<String?> author = const Value.absent(),
+    String? createdTs,
+  }) => QuoteRow(
+    body: body ?? this.body,
+    author: author.present ? author.value : this.author,
+    createdTs: createdTs ?? this.createdTs,
+  );
+  QuoteRow copyWithCompanion(QuotesCompanion data) {
+    return QuoteRow(
+      body: data.body.present ? data.body.value : this.body,
+      author: data.author.present ? data.author.value : this.author,
+      createdTs: data.createdTs.present ? data.createdTs.value : this.createdTs,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('QuoteRow(')
+          ..write('body: $body, ')
+          ..write('author: $author, ')
+          ..write('createdTs: $createdTs')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(body, author, createdTs);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is QuoteRow &&
+          other.body == this.body &&
+          other.author == this.author &&
+          other.createdTs == this.createdTs);
+}
+
+class QuotesCompanion extends UpdateCompanion<QuoteRow> {
+  final Value<String> body;
+  final Value<String?> author;
+  final Value<String> createdTs;
+  final Value<int> rowid;
+  const QuotesCompanion({
+    this.body = const Value.absent(),
+    this.author = const Value.absent(),
+    this.createdTs = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  QuotesCompanion.insert({
+    required String body,
+    this.author = const Value.absent(),
+    required String createdTs,
+    this.rowid = const Value.absent(),
+  }) : body = Value(body),
+       createdTs = Value(createdTs);
+  static Insertable<QuoteRow> custom({
+    Expression<String>? body,
+    Expression<String>? author,
+    Expression<String>? createdTs,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (body != null) 'text': body,
+      if (author != null) 'author': author,
+      if (createdTs != null) 'created_ts': createdTs,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  QuotesCompanion copyWith({
+    Value<String>? body,
+    Value<String?>? author,
+    Value<String>? createdTs,
+    Value<int>? rowid,
+  }) {
+    return QuotesCompanion(
+      body: body ?? this.body,
+      author: author ?? this.author,
+      createdTs: createdTs ?? this.createdTs,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (body.present) {
+      map['text'] = Variable<String>(body.value);
+    }
+    if (author.present) {
+      map['author'] = Variable<String>(author.value);
+    }
+    if (createdTs.present) {
+      map['created_ts'] = Variable<String>(createdTs.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('QuotesCompanion(')
+          ..write('body: $body, ')
+          ..write('author: $author, ')
+          ..write('createdTs: $createdTs, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $IntentionsTable extends Intentions
+    with TableInfo<$IntentionsTable, IntentionRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $IntentionsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _tsMeta = const VerificationMeta('ts');
+  @override
+  late final GeneratedColumn<String> ts = GeneratedColumn<String>(
+    'ts',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _bodyMeta = const VerificationMeta('body');
+  @override
+  late final GeneratedColumn<String> body = GeneratedColumn<String>(
+    'text',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _ifThenMeta = const VerificationMeta('ifThen');
+  @override
+  late final GeneratedColumn<String> ifThen = GeneratedColumn<String>(
+    'if_then',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _predictedYesMeta = const VerificationMeta(
+    'predictedYes',
+  );
+  @override
+  late final GeneratedColumn<int> predictedYes = GeneratedColumn<int>(
+    'predicted_yes',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _durationMinMeta = const VerificationMeta(
+    'durationMin',
+  );
+  @override
+  late final GeneratedColumn<int> durationMin = GeneratedColumn<int>(
+    'duration_min',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _taskUidMeta = const VerificationMeta(
+    'taskUid',
+  );
+  @override
+  late final GeneratedColumn<String> taskUid = GeneratedColumn<String>(
+    'task_uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _outcomeMeta = const VerificationMeta(
+    'outcome',
+  );
+  @override
+  late final GeneratedColumn<String> outcome = GeneratedColumn<String>(
+    'outcome',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    ts,
+    body,
+    ifThen,
+    predictedYes,
+    durationMin,
+    taskUid,
+    outcome,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'intentions';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<IntentionRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('ts')) {
+      context.handle(_tsMeta, ts.isAcceptableOrUnknown(data['ts']!, _tsMeta));
+    } else if (isInserting) {
+      context.missing(_tsMeta);
+    }
+    if (data.containsKey('text')) {
+      context.handle(
+        _bodyMeta,
+        body.isAcceptableOrUnknown(data['text']!, _bodyMeta),
+      );
+    }
+    if (data.containsKey('if_then')) {
+      context.handle(
+        _ifThenMeta,
+        ifThen.isAcceptableOrUnknown(data['if_then']!, _ifThenMeta),
+      );
+    }
+    if (data.containsKey('predicted_yes')) {
+      context.handle(
+        _predictedYesMeta,
+        predictedYes.isAcceptableOrUnknown(
+          data['predicted_yes']!,
+          _predictedYesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('duration_min')) {
+      context.handle(
+        _durationMinMeta,
+        durationMin.isAcceptableOrUnknown(
+          data['duration_min']!,
+          _durationMinMeta,
+        ),
+      );
+    }
+    if (data.containsKey('task_uid')) {
+      context.handle(
+        _taskUidMeta,
+        taskUid.isAcceptableOrUnknown(data['task_uid']!, _taskUidMeta),
+      );
+    }
+    if (data.containsKey('outcome')) {
+      context.handle(
+        _outcomeMeta,
+        outcome.isAcceptableOrUnknown(data['outcome']!, _outcomeMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  IntentionRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return IntentionRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      ts: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ts'],
+      )!,
+      body: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}text'],
+      ),
+      ifThen: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}if_then'],
+      ),
+      predictedYes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}predicted_yes'],
+      ),
+      durationMin: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}duration_min'],
+      ),
+      taskUid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}task_uid'],
+      ),
+      outcome: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}outcome'],
+      ),
+    );
+  }
+
+  @override
+  $IntentionsTable createAlias(String alias) {
+    return $IntentionsTable(attachedDatabase, alias);
+  }
+}
+
+class IntentionRow extends DataClass implements Insertable<IntentionRow> {
+  final int id;
+  final String ts;
+  final String? body;
+  final String? ifThen;
+  final int? predictedYes;
+  final int? durationMin;
+  final String? taskUid;
+  final String? outcome;
+  const IntentionRow({
+    required this.id,
+    required this.ts,
+    this.body,
+    this.ifThen,
+    this.predictedYes,
+    this.durationMin,
+    this.taskUid,
+    this.outcome,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['ts'] = Variable<String>(ts);
+    if (!nullToAbsent || body != null) {
+      map['text'] = Variable<String>(body);
+    }
+    if (!nullToAbsent || ifThen != null) {
+      map['if_then'] = Variable<String>(ifThen);
+    }
+    if (!nullToAbsent || predictedYes != null) {
+      map['predicted_yes'] = Variable<int>(predictedYes);
+    }
+    if (!nullToAbsent || durationMin != null) {
+      map['duration_min'] = Variable<int>(durationMin);
+    }
+    if (!nullToAbsent || taskUid != null) {
+      map['task_uid'] = Variable<String>(taskUid);
+    }
+    if (!nullToAbsent || outcome != null) {
+      map['outcome'] = Variable<String>(outcome);
+    }
+    return map;
+  }
+
+  IntentionsCompanion toCompanion(bool nullToAbsent) {
+    return IntentionsCompanion(
+      id: Value(id),
+      ts: Value(ts),
+      body: body == null && nullToAbsent ? const Value.absent() : Value(body),
+      ifThen: ifThen == null && nullToAbsent
+          ? const Value.absent()
+          : Value(ifThen),
+      predictedYes: predictedYes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(predictedYes),
+      durationMin: durationMin == null && nullToAbsent
+          ? const Value.absent()
+          : Value(durationMin),
+      taskUid: taskUid == null && nullToAbsent
+          ? const Value.absent()
+          : Value(taskUid),
+      outcome: outcome == null && nullToAbsent
+          ? const Value.absent()
+          : Value(outcome),
+    );
+  }
+
+  factory IntentionRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return IntentionRow(
+      id: serializer.fromJson<int>(json['id']),
+      ts: serializer.fromJson<String>(json['ts']),
+      body: serializer.fromJson<String?>(json['body']),
+      ifThen: serializer.fromJson<String?>(json['ifThen']),
+      predictedYes: serializer.fromJson<int?>(json['predictedYes']),
+      durationMin: serializer.fromJson<int?>(json['durationMin']),
+      taskUid: serializer.fromJson<String?>(json['taskUid']),
+      outcome: serializer.fromJson<String?>(json['outcome']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'ts': serializer.toJson<String>(ts),
+      'body': serializer.toJson<String?>(body),
+      'ifThen': serializer.toJson<String?>(ifThen),
+      'predictedYes': serializer.toJson<int?>(predictedYes),
+      'durationMin': serializer.toJson<int?>(durationMin),
+      'taskUid': serializer.toJson<String?>(taskUid),
+      'outcome': serializer.toJson<String?>(outcome),
+    };
+  }
+
+  IntentionRow copyWith({
+    int? id,
+    String? ts,
+    Value<String?> body = const Value.absent(),
+    Value<String?> ifThen = const Value.absent(),
+    Value<int?> predictedYes = const Value.absent(),
+    Value<int?> durationMin = const Value.absent(),
+    Value<String?> taskUid = const Value.absent(),
+    Value<String?> outcome = const Value.absent(),
+  }) => IntentionRow(
+    id: id ?? this.id,
+    ts: ts ?? this.ts,
+    body: body.present ? body.value : this.body,
+    ifThen: ifThen.present ? ifThen.value : this.ifThen,
+    predictedYes: predictedYes.present ? predictedYes.value : this.predictedYes,
+    durationMin: durationMin.present ? durationMin.value : this.durationMin,
+    taskUid: taskUid.present ? taskUid.value : this.taskUid,
+    outcome: outcome.present ? outcome.value : this.outcome,
+  );
+  IntentionRow copyWithCompanion(IntentionsCompanion data) {
+    return IntentionRow(
+      id: data.id.present ? data.id.value : this.id,
+      ts: data.ts.present ? data.ts.value : this.ts,
+      body: data.body.present ? data.body.value : this.body,
+      ifThen: data.ifThen.present ? data.ifThen.value : this.ifThen,
+      predictedYes: data.predictedYes.present
+          ? data.predictedYes.value
+          : this.predictedYes,
+      durationMin: data.durationMin.present
+          ? data.durationMin.value
+          : this.durationMin,
+      taskUid: data.taskUid.present ? data.taskUid.value : this.taskUid,
+      outcome: data.outcome.present ? data.outcome.value : this.outcome,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('IntentionRow(')
+          ..write('id: $id, ')
+          ..write('ts: $ts, ')
+          ..write('body: $body, ')
+          ..write('ifThen: $ifThen, ')
+          ..write('predictedYes: $predictedYes, ')
+          ..write('durationMin: $durationMin, ')
+          ..write('taskUid: $taskUid, ')
+          ..write('outcome: $outcome')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    ts,
+    body,
+    ifThen,
+    predictedYes,
+    durationMin,
+    taskUid,
+    outcome,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is IntentionRow &&
+          other.id == this.id &&
+          other.ts == this.ts &&
+          other.body == this.body &&
+          other.ifThen == this.ifThen &&
+          other.predictedYes == this.predictedYes &&
+          other.durationMin == this.durationMin &&
+          other.taskUid == this.taskUid &&
+          other.outcome == this.outcome);
+}
+
+class IntentionsCompanion extends UpdateCompanion<IntentionRow> {
+  final Value<int> id;
+  final Value<String> ts;
+  final Value<String?> body;
+  final Value<String?> ifThen;
+  final Value<int?> predictedYes;
+  final Value<int?> durationMin;
+  final Value<String?> taskUid;
+  final Value<String?> outcome;
+  const IntentionsCompanion({
+    this.id = const Value.absent(),
+    this.ts = const Value.absent(),
+    this.body = const Value.absent(),
+    this.ifThen = const Value.absent(),
+    this.predictedYes = const Value.absent(),
+    this.durationMin = const Value.absent(),
+    this.taskUid = const Value.absent(),
+    this.outcome = const Value.absent(),
+  });
+  IntentionsCompanion.insert({
+    this.id = const Value.absent(),
+    required String ts,
+    this.body = const Value.absent(),
+    this.ifThen = const Value.absent(),
+    this.predictedYes = const Value.absent(),
+    this.durationMin = const Value.absent(),
+    this.taskUid = const Value.absent(),
+    this.outcome = const Value.absent(),
+  }) : ts = Value(ts);
+  static Insertable<IntentionRow> custom({
+    Expression<int>? id,
+    Expression<String>? ts,
+    Expression<String>? body,
+    Expression<String>? ifThen,
+    Expression<int>? predictedYes,
+    Expression<int>? durationMin,
+    Expression<String>? taskUid,
+    Expression<String>? outcome,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (ts != null) 'ts': ts,
+      if (body != null) 'text': body,
+      if (ifThen != null) 'if_then': ifThen,
+      if (predictedYes != null) 'predicted_yes': predictedYes,
+      if (durationMin != null) 'duration_min': durationMin,
+      if (taskUid != null) 'task_uid': taskUid,
+      if (outcome != null) 'outcome': outcome,
+    });
+  }
+
+  IntentionsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? ts,
+    Value<String?>? body,
+    Value<String?>? ifThen,
+    Value<int?>? predictedYes,
+    Value<int?>? durationMin,
+    Value<String?>? taskUid,
+    Value<String?>? outcome,
+  }) {
+    return IntentionsCompanion(
+      id: id ?? this.id,
+      ts: ts ?? this.ts,
+      body: body ?? this.body,
+      ifThen: ifThen ?? this.ifThen,
+      predictedYes: predictedYes ?? this.predictedYes,
+      durationMin: durationMin ?? this.durationMin,
+      taskUid: taskUid ?? this.taskUid,
+      outcome: outcome ?? this.outcome,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (ts.present) {
+      map['ts'] = Variable<String>(ts.value);
+    }
+    if (body.present) {
+      map['text'] = Variable<String>(body.value);
+    }
+    if (ifThen.present) {
+      map['if_then'] = Variable<String>(ifThen.value);
+    }
+    if (predictedYes.present) {
+      map['predicted_yes'] = Variable<int>(predictedYes.value);
+    }
+    if (durationMin.present) {
+      map['duration_min'] = Variable<int>(durationMin.value);
+    }
+    if (taskUid.present) {
+      map['task_uid'] = Variable<String>(taskUid.value);
+    }
+    if (outcome.present) {
+      map['outcome'] = Variable<String>(outcome.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('IntentionsCompanion(')
+          ..write('id: $id, ')
+          ..write('ts: $ts, ')
+          ..write('body: $body, ')
+          ..write('ifThen: $ifThen, ')
+          ..write('predictedYes: $predictedYes, ')
+          ..write('durationMin: $durationMin, ')
+          ..write('taskUid: $taskUid, ')
+          ..write('outcome: $outcome')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SessionsTable extends Sessions
+    with TableInfo<$SessionsTable, SessionRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SessionsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _intentionIdMeta = const VerificationMeta(
+    'intentionId',
+  );
+  @override
+  late final GeneratedColumn<int> intentionId = GeneratedColumn<int>(
+    'intention_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _taskUidMeta = const VerificationMeta(
+    'taskUid',
+  );
+  @override
+  late final GeneratedColumn<String> taskUid = GeneratedColumn<String>(
+    'task_uid',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _taskTitleMeta = const VerificationMeta(
+    'taskTitle',
+  );
+  @override
+  late final GeneratedColumn<String> taskTitle = GeneratedColumn<String>(
+    'task_title',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _startedTsMeta = const VerificationMeta(
+    'startedTs',
+  );
+  @override
+  late final GeneratedColumn<int> startedTs = GeneratedColumn<int>(
+    'started_ts',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _endsTsMeta = const VerificationMeta('endsTs');
+  @override
+  late final GeneratedColumn<int> endsTs = GeneratedColumn<int>(
+    'ends_ts',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _durationMinMeta = const VerificationMeta(
+    'durationMin',
+  );
+  @override
+  late final GeneratedColumn<int> durationMin = GeneratedColumn<int>(
+    'duration_min',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _predictedYesMeta = const VerificationMeta(
+    'predictedYes',
+  );
+  @override
+  late final GeneratedColumn<int> predictedYes = GeneratedColumn<int>(
+    'predicted_yes',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _stateMeta = const VerificationMeta('state');
+  @override
+  late final GeneratedColumn<String> state = GeneratedColumn<String>(
+    'state',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('running'),
+  );
+  static const VerificationMeta _endedTsMeta = const VerificationMeta(
+    'endedTs',
+  );
+  @override
+  late final GeneratedColumn<int> endedTs = GeneratedColumn<int>(
+    'ended_ts',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _answeredTsMeta = const VerificationMeta(
+    'answeredTs',
+  );
+  @override
+  late final GeneratedColumn<int> answeredTs = GeneratedColumn<int>(
+    'answered_ts',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _taskDoneMeta = const VerificationMeta(
+    'taskDone',
+  );
+  @override
+  late final GeneratedColumn<int> taskDone = GeneratedColumn<int>(
+    'task_done',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    intentionId,
+    taskUid,
+    taskTitle,
+    startedTs,
+    endsTs,
+    durationMin,
+    predictedYes,
+    state,
+    endedTs,
+    answeredTs,
+    taskDone,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'sessions';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SessionRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('intention_id')) {
+      context.handle(
+        _intentionIdMeta,
+        intentionId.isAcceptableOrUnknown(
+          data['intention_id']!,
+          _intentionIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_intentionIdMeta);
+    }
+    if (data.containsKey('task_uid')) {
+      context.handle(
+        _taskUidMeta,
+        taskUid.isAcceptableOrUnknown(data['task_uid']!, _taskUidMeta),
+      );
+    }
+    if (data.containsKey('task_title')) {
+      context.handle(
+        _taskTitleMeta,
+        taskTitle.isAcceptableOrUnknown(data['task_title']!, _taskTitleMeta),
+      );
+    }
+    if (data.containsKey('started_ts')) {
+      context.handle(
+        _startedTsMeta,
+        startedTs.isAcceptableOrUnknown(data['started_ts']!, _startedTsMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_startedTsMeta);
+    }
+    if (data.containsKey('ends_ts')) {
+      context.handle(
+        _endsTsMeta,
+        endsTs.isAcceptableOrUnknown(data['ends_ts']!, _endsTsMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_endsTsMeta);
+    }
+    if (data.containsKey('duration_min')) {
+      context.handle(
+        _durationMinMeta,
+        durationMin.isAcceptableOrUnknown(
+          data['duration_min']!,
+          _durationMinMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_durationMinMeta);
+    }
+    if (data.containsKey('predicted_yes')) {
+      context.handle(
+        _predictedYesMeta,
+        predictedYes.isAcceptableOrUnknown(
+          data['predicted_yes']!,
+          _predictedYesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('state')) {
+      context.handle(
+        _stateMeta,
+        state.isAcceptableOrUnknown(data['state']!, _stateMeta),
+      );
+    }
+    if (data.containsKey('ended_ts')) {
+      context.handle(
+        _endedTsMeta,
+        endedTs.isAcceptableOrUnknown(data['ended_ts']!, _endedTsMeta),
+      );
+    }
+    if (data.containsKey('answered_ts')) {
+      context.handle(
+        _answeredTsMeta,
+        answeredTs.isAcceptableOrUnknown(data['answered_ts']!, _answeredTsMeta),
+      );
+    }
+    if (data.containsKey('task_done')) {
+      context.handle(
+        _taskDoneMeta,
+        taskDone.isAcceptableOrUnknown(data['task_done']!, _taskDoneMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SessionRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SessionRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      intentionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}intention_id'],
+      )!,
+      taskUid: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}task_uid'],
+      ),
+      taskTitle: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}task_title'],
+      ),
+      startedTs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}started_ts'],
+      )!,
+      endsTs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}ends_ts'],
+      )!,
+      durationMin: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}duration_min'],
+      )!,
+      predictedYes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}predicted_yes'],
+      ),
+      state: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}state'],
+      )!,
+      endedTs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}ended_ts'],
+      ),
+      answeredTs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}answered_ts'],
+      ),
+      taskDone: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}task_done'],
+      )!,
+    );
+  }
+
+  @override
+  $SessionsTable createAlias(String alias) {
+    return $SessionsTable(attachedDatabase, alias);
+  }
+}
+
+class SessionRow extends DataClass implements Insertable<SessionRow> {
+  final int id;
+  final int intentionId;
+  final String? taskUid;
+  final String? taskTitle;
+  final int startedTs;
+  final int endsTs;
+  final int durationMin;
+  final int? predictedYes;
+  final String state;
+  final int? endedTs;
+  final int? answeredTs;
+  final int taskDone;
+  const SessionRow({
+    required this.id,
+    required this.intentionId,
+    this.taskUid,
+    this.taskTitle,
+    required this.startedTs,
+    required this.endsTs,
+    required this.durationMin,
+    this.predictedYes,
+    required this.state,
+    this.endedTs,
+    this.answeredTs,
+    required this.taskDone,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['intention_id'] = Variable<int>(intentionId);
+    if (!nullToAbsent || taskUid != null) {
+      map['task_uid'] = Variable<String>(taskUid);
+    }
+    if (!nullToAbsent || taskTitle != null) {
+      map['task_title'] = Variable<String>(taskTitle);
+    }
+    map['started_ts'] = Variable<int>(startedTs);
+    map['ends_ts'] = Variable<int>(endsTs);
+    map['duration_min'] = Variable<int>(durationMin);
+    if (!nullToAbsent || predictedYes != null) {
+      map['predicted_yes'] = Variable<int>(predictedYes);
+    }
+    map['state'] = Variable<String>(state);
+    if (!nullToAbsent || endedTs != null) {
+      map['ended_ts'] = Variable<int>(endedTs);
+    }
+    if (!nullToAbsent || answeredTs != null) {
+      map['answered_ts'] = Variable<int>(answeredTs);
+    }
+    map['task_done'] = Variable<int>(taskDone);
+    return map;
+  }
+
+  SessionsCompanion toCompanion(bool nullToAbsent) {
+    return SessionsCompanion(
+      id: Value(id),
+      intentionId: Value(intentionId),
+      taskUid: taskUid == null && nullToAbsent
+          ? const Value.absent()
+          : Value(taskUid),
+      taskTitle: taskTitle == null && nullToAbsent
+          ? const Value.absent()
+          : Value(taskTitle),
+      startedTs: Value(startedTs),
+      endsTs: Value(endsTs),
+      durationMin: Value(durationMin),
+      predictedYes: predictedYes == null && nullToAbsent
+          ? const Value.absent()
+          : Value(predictedYes),
+      state: Value(state),
+      endedTs: endedTs == null && nullToAbsent
+          ? const Value.absent()
+          : Value(endedTs),
+      answeredTs: answeredTs == null && nullToAbsent
+          ? const Value.absent()
+          : Value(answeredTs),
+      taskDone: Value(taskDone),
+    );
+  }
+
+  factory SessionRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SessionRow(
+      id: serializer.fromJson<int>(json['id']),
+      intentionId: serializer.fromJson<int>(json['intentionId']),
+      taskUid: serializer.fromJson<String?>(json['taskUid']),
+      taskTitle: serializer.fromJson<String?>(json['taskTitle']),
+      startedTs: serializer.fromJson<int>(json['startedTs']),
+      endsTs: serializer.fromJson<int>(json['endsTs']),
+      durationMin: serializer.fromJson<int>(json['durationMin']),
+      predictedYes: serializer.fromJson<int?>(json['predictedYes']),
+      state: serializer.fromJson<String>(json['state']),
+      endedTs: serializer.fromJson<int?>(json['endedTs']),
+      answeredTs: serializer.fromJson<int?>(json['answeredTs']),
+      taskDone: serializer.fromJson<int>(json['taskDone']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'intentionId': serializer.toJson<int>(intentionId),
+      'taskUid': serializer.toJson<String?>(taskUid),
+      'taskTitle': serializer.toJson<String?>(taskTitle),
+      'startedTs': serializer.toJson<int>(startedTs),
+      'endsTs': serializer.toJson<int>(endsTs),
+      'durationMin': serializer.toJson<int>(durationMin),
+      'predictedYes': serializer.toJson<int?>(predictedYes),
+      'state': serializer.toJson<String>(state),
+      'endedTs': serializer.toJson<int?>(endedTs),
+      'answeredTs': serializer.toJson<int?>(answeredTs),
+      'taskDone': serializer.toJson<int>(taskDone),
+    };
+  }
+
+  SessionRow copyWith({
+    int? id,
+    int? intentionId,
+    Value<String?> taskUid = const Value.absent(),
+    Value<String?> taskTitle = const Value.absent(),
+    int? startedTs,
+    int? endsTs,
+    int? durationMin,
+    Value<int?> predictedYes = const Value.absent(),
+    String? state,
+    Value<int?> endedTs = const Value.absent(),
+    Value<int?> answeredTs = const Value.absent(),
+    int? taskDone,
+  }) => SessionRow(
+    id: id ?? this.id,
+    intentionId: intentionId ?? this.intentionId,
+    taskUid: taskUid.present ? taskUid.value : this.taskUid,
+    taskTitle: taskTitle.present ? taskTitle.value : this.taskTitle,
+    startedTs: startedTs ?? this.startedTs,
+    endsTs: endsTs ?? this.endsTs,
+    durationMin: durationMin ?? this.durationMin,
+    predictedYes: predictedYes.present ? predictedYes.value : this.predictedYes,
+    state: state ?? this.state,
+    endedTs: endedTs.present ? endedTs.value : this.endedTs,
+    answeredTs: answeredTs.present ? answeredTs.value : this.answeredTs,
+    taskDone: taskDone ?? this.taskDone,
+  );
+  SessionRow copyWithCompanion(SessionsCompanion data) {
+    return SessionRow(
+      id: data.id.present ? data.id.value : this.id,
+      intentionId: data.intentionId.present
+          ? data.intentionId.value
+          : this.intentionId,
+      taskUid: data.taskUid.present ? data.taskUid.value : this.taskUid,
+      taskTitle: data.taskTitle.present ? data.taskTitle.value : this.taskTitle,
+      startedTs: data.startedTs.present ? data.startedTs.value : this.startedTs,
+      endsTs: data.endsTs.present ? data.endsTs.value : this.endsTs,
+      durationMin: data.durationMin.present
+          ? data.durationMin.value
+          : this.durationMin,
+      predictedYes: data.predictedYes.present
+          ? data.predictedYes.value
+          : this.predictedYes,
+      state: data.state.present ? data.state.value : this.state,
+      endedTs: data.endedTs.present ? data.endedTs.value : this.endedTs,
+      answeredTs: data.answeredTs.present
+          ? data.answeredTs.value
+          : this.answeredTs,
+      taskDone: data.taskDone.present ? data.taskDone.value : this.taskDone,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SessionRow(')
+          ..write('id: $id, ')
+          ..write('intentionId: $intentionId, ')
+          ..write('taskUid: $taskUid, ')
+          ..write('taskTitle: $taskTitle, ')
+          ..write('startedTs: $startedTs, ')
+          ..write('endsTs: $endsTs, ')
+          ..write('durationMin: $durationMin, ')
+          ..write('predictedYes: $predictedYes, ')
+          ..write('state: $state, ')
+          ..write('endedTs: $endedTs, ')
+          ..write('answeredTs: $answeredTs, ')
+          ..write('taskDone: $taskDone')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    intentionId,
+    taskUid,
+    taskTitle,
+    startedTs,
+    endsTs,
+    durationMin,
+    predictedYes,
+    state,
+    endedTs,
+    answeredTs,
+    taskDone,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SessionRow &&
+          other.id == this.id &&
+          other.intentionId == this.intentionId &&
+          other.taskUid == this.taskUid &&
+          other.taskTitle == this.taskTitle &&
+          other.startedTs == this.startedTs &&
+          other.endsTs == this.endsTs &&
+          other.durationMin == this.durationMin &&
+          other.predictedYes == this.predictedYes &&
+          other.state == this.state &&
+          other.endedTs == this.endedTs &&
+          other.answeredTs == this.answeredTs &&
+          other.taskDone == this.taskDone);
+}
+
+class SessionsCompanion extends UpdateCompanion<SessionRow> {
+  final Value<int> id;
+  final Value<int> intentionId;
+  final Value<String?> taskUid;
+  final Value<String?> taskTitle;
+  final Value<int> startedTs;
+  final Value<int> endsTs;
+  final Value<int> durationMin;
+  final Value<int?> predictedYes;
+  final Value<String> state;
+  final Value<int?> endedTs;
+  final Value<int?> answeredTs;
+  final Value<int> taskDone;
+  const SessionsCompanion({
+    this.id = const Value.absent(),
+    this.intentionId = const Value.absent(),
+    this.taskUid = const Value.absent(),
+    this.taskTitle = const Value.absent(),
+    this.startedTs = const Value.absent(),
+    this.endsTs = const Value.absent(),
+    this.durationMin = const Value.absent(),
+    this.predictedYes = const Value.absent(),
+    this.state = const Value.absent(),
+    this.endedTs = const Value.absent(),
+    this.answeredTs = const Value.absent(),
+    this.taskDone = const Value.absent(),
+  });
+  SessionsCompanion.insert({
+    this.id = const Value.absent(),
+    required int intentionId,
+    this.taskUid = const Value.absent(),
+    this.taskTitle = const Value.absent(),
+    required int startedTs,
+    required int endsTs,
+    required int durationMin,
+    this.predictedYes = const Value.absent(),
+    this.state = const Value.absent(),
+    this.endedTs = const Value.absent(),
+    this.answeredTs = const Value.absent(),
+    this.taskDone = const Value.absent(),
+  }) : intentionId = Value(intentionId),
+       startedTs = Value(startedTs),
+       endsTs = Value(endsTs),
+       durationMin = Value(durationMin);
+  static Insertable<SessionRow> custom({
+    Expression<int>? id,
+    Expression<int>? intentionId,
+    Expression<String>? taskUid,
+    Expression<String>? taskTitle,
+    Expression<int>? startedTs,
+    Expression<int>? endsTs,
+    Expression<int>? durationMin,
+    Expression<int>? predictedYes,
+    Expression<String>? state,
+    Expression<int>? endedTs,
+    Expression<int>? answeredTs,
+    Expression<int>? taskDone,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (intentionId != null) 'intention_id': intentionId,
+      if (taskUid != null) 'task_uid': taskUid,
+      if (taskTitle != null) 'task_title': taskTitle,
+      if (startedTs != null) 'started_ts': startedTs,
+      if (endsTs != null) 'ends_ts': endsTs,
+      if (durationMin != null) 'duration_min': durationMin,
+      if (predictedYes != null) 'predicted_yes': predictedYes,
+      if (state != null) 'state': state,
+      if (endedTs != null) 'ended_ts': endedTs,
+      if (answeredTs != null) 'answered_ts': answeredTs,
+      if (taskDone != null) 'task_done': taskDone,
+    });
+  }
+
+  SessionsCompanion copyWith({
+    Value<int>? id,
+    Value<int>? intentionId,
+    Value<String?>? taskUid,
+    Value<String?>? taskTitle,
+    Value<int>? startedTs,
+    Value<int>? endsTs,
+    Value<int>? durationMin,
+    Value<int?>? predictedYes,
+    Value<String>? state,
+    Value<int?>? endedTs,
+    Value<int?>? answeredTs,
+    Value<int>? taskDone,
+  }) {
+    return SessionsCompanion(
+      id: id ?? this.id,
+      intentionId: intentionId ?? this.intentionId,
+      taskUid: taskUid ?? this.taskUid,
+      taskTitle: taskTitle ?? this.taskTitle,
+      startedTs: startedTs ?? this.startedTs,
+      endsTs: endsTs ?? this.endsTs,
+      durationMin: durationMin ?? this.durationMin,
+      predictedYes: predictedYes ?? this.predictedYes,
+      state: state ?? this.state,
+      endedTs: endedTs ?? this.endedTs,
+      answeredTs: answeredTs ?? this.answeredTs,
+      taskDone: taskDone ?? this.taskDone,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (intentionId.present) {
+      map['intention_id'] = Variable<int>(intentionId.value);
+    }
+    if (taskUid.present) {
+      map['task_uid'] = Variable<String>(taskUid.value);
+    }
+    if (taskTitle.present) {
+      map['task_title'] = Variable<String>(taskTitle.value);
+    }
+    if (startedTs.present) {
+      map['started_ts'] = Variable<int>(startedTs.value);
+    }
+    if (endsTs.present) {
+      map['ends_ts'] = Variable<int>(endsTs.value);
+    }
+    if (durationMin.present) {
+      map['duration_min'] = Variable<int>(durationMin.value);
+    }
+    if (predictedYes.present) {
+      map['predicted_yes'] = Variable<int>(predictedYes.value);
+    }
+    if (state.present) {
+      map['state'] = Variable<String>(state.value);
+    }
+    if (endedTs.present) {
+      map['ended_ts'] = Variable<int>(endedTs.value);
+    }
+    if (answeredTs.present) {
+      map['answered_ts'] = Variable<int>(answeredTs.value);
+    }
+    if (taskDone.present) {
+      map['task_done'] = Variable<int>(taskDone.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SessionsCompanion(')
+          ..write('id: $id, ')
+          ..write('intentionId: $intentionId, ')
+          ..write('taskUid: $taskUid, ')
+          ..write('taskTitle: $taskTitle, ')
+          ..write('startedTs: $startedTs, ')
+          ..write('endsTs: $endsTs, ')
+          ..write('durationMin: $durationMin, ')
+          ..write('predictedYes: $predictedYes, ')
+          ..write('state: $state, ')
+          ..write('endedTs: $endedTs, ')
+          ..write('answeredTs: $answeredTs, ')
+          ..write('taskDone: $taskDone')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -3106,6 +4582,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $GoogleEventMapTable googleEventMap = $GoogleEventMapTable(this);
   late final $SyncStateTable syncState = $SyncStateTable(this);
   late final $PendingOpsTable pendingOps = $PendingOpsTable(this);
+  late final $QuotesTable quotes = $QuotesTable(this);
+  late final $IntentionsTable intentions = $IntentionsTable(this);
+  late final $SessionsTable sessions = $SessionsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3117,6 +4596,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     googleEventMap,
     syncState,
     pendingOps,
+    quotes,
+    intentions,
+    sessions,
   ];
 }
 
@@ -4664,6 +6146,749 @@ typedef $$PendingOpsTableProcessedTableManager =
       PendingOpRow,
       PrefetchHooks Function()
     >;
+typedef $$QuotesTableCreateCompanionBuilder =
+    QuotesCompanion Function({
+      required String body,
+      Value<String?> author,
+      required String createdTs,
+      Value<int> rowid,
+    });
+typedef $$QuotesTableUpdateCompanionBuilder =
+    QuotesCompanion Function({
+      Value<String> body,
+      Value<String?> author,
+      Value<String> createdTs,
+      Value<int> rowid,
+    });
+
+class $$QuotesTableFilterComposer
+    extends Composer<_$AppDatabase, $QuotesTable> {
+  $$QuotesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get body => $composableBuilder(
+    column: $table.body,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get author => $composableBuilder(
+    column: $table.author,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdTs => $composableBuilder(
+    column: $table.createdTs,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$QuotesTableOrderingComposer
+    extends Composer<_$AppDatabase, $QuotesTable> {
+  $$QuotesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get body => $composableBuilder(
+    column: $table.body,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get author => $composableBuilder(
+    column: $table.author,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdTs => $composableBuilder(
+    column: $table.createdTs,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$QuotesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $QuotesTable> {
+  $$QuotesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get body =>
+      $composableBuilder(column: $table.body, builder: (column) => column);
+
+  GeneratedColumn<String> get author =>
+      $composableBuilder(column: $table.author, builder: (column) => column);
+
+  GeneratedColumn<String> get createdTs =>
+      $composableBuilder(column: $table.createdTs, builder: (column) => column);
+}
+
+class $$QuotesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $QuotesTable,
+          QuoteRow,
+          $$QuotesTableFilterComposer,
+          $$QuotesTableOrderingComposer,
+          $$QuotesTableAnnotationComposer,
+          $$QuotesTableCreateCompanionBuilder,
+          $$QuotesTableUpdateCompanionBuilder,
+          (QuoteRow, BaseReferences<_$AppDatabase, $QuotesTable, QuoteRow>),
+          QuoteRow,
+          PrefetchHooks Function()
+        > {
+  $$QuotesTableTableManager(_$AppDatabase db, $QuotesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$QuotesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$QuotesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$QuotesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> body = const Value.absent(),
+                Value<String?> author = const Value.absent(),
+                Value<String> createdTs = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => QuotesCompanion(
+                body: body,
+                author: author,
+                createdTs: createdTs,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String body,
+                Value<String?> author = const Value.absent(),
+                required String createdTs,
+                Value<int> rowid = const Value.absent(),
+              }) => QuotesCompanion.insert(
+                body: body,
+                author: author,
+                createdTs: createdTs,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$QuotesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $QuotesTable,
+      QuoteRow,
+      $$QuotesTableFilterComposer,
+      $$QuotesTableOrderingComposer,
+      $$QuotesTableAnnotationComposer,
+      $$QuotesTableCreateCompanionBuilder,
+      $$QuotesTableUpdateCompanionBuilder,
+      (QuoteRow, BaseReferences<_$AppDatabase, $QuotesTable, QuoteRow>),
+      QuoteRow,
+      PrefetchHooks Function()
+    >;
+typedef $$IntentionsTableCreateCompanionBuilder =
+    IntentionsCompanion Function({
+      Value<int> id,
+      required String ts,
+      Value<String?> body,
+      Value<String?> ifThen,
+      Value<int?> predictedYes,
+      Value<int?> durationMin,
+      Value<String?> taskUid,
+      Value<String?> outcome,
+    });
+typedef $$IntentionsTableUpdateCompanionBuilder =
+    IntentionsCompanion Function({
+      Value<int> id,
+      Value<String> ts,
+      Value<String?> body,
+      Value<String?> ifThen,
+      Value<int?> predictedYes,
+      Value<int?> durationMin,
+      Value<String?> taskUid,
+      Value<String?> outcome,
+    });
+
+class $$IntentionsTableFilterComposer
+    extends Composer<_$AppDatabase, $IntentionsTable> {
+  $$IntentionsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ts => $composableBuilder(
+    column: $table.ts,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get body => $composableBuilder(
+    column: $table.body,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ifThen => $composableBuilder(
+    column: $table.ifThen,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get predictedYes => $composableBuilder(
+    column: $table.predictedYes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get durationMin => $composableBuilder(
+    column: $table.durationMin,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get taskUid => $composableBuilder(
+    column: $table.taskUid,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get outcome => $composableBuilder(
+    column: $table.outcome,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$IntentionsTableOrderingComposer
+    extends Composer<_$AppDatabase, $IntentionsTable> {
+  $$IntentionsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ts => $composableBuilder(
+    column: $table.ts,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get body => $composableBuilder(
+    column: $table.body,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ifThen => $composableBuilder(
+    column: $table.ifThen,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get predictedYes => $composableBuilder(
+    column: $table.predictedYes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get durationMin => $composableBuilder(
+    column: $table.durationMin,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get taskUid => $composableBuilder(
+    column: $table.taskUid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get outcome => $composableBuilder(
+    column: $table.outcome,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$IntentionsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $IntentionsTable> {
+  $$IntentionsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get ts =>
+      $composableBuilder(column: $table.ts, builder: (column) => column);
+
+  GeneratedColumn<String> get body =>
+      $composableBuilder(column: $table.body, builder: (column) => column);
+
+  GeneratedColumn<String> get ifThen =>
+      $composableBuilder(column: $table.ifThen, builder: (column) => column);
+
+  GeneratedColumn<int> get predictedYes => $composableBuilder(
+    column: $table.predictedYes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get durationMin => $composableBuilder(
+    column: $table.durationMin,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get taskUid =>
+      $composableBuilder(column: $table.taskUid, builder: (column) => column);
+
+  GeneratedColumn<String> get outcome =>
+      $composableBuilder(column: $table.outcome, builder: (column) => column);
+}
+
+class $$IntentionsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $IntentionsTable,
+          IntentionRow,
+          $$IntentionsTableFilterComposer,
+          $$IntentionsTableOrderingComposer,
+          $$IntentionsTableAnnotationComposer,
+          $$IntentionsTableCreateCompanionBuilder,
+          $$IntentionsTableUpdateCompanionBuilder,
+          (
+            IntentionRow,
+            BaseReferences<_$AppDatabase, $IntentionsTable, IntentionRow>,
+          ),
+          IntentionRow,
+          PrefetchHooks Function()
+        > {
+  $$IntentionsTableTableManager(_$AppDatabase db, $IntentionsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$IntentionsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$IntentionsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$IntentionsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> ts = const Value.absent(),
+                Value<String?> body = const Value.absent(),
+                Value<String?> ifThen = const Value.absent(),
+                Value<int?> predictedYes = const Value.absent(),
+                Value<int?> durationMin = const Value.absent(),
+                Value<String?> taskUid = const Value.absent(),
+                Value<String?> outcome = const Value.absent(),
+              }) => IntentionsCompanion(
+                id: id,
+                ts: ts,
+                body: body,
+                ifThen: ifThen,
+                predictedYes: predictedYes,
+                durationMin: durationMin,
+                taskUid: taskUid,
+                outcome: outcome,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String ts,
+                Value<String?> body = const Value.absent(),
+                Value<String?> ifThen = const Value.absent(),
+                Value<int?> predictedYes = const Value.absent(),
+                Value<int?> durationMin = const Value.absent(),
+                Value<String?> taskUid = const Value.absent(),
+                Value<String?> outcome = const Value.absent(),
+              }) => IntentionsCompanion.insert(
+                id: id,
+                ts: ts,
+                body: body,
+                ifThen: ifThen,
+                predictedYes: predictedYes,
+                durationMin: durationMin,
+                taskUid: taskUid,
+                outcome: outcome,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$IntentionsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $IntentionsTable,
+      IntentionRow,
+      $$IntentionsTableFilterComposer,
+      $$IntentionsTableOrderingComposer,
+      $$IntentionsTableAnnotationComposer,
+      $$IntentionsTableCreateCompanionBuilder,
+      $$IntentionsTableUpdateCompanionBuilder,
+      (
+        IntentionRow,
+        BaseReferences<_$AppDatabase, $IntentionsTable, IntentionRow>,
+      ),
+      IntentionRow,
+      PrefetchHooks Function()
+    >;
+typedef $$SessionsTableCreateCompanionBuilder =
+    SessionsCompanion Function({
+      Value<int> id,
+      required int intentionId,
+      Value<String?> taskUid,
+      Value<String?> taskTitle,
+      required int startedTs,
+      required int endsTs,
+      required int durationMin,
+      Value<int?> predictedYes,
+      Value<String> state,
+      Value<int?> endedTs,
+      Value<int?> answeredTs,
+      Value<int> taskDone,
+    });
+typedef $$SessionsTableUpdateCompanionBuilder =
+    SessionsCompanion Function({
+      Value<int> id,
+      Value<int> intentionId,
+      Value<String?> taskUid,
+      Value<String?> taskTitle,
+      Value<int> startedTs,
+      Value<int> endsTs,
+      Value<int> durationMin,
+      Value<int?> predictedYes,
+      Value<String> state,
+      Value<int?> endedTs,
+      Value<int?> answeredTs,
+      Value<int> taskDone,
+    });
+
+class $$SessionsTableFilterComposer
+    extends Composer<_$AppDatabase, $SessionsTable> {
+  $$SessionsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get intentionId => $composableBuilder(
+    column: $table.intentionId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get taskUid => $composableBuilder(
+    column: $table.taskUid,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get taskTitle => $composableBuilder(
+    column: $table.taskTitle,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get startedTs => $composableBuilder(
+    column: $table.startedTs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get endsTs => $composableBuilder(
+    column: $table.endsTs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get durationMin => $composableBuilder(
+    column: $table.durationMin,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get predictedYes => $composableBuilder(
+    column: $table.predictedYes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get endedTs => $composableBuilder(
+    column: $table.endedTs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get answeredTs => $composableBuilder(
+    column: $table.answeredTs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get taskDone => $composableBuilder(
+    column: $table.taskDone,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SessionsTableOrderingComposer
+    extends Composer<_$AppDatabase, $SessionsTable> {
+  $$SessionsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get intentionId => $composableBuilder(
+    column: $table.intentionId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get taskUid => $composableBuilder(
+    column: $table.taskUid,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get taskTitle => $composableBuilder(
+    column: $table.taskTitle,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get startedTs => $composableBuilder(
+    column: $table.startedTs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get endsTs => $composableBuilder(
+    column: $table.endsTs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get durationMin => $composableBuilder(
+    column: $table.durationMin,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get predictedYes => $composableBuilder(
+    column: $table.predictedYes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get endedTs => $composableBuilder(
+    column: $table.endedTs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get answeredTs => $composableBuilder(
+    column: $table.answeredTs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get taskDone => $composableBuilder(
+    column: $table.taskDone,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SessionsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SessionsTable> {
+  $$SessionsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get intentionId => $composableBuilder(
+    column: $table.intentionId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get taskUid =>
+      $composableBuilder(column: $table.taskUid, builder: (column) => column);
+
+  GeneratedColumn<String> get taskTitle =>
+      $composableBuilder(column: $table.taskTitle, builder: (column) => column);
+
+  GeneratedColumn<int> get startedTs =>
+      $composableBuilder(column: $table.startedTs, builder: (column) => column);
+
+  GeneratedColumn<int> get endsTs =>
+      $composableBuilder(column: $table.endsTs, builder: (column) => column);
+
+  GeneratedColumn<int> get durationMin => $composableBuilder(
+    column: $table.durationMin,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get predictedYes => $composableBuilder(
+    column: $table.predictedYes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get state =>
+      $composableBuilder(column: $table.state, builder: (column) => column);
+
+  GeneratedColumn<int> get endedTs =>
+      $composableBuilder(column: $table.endedTs, builder: (column) => column);
+
+  GeneratedColumn<int> get answeredTs => $composableBuilder(
+    column: $table.answeredTs,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get taskDone =>
+      $composableBuilder(column: $table.taskDone, builder: (column) => column);
+}
+
+class $$SessionsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SessionsTable,
+          SessionRow,
+          $$SessionsTableFilterComposer,
+          $$SessionsTableOrderingComposer,
+          $$SessionsTableAnnotationComposer,
+          $$SessionsTableCreateCompanionBuilder,
+          $$SessionsTableUpdateCompanionBuilder,
+          (
+            SessionRow,
+            BaseReferences<_$AppDatabase, $SessionsTable, SessionRow>,
+          ),
+          SessionRow,
+          PrefetchHooks Function()
+        > {
+  $$SessionsTableTableManager(_$AppDatabase db, $SessionsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SessionsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SessionsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SessionsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> intentionId = const Value.absent(),
+                Value<String?> taskUid = const Value.absent(),
+                Value<String?> taskTitle = const Value.absent(),
+                Value<int> startedTs = const Value.absent(),
+                Value<int> endsTs = const Value.absent(),
+                Value<int> durationMin = const Value.absent(),
+                Value<int?> predictedYes = const Value.absent(),
+                Value<String> state = const Value.absent(),
+                Value<int?> endedTs = const Value.absent(),
+                Value<int?> answeredTs = const Value.absent(),
+                Value<int> taskDone = const Value.absent(),
+              }) => SessionsCompanion(
+                id: id,
+                intentionId: intentionId,
+                taskUid: taskUid,
+                taskTitle: taskTitle,
+                startedTs: startedTs,
+                endsTs: endsTs,
+                durationMin: durationMin,
+                predictedYes: predictedYes,
+                state: state,
+                endedTs: endedTs,
+                answeredTs: answeredTs,
+                taskDone: taskDone,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int intentionId,
+                Value<String?> taskUid = const Value.absent(),
+                Value<String?> taskTitle = const Value.absent(),
+                required int startedTs,
+                required int endsTs,
+                required int durationMin,
+                Value<int?> predictedYes = const Value.absent(),
+                Value<String> state = const Value.absent(),
+                Value<int?> endedTs = const Value.absent(),
+                Value<int?> answeredTs = const Value.absent(),
+                Value<int> taskDone = const Value.absent(),
+              }) => SessionsCompanion.insert(
+                id: id,
+                intentionId: intentionId,
+                taskUid: taskUid,
+                taskTitle: taskTitle,
+                startedTs: startedTs,
+                endsTs: endsTs,
+                durationMin: durationMin,
+                predictedYes: predictedYes,
+                state: state,
+                endedTs: endedTs,
+                answeredTs: answeredTs,
+                taskDone: taskDone,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SessionsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SessionsTable,
+      SessionRow,
+      $$SessionsTableFilterComposer,
+      $$SessionsTableOrderingComposer,
+      $$SessionsTableAnnotationComposer,
+      $$SessionsTableCreateCompanionBuilder,
+      $$SessionsTableUpdateCompanionBuilder,
+      (SessionRow, BaseReferences<_$AppDatabase, $SessionsTable, SessionRow>),
+      SessionRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -4680,4 +6905,10 @@ class $AppDatabaseManager {
       $$SyncStateTableTableManager(_db, _db.syncState);
   $$PendingOpsTableTableManager get pendingOps =>
       $$PendingOpsTableTableManager(_db, _db.pendingOps);
+  $$QuotesTableTableManager get quotes =>
+      $$QuotesTableTableManager(_db, _db.quotes);
+  $$IntentionsTableTableManager get intentions =>
+      $$IntentionsTableTableManager(_db, _db.intentions);
+  $$SessionsTableTableManager get sessions =>
+      $$SessionsTableTableManager(_db, _db.sessions);
 }

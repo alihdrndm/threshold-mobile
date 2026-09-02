@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/theme.dart';
+import '../../../core/unlock/doorkeeper.dart';
+import '../../../core/unlock/phone.dart';
 import '../../../core/widgets/caps_label.dart';
 import '../../../core/widgets/pressable_scale.dart';
 import '../../calendar_sync/presentation/sync_providers.dart';
+import '../../ritual/presentation/ritual_providers.dart';
 import '../../tasks/domain/areas_syntax.dart';
 import '../../tasks/presentation/providers.dart';
 
@@ -49,6 +52,23 @@ class SettingsScreen extends ConsumerWidget {
           note: 'When a task dropped into Schedule may be booked, once the '
               'calendar connects. The repeat roll-forward uses these too.',
           child: _WorkingHours(settings: settings),
+        ),
+        const SizedBox(height: AppSpacing.xxl),
+        _Section(
+          title: 'The threshold',
+          note: 'Unlock the phone after half an hour away and the ritual '
+              'meets you; a quick unlock shows one of your quotes instead. '
+              'Android asks one permission for the door to open itself.',
+          child: const _ThresholdSection(),
+        ),
+        const SizedBox(height: AppSpacing.xxl),
+        _Section(
+          title: 'Quotes',
+          note: 'Your own words only, for the ritual and the quick-unlock '
+              'threshold. An empty reservoir shows nothing — a line the app '
+              'chose for you would be exactly the borrowed sentiment this '
+              'replaces.',
+          child: const _QuotesEditor(),
         ),
         const SizedBox(height: AppSpacing.xxl),
         Text(
@@ -520,4 +540,293 @@ class _WorkingHours extends ConsumerWidget {
             style: AppTypography.body.copyWith(
                 color: c.ink, fontFeatures: AppTypography.tabular)),
       );
+}
+
+/// The doorkeeper's controls: the one Android permission it needs, and the
+/// switch that stands it down entirely.
+class _ThresholdSection extends ConsumerStatefulWidget {
+  const _ThresholdSection();
+
+  @override
+  ConsumerState<_ThresholdSection> createState() =>
+      _ThresholdSectionState();
+}
+
+class _ThresholdSectionState extends ConsumerState<_ThresholdSection>
+    with WidgetsBindingObserver {
+  bool _hasPermission = false;
+  bool _enabled = true;
+  bool _canLock = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _refresh();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Coming back from the system settings page: re-read the grant.
+    if (state == AppLifecycleState.resumed) _refresh();
+  }
+
+  Future<void> _refresh() async {
+    final has = await Doorkeeper.hasOverlayPermission();
+    final enabled = await Doorkeeper.enabled();
+    final canLock = await Phone.canLock();
+    if (mounted) {
+      setState(() {
+        _hasPermission = has;
+        _enabled = enabled;
+        _canLock = canLock;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (!_hasPermission) ...[
+          Text(
+            'Needs "Display over other apps" — the door cannot open itself '
+            'without it.',
+            style: AppTypography.caption.copyWith(color: c.inkMuted),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          PressableScale(
+            onPressed: () => Doorkeeper.requestOverlayPermission(),
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(AppRadii.full),
+                border: Border.all(color: c.accent),
+                color: c.accent.withValues(alpha: 0.12),
+              ),
+              child: Text('Grant permission',
+                  style: AppTypography.body.copyWith(color: c.ink)),
+            ),
+          ),
+        ] else
+          PressableScale(
+            onPressed: () async {
+              if (_enabled) {
+                await Doorkeeper.stop();
+              } else {
+                await Doorkeeper.start();
+              }
+              await _refresh();
+            },
+            child: Row(children: [
+              Icon(
+                _enabled
+                    ? Icons.toggle_on_rounded
+                    : Icons.toggle_off_outlined,
+                size: 32,
+                color: _enabled ? c.accent : c.inkMuted,
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Text(
+                _enabled
+                    ? 'Standing at the door'
+                    : 'The door stays closed',
+                style: AppTypography.body.copyWith(color: c.ink),
+              ),
+            ]),
+          ),
+        const SizedBox(height: AppSpacing.lg),
+        // "For nothing" needs one power: putting the screen back to sleep.
+        Text(
+          _canLock
+              ? 'Threshold can lock the screen, so "For nothing" can put '
+                  'the phone back down for you.'
+              : '"For nothing" can lock the phone for you — Android asks '
+                  'you to allow that once.',
+          style: AppTypography.caption.copyWith(color: c.inkMuted),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        PressableScale(
+          onPressed: () async {
+            if (_canLock) {
+              await Phone.revokeLock();
+            } else {
+              await Phone.requestLock();
+            }
+            await _refresh();
+          },
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppRadii.full),
+              border: Border.all(
+                  color: _canLock ? c.borderSubtle : c.accent),
+              color: _canLock
+                  ? c.fillSubtle
+                  : c.accent.withValues(alpha: 0.12),
+            ),
+            child: Text(_canLock ? 'Take it back' : 'Allow locking',
+                style: AppTypography.body.copyWith(color: c.ink)),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// The reservoir, editable: your words in, your words out.
+class _QuotesEditor extends ConsumerStatefulWidget {
+  const _QuotesEditor();
+
+  @override
+  ConsumerState<_QuotesEditor> createState() => _QuotesEditorState();
+}
+
+class _QuotesEditorState extends ConsumerState<_QuotesEditor> {
+  final _text = TextEditingController();
+  final _author = TextEditingController();
+
+  @override
+  void dispose() {
+    _text.dispose();
+    _author.dispose();
+    super.dispose();
+  }
+
+  Future<void> _add() async {
+    final text = _text.text.trim();
+    if (text.isEmpty) return;
+    await ref.read(ritualRepositoryProvider).addQuote(
+          text,
+          author: _author.text.trim().isEmpty ? null : _author.text.trim(),
+        );
+    _text.clear();
+    _author.clear();
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final quotes = ref.watch(quotesProvider).value ?? const [];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (final q in quotes) ...[
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(q.body,
+                        style:
+                            AppTypography.body.copyWith(color: c.ink)),
+                    if (q.author != null)
+                      Text('— ${q.author}',
+                          style: AppTypography.caption
+                              .copyWith(color: c.inkMuted)),
+                  ],
+                ),
+              ),
+              PressableScale(
+                onPressed: () => ref
+                    .read(ritualRepositoryProvider)
+                    .removeQuote(q.body),
+                semanticLabel: 'Remove this quote',
+                child: SizedBox(
+                  width: 28,
+                  height: 28,
+                  child: Icon(Icons.close,
+                      size: 14,
+                      color: c.inkMuted.withValues(alpha: 0.75)),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+        ],
+        TextField(
+          controller: _text,
+          maxLength: 280,
+          style: AppTypography.body.copyWith(color: c.ink),
+          cursorColor: c.accent,
+          decoration: InputDecoration(
+            hintText: 'A line worth keeping',
+            hintStyle: AppTypography.body.copyWith(color: c.inkMuted),
+            counterText: '',
+            isDense: true,
+            filled: true,
+            fillColor: c.fillSubtle,
+            contentPadding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.lg, vertical: 10),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppRadii.item),
+              borderSide: BorderSide(color: c.borderSubtle),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppRadii.item),
+              borderSide:
+                  BorderSide(color: c.accent.withValues(alpha: 0.65)),
+            ),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Row(children: [
+          Expanded(
+            child: TextField(
+              controller: _author,
+              style: AppTypography.caption.copyWith(color: c.ink),
+              cursorColor: c.accent,
+              decoration: InputDecoration(
+                hintText: 'Who said it (optional)',
+                hintStyle:
+                    AppTypography.caption.copyWith(color: c.inkMuted),
+                isDense: true,
+                filled: true,
+                fillColor: c.fillSubtle,
+                contentPadding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg, vertical: 10),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppRadii.item),
+                  borderSide: BorderSide(color: c.borderSubtle),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppRadii.item),
+                  borderSide: BorderSide(
+                      color: c.accent.withValues(alpha: 0.65)),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          PressableScale(
+            onPressed: _add,
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(AppRadii.full),
+                border: Border.all(color: c.borderSubtle),
+                color: c.fillSubtle,
+              ),
+              child: Text('Keep it',
+                  style: AppTypography.body.copyWith(color: c.ink)),
+            ),
+          ),
+        ]),
+      ],
+    );
+  }
 }

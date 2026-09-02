@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- force-lock alone: the only policy Threshold wants is the power to put
+     the screen back to sleep. No wipe, no password rules, no camera
+     control - the grant screen shows the user exactly this and no more. -->
+<device-admin xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-policies>
+        <force-lock />
+    </uses-policies>
+</device-admin>

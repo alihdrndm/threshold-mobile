@@ -131,6 +131,38 @@ Map<String, Object?> areasToMap(
       'updatedTs': updatedTs,
     };
 
+/// The quote reservoir rides the same meta document, under its own clock
+/// (`quotesUpdatedTs`) so areas and quotes win or lose independently.
+Map<String, Object?> quotesToMap(
+        List<({String text, String? author, String createdTs})> quotes,
+        int updatedTs) =>
+    {
+      'quotes': [
+        for (final q in quotes)
+          {'text': q.text, 'author': q.author, 'createdTs': q.createdTs}
+      ],
+      'quotesUpdatedTs': updatedTs,
+    };
+
+(List<({String text, String? author, String createdTs})>, int)? quotesFromMap(
+    Map<String, Object?> m) {
+  final updatedTs = m['quotesUpdatedTs'];
+  final raw = m['quotes'];
+  if (updatedTs is! int || raw is! List) return null;
+  final quotes = <({String text, String? author, String createdTs})>[];
+  for (final e in raw) {
+    if (e is! Map) continue;
+    final text = e['text'];
+    if (text is! String || text.isEmpty) continue;
+    quotes.add((
+      text: text,
+      author: e['author'] as String?,
+      createdTs: (e['createdTs'] as String?) ?? '',
+    ));
+  }
+  return (quotes, updatedTs);
+}
+
 (List<({String name, int sortOrder})>, int)? areasFromMap(
     Map<String, Object?> m) {
   final updatedTs = m['updatedTs'];

@@ -33,9 +33,11 @@ class BoardSyncService {
   /// keeps remote applies from echoing straight back out.
   final _seenTs = <String, int>{};
   int _seenAreasTs = -1;
+  int _seenQuotesTs = -1;
 
   StreamSubscription<List<TaskRow>>? _tasksSub;
   StreamSubscription<List<AreaRow>>? _areasSub;
+  StreamSubscription<List<QuoteRow>>? _quotesSub;
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _remoteSub;
   StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>? _metaSub;
   bool _running = false;
@@ -87,8 +89,11 @@ class BoardSyncService {
     });
     _metaSub = _board.snapshots().listen((snap) async {
       if (snap.metadata.hasPendingWrites) return;
-      final decoded = areasFromMap(snap.data() ?? const {});
+      final data = snap.data() ?? const {};
+      final decoded = areasFromMap(data);
       if (decoded != null) await _applyRemoteAreas(decoded.$1, decoded.$2);
+      final quotes = quotesFromMap(data);
+      if (quotes != null) await _applyRemoteQuotes(quotes.$1, quotes.$2);
     }, onError: (Object e) {
       debugPrint('threshold-board-sync meta listen: $e');
     });
@@ -96,12 +101,14 @@ class BoardSyncService {
 
     _tasksSub = _db.select(_db.tasks).watch().listen(_pushTasks);
     _areasSub = _db.select(_db.areas).watch().listen(_pushAreas);
+    _quotesSub = _db.select(_db.quotes).watch().listen(_pushQuotes);
   }
 
   Future<void> stop() async {
     _running = false;
     await _tasksSub?.cancel();
     await _areasSub?.cancel();
+    await _quotesSub?.cancel();
     await _remoteSub?.cancel();
     await _metaSub?.cancel();
   }
@@ -134,12 +141,38 @@ class BoardSyncService {
     _seenAreasTs = maxTs;
     final sorted = [...rows]..sort((a, b) => a.sortOrder - b.sortOrder);
     try {
-      await _board.set(areasToMap(
-          [for (final a in sorted) (name: a.name, sortOrder: a.sortOrder)],
-          maxTs));
+      // merge, never replace: quotes share this document under their own
+      // clock, and a full set would erase them.
+      await _board.set(
+          areasToMap(
+              [for (final a in sorted) (name: a.name, sortOrder: a.sortOrder)],
+              maxTs),
+          SetOptions(merge: true));
     } on Object catch (e) {
       _seenAreasTs = -1;
       debugPrint('threshold-board-sync push areas: $e');
+    }
+  }
+
+  Future<void> _pushQuotes(List<QuoteRow> rows) async {
+    final clockRow = await (_db.select(_db.settingsKV)
+          ..where((s) => s.key.equals('quotes_updated_ts')))
+        .getSingleOrNull();
+    final clock = int.tryParse(clockRow?.value ?? '') ?? 0;
+    if (clock == 0 || _seenQuotesTs >= clock) return;
+    _seenQuotesTs = clock;
+    try {
+      await _board.set(
+          quotesToMap(
+              [
+                for (final q in rows)
+                  (text: q.body, author: q.author, createdTs: q.createdTs)
+              ],
+              clock),
+          SetOptions(merge: true));
+    } on Object catch (e) {
+      _seenQuotesTs = -1;
+      debugPrint('threshold-board-sync push quotes: $e');
     }
   }
 
@@ -247,6 +280,35 @@ class BoardSyncService {
         ),
         mode: InsertMode.insertOrIgnore);
     return uid;
+  }
+
+  Future<void> _applyRemoteQuotes(
+      List<({String text, String? author, String createdTs})> remote,
+      int updatedTs) async {
+    await _db.transaction(() async {
+      final clockRow = await (_db.select(_db.settingsKV)
+            ..where((s) => s.key.equals('quotes_updated_ts')))
+          .getSingleOrNull();
+      final local = int.tryParse(clockRow?.value ?? '') ?? 0;
+      final alreadyOurs = _seenQuotesTs == updatedTs;
+      if (local > updatedTs || (local == updatedTs && alreadyOurs)) return;
+      _seenQuotesTs = updatedTs;
+      // Whole-list LWW: the newer reservoir replaces the older one.
+      await _db.delete(_db.quotes).go();
+      for (final q in remote) {
+        await _db.into(_db.quotes).insert(
+              QuotesCompanion.insert(
+                body: q.text,
+                author: Value(q.author),
+                createdTs: q.createdTs,
+              ),
+              mode: InsertMode.insertOrIgnore,
+            );
+      }
+      await _db.into(_db.settingsKV).insertOnConflictUpdate(
+          SettingsKVCompanion.insert(
+              key: 'quotes_updated_ts', value: '$updatedTs'));
+    });
   }
 
   Future<void> _applyRemoteAreas(

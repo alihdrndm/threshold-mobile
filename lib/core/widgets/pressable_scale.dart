@@ -11,13 +11,25 @@ import '../theme/theme.dart';
 class PressableScale extends StatefulWidget {
   const PressableScale({
     super.key,
-    required this.child,
+    required Widget this.child,
     this.onPressed,
     this.large = false,
     this.semanticLabel,
-  });
+  }) : builder = null;
 
-  final Widget child;
+  /// For controls that answer with more than scale — a text action that
+  /// brightens under the finger, say. The press dip is still this
+  /// widget's, so the guarantee that it always lands holds there too.
+  const PressableScale.builder({
+    super.key,
+    required Widget Function(BuildContext context, bool pressed) this.builder,
+    this.onPressed,
+    this.large = false,
+    this.semanticLabel,
+  }) : child = null;
+
+  final Widget? child;
+  final Widget Function(BuildContext context, bool pressed)? builder;
   final VoidCallback? onPressed;
 
   /// Large surfaces move less — 0.99, the week-day rule.
@@ -74,7 +86,16 @@ class _PressableScaleState extends State<PressableScale>
               }
             : null,
         onTapCancel: enabled ? _release : null,
-        child: ScaleTransition(scale: _scale, child: widget.child),
+        child: ScaleTransition(
+          scale: _scale,
+          child: widget.builder == null
+              ? widget.child
+              : AnimatedBuilder(
+                  animation: _controller,
+                  builder: (context, _) =>
+                      widget.builder!(context, _controller.value > 0),
+                ),
+        ),
       ),
     );
   }

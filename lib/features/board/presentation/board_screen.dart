@@ -1,11 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../core/db/app_database.dart' show SessionRow;
 import '../../../core/theme/theme.dart';
 import '../../../core/widgets/arrive_in.dart';
 import '../../../core/widgets/caps_label.dart';
 import '../../../core/widgets/pressable_scale.dart';
+import '../../ritual/presentation/ritual_providers.dart';
 import '../../tasks/domain/areas_syntax.dart';
 import '../../tasks/domain/quadrant.dart';
 import '../../tasks/presentation/providers.dart';
@@ -133,6 +138,7 @@ class _BoardScreenState extends ConsumerState<BoardScreen> {
                 onChanged: (v) => setState(() => _query = v),
                 onSubmitted: (_) {},
               ),
+              const _SessionBanner(),
               // AnimatedSize glides the layout as the notice claims and
               // releases its row; the line itself fades and rises within.
               AnimatedSize(
@@ -292,6 +298,105 @@ class _ZoneSection extends ConsumerWidget {
         );
       },
     );
+  }
+}
+
+/// The running session's banner: the commitment, its remaining minutes,
+/// and the one place End session lives. Ticks once a minute.
+class _SessionBanner extends ConsumerStatefulWidget {
+  const _SessionBanner();
+
+  @override
+  ConsumerState<_SessionBanner> createState() => _SessionBannerState();
+}
+
+class _SessionBannerState extends ConsumerState<_SessionBanner> {
+  Timer? _tick;
+
+  @override
+  void initState() {
+    super.initState();
+    _tick = Timer.periodic(
+        const Duration(seconds: 30), (_) => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _tick?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final session = ref.watch(runningSessionProvider).value;
+    return AnimatedSize(
+      duration: AppDurations.notice,
+      curve: AppCurves.out,
+      alignment: Alignment.topCenter,
+      child: session == null
+          ? const SizedBox(width: double.infinity)
+          : Padding(
+              padding: const EdgeInsets.only(top: AppSpacing.sm),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
+                decoration: BoxDecoration(
+                  color: c.accent.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(AppRadii.card),
+                  border: Border.all(
+                      color: c.accent.withValues(alpha: 0.4)),
+                ),
+                child: Row(children: [
+                  Expanded(
+                    child: Text(
+                      _line(session),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.body.copyWith(color: c.ink),
+                    ),
+                  ),
+                  PressableScale(
+                    onPressed: () async {
+                      await ref
+                          .read(ritualRepositoryProvider)
+                          .endEarly(session.id);
+                      final awaiting = await ref
+                          .read(ritualRepositoryProvider)
+                          .settle();
+                      if (awaiting != null && context.mounted) {
+                        context.push('/checkin/${awaiting.id}');
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: AppSpacing.xs),
+                      decoration: BoxDecoration(
+                        borderRadius:
+                            BorderRadius.circular(AppRadii.full),
+                        border: Border.all(
+                            color: c.ink.withValues(alpha: 0.16)),
+                      ),
+                      child: Text('End session',
+                          style: AppTypography.caption
+                              .copyWith(color: c.ink)),
+                    ),
+                  ),
+                ]),
+              ),
+            ),
+    );
+  }
+
+  String _line(SessionRow session) {
+    final left = ((session.endsTs -
+                DateTime.now().millisecondsSinceEpoch ~/ 1000) /
+            60)
+        .ceil();
+    final subject = session.taskTitle ?? 'your intention';
+    return left > 0
+        ? '$subject — $left min left'
+        : '$subject — time is up';
   }
 }
 
