@@ -272,54 +272,46 @@ class _RitualScreenState extends ConsumerState<RitualScreen> {
         const SizedBox(height: AppSpacing.xxxl),
         // Three answers to the question above, in the order the truth
         // usually arrives: nothing, browsing, and — reached past both —
-        // the commitment. One vocabulary at one width; only the fill
-        // carries the hierarchy, so the set reads as a set.
-        _exit(
+        // the commitment. Only Begin is a button, because only Begin is a
+        // destination; the two ways out are words, and a border around a
+        // way out would make it look like somewhere to go.
+        _textAction(
           'For nothing',
           _forNothing,
           semantic: 'Picked it up for nothing — lock the phone again',
         ),
-        const SizedBox(height: AppSpacing.sm),
-        _exit('Just browsing today', _browse),
+        _textAction('Just browsing today', _browse),
         const SizedBox(height: AppSpacing.lg),
         _primary('Begin', () => _advance(_Step.intention)),
       ],
     );
   }
 
-  /// An honest way out.
+  /// An honest way out, as words rather than furniture.
   ///
-  /// The one detail this screen spends: a hairline brightest along the top
-  /// and dissolving toward the bottom, the way light catches a real edge.
-  /// It costs nothing, it is the same on both exits so they read as a
-  /// pair, and on the one that sleeps the phone it happens to say exactly
-  /// what the button does.
-  Widget _exit(String label, VoidCallback onTap, {String? semantic}) =>
-      PressableScale(
+  /// No border, no fill — a border here would make an exit look like a
+  /// destination. What makes it feel alive instead is the answer under the
+  /// finger: it lifts out of the dark to full ink as you press, and settles
+  /// back when you let go. Purpose is feedback and nothing else, so it is
+  /// fast (the press dip) and cheap (opacity only). The padding is the tap
+  /// target — 48dp tall, though only the words are visible.
+  Widget _textAction(String label, VoidCallback onTap, {String? semantic}) =>
+      PressableScale.builder(
         onPressed: onTap,
         semanticLabel: semantic,
-        child: Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppRadii.full),
-            gradient: const LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Color(0x3DFFFFFF), Color(0x0AFFFFFF)],
-            ),
-          ),
-          padding: const EdgeInsets.all(1),
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 11),
-            decoration: BoxDecoration(
-              color: theme.surface,
-              borderRadius: BorderRadius.circular(AppRadii.full),
-            ),
+        builder: (context, pressed) => Padding(
+          padding: const EdgeInsets.symmetric(
+              vertical: 14, horizontal: AppSpacing.lg),
+          child: AnimatedOpacity(
+            duration: AppDurations.base,
+            curve: Curves.ease,
+            opacity: pressed ? 1 : 0.68,
             child: Text(
               label,
               textAlign: TextAlign.center,
               style: AppTypography.body.copyWith(
-                color: _ink.withValues(alpha: 0.88),
+                color: _ink,
+                fontSize: 15,
               ),
             ),
           ),
@@ -534,45 +526,57 @@ class _RitualScreenState extends ConsumerState<RitualScreen> {
           constraints: BoxConstraints(minHeight: constraints.maxHeight),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: AppSpacing.xxl),
+              // The chain of narration, quiet: it places the words without
+              // competing with them.
               Text(
                 _browsingLeadIn,
-                style: AppTypography.caption.copyWith(
+                textAlign: TextAlign.center,
+                style: AppTypography.body.copyWith(
                   color: _inkMuted,
-                  height: 1.6,
+                  height: 1.65,
                 ),
               ),
-              const SizedBox(height: AppSpacing.lg),
+              const SizedBox(height: AppSpacing.xl),
+              // The saying carries the weight of the screen — display size,
+              // light, tracked in a touch as large text wants.
               Text(
                 _browsingSaying,
-                style: AppTypography.body.copyWith(color: _ink, height: 1.55),
+                textAlign: TextAlign.center,
+                style: AppTypography.headline.copyWith(
+                  color: _ink,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w300,
+                  height: 1.45,
+                  letterSpacing: -0.2,
+                ),
               ),
-              const SizedBox(height: AppSpacing.md),
-              // Five lines because they are five, and the parallel only reads
-              // when the eye can stack them.
+              const SizedBox(height: AppSpacing.xl),
+              // Set as five short lines with air between them: they are
+              // five parallel clauses, and stacked they read as verse
+              // rather than as a sentence that ran long.
               for (final line in _browsingFive)
                 Padding(
-                  padding: const EdgeInsets.only(
-                    left: AppSpacing.md,
-                    bottom: 6,
-                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 7),
                   child: Text(
                     line,
+                    textAlign: TextAlign.center,
                     style: AppTypography.body.copyWith(
-                      color: _ink.withValues(alpha: 0.9),
-                      height: 1.5,
+                      color: _ink.withValues(alpha: 0.92),
+                      fontSize: 17,
+                      height: 1.4,
                     ),
                   ),
                 ),
-              const SizedBox(height: AppSpacing.lg),
+              const SizedBox(height: AppSpacing.xl),
               Text(
                 _browsingSource,
+                textAlign: TextAlign.center,
                 style: AppTypography.caption.copyWith(color: theme.accent),
               ),
               const SizedBox(height: AppSpacing.xxl),
-              _exit('Go on', () => context.pop()),
+              _textAction('Go on', () => context.pop()),
               const SizedBox(height: AppSpacing.xxl),
             ],
           ),
